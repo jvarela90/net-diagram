@@ -1,0 +1,91 @@
+{
+  "version": "2.0.0",
+  "metadata": {
+    "created": "2025-07-14T14:53:47.047Z",
+    "deviceCount": 4,
+    "connectionCount": 0
+  },
+  "devices": [
+    {
+      "id": "device_1_1752503165766",
+      "type": "router",
+      "name": "ROUTER-01",
+      "x": 100,
+      "y": 100,
+      "config": {
+        "hostname": "ROUTER-01",
+        "interfaces": [
+          "GE0/0",
+          "GE0/1",
+          "Serial0/0"
+        ],
+        "ipAddress": "",
+        "status": "up"
+      },
+      "created": 1752503165766,
+      "modified": 1752504815870
+    },
+    {
+      "id": "device_2_1752503167205",
+      "type": "switch",
+      "name": "SWITCH-01",
+      "x": 300,
+      "y": 100,
+      "config": {
+        "hostname": "SWITCH-01",
+        "interfaces": [
+          "Fa0/1",
+          "Fa0/2",
+          "Fa0/3",
+          "Fa0/4"
+        ],
+        "ipAddress": "",
+        "status": "up"
+      },
+      "created": 1752503167205,
+      "modified": 1752504815870
+    },
+    {
+      "id": "device_3_1752503168125",
+      "type": "firewall",
+      "name": "FIREWALL-01",
+      "x": 100,
+      "y": 300,
+      "config": {
+        "hostname": "FIREWALL-01",
+        "interfaces": [
+          "Outside",
+          "Inside",
+          "DMZ"
+        ],
+        "ipAddress": "",
+        "status": "up"
+      },
+      "created": 1752503168125,
+      "modified": 1752504815870
+    },
+    {
+      "id": "device_4_1752504812478",
+      "type": "router",
+      "name": "ROUTER-02",
+      "x": 300,
+      "y": 300,
+      "config": {
+        "hostname": "ROUTER-02",
+        "interfaces": [
+          "GE0/0",
+          "GE0/1",
+          "Serial0/0"
+        ],
+        "ipAddress": "",
+        "status": "up"
+      },
+      "created": 1752504812478,
+      "modified": 1752504815870
+    }
+  ],
+  "connections": [],
+  "settings": {
+    "zoom": 1
+  }
+}

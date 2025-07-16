@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Network Diagram Creator v4.0</title>
+    <style>
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #0f3460;
+            --success: #00d4aa;
+            --warning: #ff6b35;
+            --danger: #e74c3c;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --border: #e1e5e9;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --radius: 8px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            height: 100vh;
+            overflow: hidden;
+            color: var(--light);
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: var(--light);
+            margin: 8px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            color: var(--dark);
+        }
+
+        /* Header */
+        .app-header {
+            background: var(--primary);
+            color: var(--light);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px var(--shadow);
+            position: relative;
+            z-index: 1000;
+        }
+
+        .app-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e4a72;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--light);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            background: white;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            background: var(--accent);
+            color: white;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .device-category {
+            margin-bottom: 20px;
+        }
+
+        .category-header {
+            padding: 8px 12px;
+            background: var(--light);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .device-item {
+            padding: 12px;
+            margin: 4px 0;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: grab;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .device-item:hover {
+            border-color: var(--accent);
+            box-shadow: 0 2px 8px var(--shadow);
+            transform: translateX(2px);
+        }
+
+        .device-item:active {
+            cursor: grabbing;
+        }
+
+        .device-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 10px;
+            color: white;
+        }
+
+        /* Workspace */
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .toolbar {
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: #fafbfc;
+        }
+
+        .canvas-viewport {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+        }
+
+        .canvas {
+            position: relative;
+            width: 4000px;
+            height: 3000px;
+            background: 
+                linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(180deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            transform-origin: 0 0;
+        }
+
+        /* Device on Canvas */
+        .device-on-canvas {
+            position: absolute;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px;
+            cursor: move;
+            box-shadow: 0 4px 12px var(--shadow);
+            min-width: 120px;
+            transition: var(--transition);
+            user-select: none;
+        }
+
+        .device-on-canvas:hover {
+            border-color: var(--accent);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .device-on-canvas.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(15, 52, 96, 0.3);
+        }
+
+        .device-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .device-name {
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .device-type {
+            font-size: 10px;
+            color: #666;
+        }
+
+        .device-status {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-left: auto;
+        }
+
+        .status-up { background: var(--success); }
+        .status-down { background: var(--danger); }
+        .status-warning { background: var(--warning); }
+
+        /* Connection Lines */
+        .connection-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .connection-line {
+            stroke-width: 3;
+            fill: none;
+        }
+
+        .ethernet-line { stroke: var(--success); }
+        .fiber-line { stroke: var(--warning); }
+        .wireless-line { stroke: var(--accent); stroke-dasharray: 5,5; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 24px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 13px;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(15, 52, 96, 0.1);
+        }
+
+        /* Status Bar */
+        .status-bar {
+            background: var(--primary);
+            color: white;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 16px 20px;
+            z-index: 3000;
+            max-width: 400px;
+            transform: translateX(450px);
+            transition: var(--transition);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success { border-left: 4px solid var(--success); }
+        .notification.warning { border-left: 4px solid var(--warning); }
+        .notification.error { border-left: 4px solid var(--danger); }
+
+        /* Device Colors */
+        .router-icon { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .switch-icon { background: linear-gradient(135deg, #27ae60, #229954); }
+        .firewall-icon { background: linear-gradient(135deg, #e74c3c, #cb4335); }
+        .server-icon { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .pc-icon { background: linear-gradient(135deg, #95a5a6, #7f8c8d); }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid var(--border);
+            border-top: 2px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                z-index: 100;
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-layout {
+                flex-direction: column;
+            }
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        *:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        button:focus,
+        input:focus,
+        select:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container" id="app">
+        <!-- Header -->
+        <header class="app-header" role="banner">
+            <div class="app-title">
+                <span role="img" aria-label="Network">🌐</span>
+                <span>Enterprise Network Designer v4.0</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="app.toggleSidebar()" aria-label="Toggle sidebar">
+                    <span>☰</span>
+                </button>
+                <button class="btn btn-primary" onclick="app.save()" aria-label="Save diagram">
+                    <span>💾</span> Save
+                </button>
+                <button class="btn btn-secondary" onclick="app.export()" aria-label="Export diagram">
+                    <span>📤</span> Export
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <main class="main-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar" role="complementary" id="sidebar">
+                <div class="sidebar-header">
+                    <h2>Network Devices</h2>
+                </div>
+                <div class="sidebar-content">
+                    <div class="device-category">
+                        <div class="category-header" onclick="app.toggleCategory(this)">
+                            <span>🔀 Routers</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="category-devices">
+                            <div class="device-item" draggable="true" data-device-type="router">
+                                <div class="device-icon router-icon">R</div>
+                                <div>
+                                    <div class="device-name">Router</div>
+                                    <div class="device-type">Layer 3</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="device-category">
+                        <div class="category-header" onclick="app.toggleCategory(this)">
+                            <span>🔄 Switches</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="category-devices">
+                            <div class="device-item" draggable="true" data-device-type="switch">
+                                <div class="device-icon switch-icon">SW</div>
+                                <div>
+                                    <div class="device-name">Switch</div>
+                                    <div class="device-type">Layer 2</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="device-category">
+                        <div class="category-header" onclick="app.toggleCategory(this)">
+                            <span>🛡️ Security</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="category-devices">
+                            <div class="device-item" draggable="true" data-device-type="firewall">
+                                <div class="device-icon firewall-icon">FW</div>
+                                <div>
+                                    <div class="device-name">Firewall</div>
+                                    <div class="device-type">Security</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="device-category">
+                        <div class="category-header" onclick="app.toggleCategory(this)">
+                            <span>🖥️ Servers</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="category-devices">
+                            <div class="device-item" draggable="true" data-device-type="server">
+                                <div class="device-icon server-icon">SRV</div>
+                                <div>
+                                    <div class="device-name">Server</div>
+                                    <div class="device-type">Application</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="device-category">
+                        <div class="category-header" onclick="app.toggleCategory(this)">
+                            <span>💻 Endpoints</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="category-devices">
+                            <div class="device-item" draggable="true" data-device-type="pc">
+                                <div class="device-icon pc-icon">PC</div>
+                                <div>
+                                    <div class="device-name">PC</div>
+                                    <div class="device-type">Endpoint</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Workspace -->
+            <div class="workspace">
+                <div class="toolbar" role="toolbar">
+                    <button class="btn btn-primary" onclick="app.newDiagram()" aria-label="New diagram">
+                        <span>📄</span> New
+                    </button>
+                    <button class="btn btn-secondary" onclick="app.toggleConnectionMode()" id="connect-btn" aria-label="Toggle connection mode">
+                        <span>🔗</span> Connect
+                    </button>
+                    <select id="connection-type" class="form-input" style="width: auto;" aria-label="Connection type">
+                        <option value="ethernet">Ethernet</option>
+                        <option value="fiber">Fiber</option>
+                        <option value="wireless">Wireless</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="app.validate()" aria-label="Validate network">
+                        <span>✅</span> Validate
+                    </button>
+                    <div style="margin-left: auto;">
+                        <button class="btn btn-secondary" onclick="app.zoomOut()" aria-label="Zoom out">-</button>
+                        <span id="zoom-level">100%</span>
+                        <button class="btn btn-secondary" onclick="app.zoomIn()" aria-label="Zoom in">+</button>
+                    </div>
+                </div>
+
+                <div class="canvas-container">
+                    <div class="canvas-viewport" id="viewport">
+                        <div class="canvas" id="canvas">
+                            <svg class="connection-svg" id="connections"></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Status Bar -->
+        <footer class="status-bar" role="contentinfo">
+            <div id="status-text">Ready - Enterprise Network Designer v4.0</div>
+            <div>
+                <span>Devices: <strong id="device-count">0</strong></span>
+                <span style="margin-left: 20px;">Connections: <strong id="connection-count">0</strong></span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">Device Configuration</h3>
+                <button class="btn btn-secondary" onclick="app.closeModal()" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification" role="alert" aria-live="polite">
+        <div id="notification-text"></div>
+    </div>
+
+    <script>
+        // Enterprise-Grade Architecture
+        
+        // Core Observer Pattern for State Management
+        class EventEmitter {
+            constructor() {
+                this.events = new Map();
+            }
+
+            on(event, callback) {
+                if (!this.events.has(event)) {
+                    this.events.set(event, []);
+                }
+                this.events.get(event).push(callback);
+                return () => this.off(event, callback);
+            }
+
+            off(event, callback) {
+                if (this.events.has(event)) {
+                    const callbacks = this.events.get(event);
+                    const index = callbacks.indexOf(callback);
+                    if (index > -1) {
+                        callbacks.splice(index, 1);
+                    }
+                }
+            }
+
+            emit(event, data) {
+                if (this.events.has(event)) {
+                    this.events.get(event).forEach(callback => {
+                        try {
+                            callback(data);
+                        } catch (error) {
+                            console.error(`Error in event handler for ${event}:`, error);
+                        }
+                    });
+                }
+            }
+        }
+
+        // Security & Validation Layer
+        class SecurityManager {
+            static sanitizeInput(input) {
+                if (typeof input !== 'string') return input;
+                return input
+                    .replace(/[<>]/g, '')
+                    .replace(/javascript:/gi, '')
+                    .trim()
+                    .slice(0, 1000); // Prevent oversized inputs
+            }
+
+            static validateIP(ip) {
+                const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+                return ipRegex.test(ip);
+            }
+
+            static validateHostname(hostname) {
+                const hostnameRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$/;
+                return hostnameRegex.test(hostname);
+            }
+
+            static escapeHTML(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+        }
+
+        // Error Handling System
+        class ErrorHandler {
+            static handle(error, context = 'Unknown') {
+                console.error(`[${context}]`, error);
+                
+                const userMessage = this.getUserFriendlyMessage(error);
+                app.notify(userMessage, 'error');
+                
+                // In production, send to logging service
+                this.logError(error, context);
+            }
+
+            static getUserFriendlyMessage(error) {
+                if (error.message.includes('network')) {
+                    return 'Network operation failed. Please check your connection.';
+                }
+                if (error.message.includes('validation')) {
+                    return 'Invalid input provided. Please check your data.';
+                }
+                return 'An unexpected error occurred. Please try again.';
+            }
+
+            static logError(error, context) {
+                // In real app: send to Sentry, DataDog, etc.
+                const errorLog = {
+                    timestamp: new Date().toISOString(),
+                    context,
+                    message: error.message,
+                    stack: error.stack,
+                    userAgent: navigator.userAgent
+                };
+                console.log('Error logged:', errorLog);
+            }
+        }
+
+        // Performance Monitor
+        class PerformanceMonitor {
+            static measure(name, fn) {
+                const start = performance.now();
+                try {
+                    const result = fn();
+                    const end = performance.now();
+                    console.log(`[PERF] ${name}: ${(end - start).toFixed(2)}ms`);
+                    return result;
+                } catch (error) {
+                    const end = performance.now();
+                    console.log(`[PERF] ${name}: ${(end - start).toFixed(2)}ms (ERROR)`);
+                    throw error;
+                }
+            }
+
+            static async measureAsync(name, fn) {
+                const start = performance.now();
+                try {
+                    const result = await fn();
+                    const end = performance.now();
+                    console.log(`[PERF] ${name}: ${(end - start).toFixed(2)}ms`);
+                    return result;
+                } catch (error) {
+                    const end = performance.now();
+                    console.log(`[PERF] ${name}: ${(end - start).toFixed(2)}ms (ERROR)`);
+                    throw error;
+                }
+            }
+        }
+
+        // State Management with Observer Pattern
+        class NetworkState extends EventEmitter {
+            constructor() {
+                super();
+                this.state = {
+                    devices: new Map(),
+                    connections: new Map(),
+                    selectedDevice: null,
+                    connectionMode: false,
+                    zoom: 1,
+                    viewport: { x: 0, y: 0 }
+                };
+                this.history = [];
+                this.historyIndex = -1;
+            }
+
+            getState() {
+                return { ...this.state };
+            }
+
+            setState(updates) {
+                const prevState = { ...this.state };
+                this.state = { ...this.state, ...updates };
+                
+                // Save to history for undo/redo
+                this.pushToHistory(prevState);
+                
+                this.emit('stateChange', {
+                    prevState,
+                    newState: this.state,
+                    updates
+                });
+            }
+
+            pushToHistory(state) {
+                this.history = this.history.slice(0, this.historyIndex + 1);
+                this.history.push(JSON.parse(JSON.stringify(state)));
+                this.historyIndex++;
+                
+                // Limit history size
+                if (this.history.length > 50) {
+                    this.history.shift();
+                    this.historyIndex--;
+                }
+            }
+
+            undo() {
+                if (this.historyIndex > 0) {
+                    this.historyIndex--;
+                    this.state = JSON.parse(JSON.stringify(this.history[this.historyIndex]));
+                    this.emit('stateChange', { newState: this.state, isUndo: true });
+                }
+            }
+
+            redo() {
+                if (this.historyIndex < this.history.length - 1) {
+                    this.historyIndex++;
+                    this.state = JSON.parse(JSON.stringify(this.history[this.historyIndex]));
+                    this.emit('stateChange', { newState: this.state, isRedo: true });
+                }
+            }
+
+            // Device operations
+            addDevice(device) {
+                try {
+                    const sanitizedDevice = this.sanitizeDevice(device);
+                    const devices = new Map(this.state.devices);
+                    devices.set(sanitizedDevice.id, sanitizedDevice);
+                    this.setState({ devices });
+                    this.emit('deviceAdded', sanitizedDevice);
+                } catch (error) {
+                    ErrorHandler.handle(error, 'addDevice');
+                }
+            }
+
+            updateDevice(id, updates) {
+                try {
+                    const devices = new Map(this.state.devices);
+                    if (devices.has(id)) {
+                        const device = { ...devices.get(id), ...updates };
+                        const sanitizedDevice = this.sanitizeDevice(device);
+                        devices.set(id, sanitizedDevice);
+                        this.setState({ devices });
+                        this.emit('deviceUpdated', { id, device: sanitizedDevice });
+                    }
+                } catch (error) {
+                    ErrorHandler.handle(error, 'updateDevice');
+                }
+            }
+
+            removeDevice(id) {
+                try {
+                    const devices = new Map(this.state.devices);
+                    const connections = new Map(this.state.connections);
+                    
+                    // Remove device
+                    const device = devices.get(id);
+                    devices.delete(id);
+                    
+                    // Remove associated connections
+                    for (const [connId, conn] of connections) {
+                        if (conn.device1 === id || conn.device2 === id) {
+                            connections.delete(connId);
+                        }
+                    }
+                    
+                    this.setState({ devices, connections });
+                    this.emit('deviceRemoved', { id, device });
+                } catch (error) {
+                    ErrorHandler.handle(error, 'removeDevice');
+                }
+            }
+
+            sanitizeDevice(device) {
+                return {
+                    ...device,
+                    hostname: SecurityManager.sanitizeInput(device.hostname),
+                    type: SecurityManager.sanitizeInput(device.type),
+                    description: SecurityManager.sanitizeInput(device.description || '')
+                };
+            }
+
+            // Connection operations
+            addConnection(connection) {
+                try {
+                    const connections = new Map(this.state.connections);
+                    connections.set(connection.id, connection);
+                    this.setState({ connections });
+                    this.emit('connectionAdded', connection);
+                } catch (error) {
+                    ErrorHandler.handle(error, 'addConnection');
+                }
+            }
+
+            removeConnection(id) {
+                try {
+                    const connections = new Map(this.state.connections);
+                    const connection = connections.get(id);
+                    connections.delete(id);
+                    this.setState({ connections });
+                    this.emit('connectionRemoved', { id, connection });
+                } catch (error) {
+                    ErrorHandler.handle(error, 'removeConnection');
+                }
+            }
+        }
+
+        // Device Factory with Specifications
+        class DeviceFactory {
+            static deviceSpecs = {
+                router: {
+                    type: 'Router',
+                    icon: 'R',
+                    color: 'router-icon',
+                    interfaces: ['GigabitEthernet0/0', 'GigabitEthernet0/1', 'Serial0/0/0'],
+                    services: ['routing', 'nat', 'dhcp'],
+                    defaultConfig: {
+                        hostname: 'Router',
+                        ip: '192.168.1.1',
+                        subnet: '255.255.255.0'
+                    }
+                },
+                switch: {
+                    type: 'Switch',
+                    icon: 'SW',
+                    color: 'switch-icon',
+                    interfaces: Array.from({length: 24}, (_, i) => `FastEthernet0/${i+1}`),
+                    services: ['switching', 'vlan', 'stp'],
+                    defaultConfig: {
+                        hostname: 'Switch',
+                        vlan: '1'
+                    }
+                },
+                firewall: {
+                    type: 'Firewall',
+                    icon: 'FW',
+                    color: 'firewall-icon',
+                    interfaces: ['Outside', 'Inside', 'DMZ'],
+                    services: ['firewall', 'vpn', 'ips'],
+                    defaultConfig: {
+                        hostname: 'Firewall',
+                        zones: ['outside', 'inside', 'dmz']
+                    }
+                },
+                server: {
+                    type: 'Server',
+                    icon: 'SRV',
+                    color: 'server-icon',
+                    interfaces: ['Ethernet0'],
+                    services: ['web', 'database', 'file'],
+                    defaultConfig: {
+                        hostname: 'Server',
+                        os: 'Linux',
+                        ip: 'DHCP'
+                    }
+                },
+                pc: {
+                    type: 'PC',
+                    icon: 'PC',
+                    color: 'pc-icon',
+                    interfaces: ['Ethernet0'],
+                    services: ['client'],
+                    defaultConfig: {
+                        hostname: 'PC',
+                        os: 'Windows',
+                        ip: 'DHCP'
+                    }
+                }
+            };
+
+            static create(type, position) {
+                const spec = this.deviceSpecs[type];
+                if (!spec) {
+                    throw new Error(`Unknown device type: ${type}`);
+                }
+
+                const id = `${type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                
+                return {
+                    id,
+                    type,
+                    ...spec,
+                    position,
+                    config: { ...spec.defaultConfig },
+                    status: 'up',
+                    created: new Date().toISOString()
+                };
+            }
+        }
+
+        // Rendering Engine with Virtual DOM concepts
+        class RenderEngine {
+            constructor(state) {
+                this.state = state;
+                this.renderedElements = new Map();
+                this.connectionElements = new Map();
+                
+                this.state.on('deviceAdded', (device) => this.renderDevice(device));
+                this.state.on('deviceUpdated', ({ id, device }) => this.updateDeviceElement(id, device));
+                this.state.on('deviceRemoved', ({ id }) => this.removeDeviceElement(id));
+                this.state.on('connectionAdded', (connection) => this.renderConnection(connection));
+                this.state.on('connectionRemoved', ({ id }) => this.removeConnectionElement(id));
+            }
+
+            renderDevice(device) {
+                const element = this.createDeviceElement(device);
+                this.renderedElements.set(device.id, element);
+                document.getElementById('canvas').appendChild(element);
+            }
+
+            createDeviceElement(device) {
+                const element = document.createElement('div');
+                element.className = `device-on-canvas ${device.status}`;
+                element.id = device.id;
+                element.style.left = `${device.position.x}px`;
+                element.style.top = `${device.position.y}px`;
+                element.draggable = true;
+                
+                element.innerHTML = `
+                    <div class="device-header">
+                        <div class="device-icon ${device.color}">${device.icon}</div>
+                        <div>
+                            <div class="device-name">${SecurityManager.escapeHTML(device.config.hostname)}</div>
+                            <div class="device-type">${SecurityManager.escapeHTML(device.type)}</div>
+                        </div>
+                        <div class="device-status status-${device.status}"></div>
+                    </div>
+                `;
+
+                // Event listeners
+                element.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.selectDevice(device.id);
+                });
+
+                element.addEventListener('dblclick', (e) => {
+                    e.stopPropagation();
+                    app.openDeviceConfig(device.id);
+                });
+
+                element.addEventListener('dragstart', (e) => {
+                    this.draggedDeviceId = device.id;
+                });
+
+                element.addEventListener('drag', (e) => {
+                    if (e.clientX && e.clientY) {
+                        const rect = document.getElementById('canvas').getBoundingClientRect();
+                        const zoom = this.state.getState().zoom;
+                        this.state.updateDevice(device.id, {
+                            position: {
+                                x: (e.clientX - rect.left) / zoom,
+                                y: (e.clientY - rect.top) / zoom
+                            }
+                        });
+                    }
+                });
+
+                return element;
+            }
+
+            updateDeviceElement(id, device) {
+                const element = this.renderedElements.get(id);
+                if (element) {
+                    element.style.left = `${device.position.x}px`;
+                    element.style.top = `${device.position.y}px`;
+                    element.className = `device-on-canvas ${device.status}`;
+                    
+                    const nameElement = element.querySelector('.device-name');
+                    if (nameElement) {
+                        nameElement.textContent = device.config.hostname;
+                    }
+                }
+            }
+
+            removeDeviceElement(id) {
+                const element = this.renderedElements.get(id);
+                if (element) {
+                    element.remove();
+                    this.renderedElements.delete(id);
+                }
+            }
+
+            selectDevice(id) {
+                // Remove previous selection
+                document.querySelectorAll('.device-on-canvas.selected').forEach(el => {
+                    el.classList.remove('selected');
+                });
+
+                // Add selection to current device
+                const element = this.renderedElements.get(id);
+                if (element) {
+                    element.classList.add('selected');
+                    this.state.setState({ selectedDevice: id });
+                }
+            }
+
+            renderConnection(connection) {
+                const svg = document.getElementById('connections');
+                const device1 = this.state.getState().devices.get(connection.device1);
+                const device2 = this.state.getState().devices.get(connection.device2);
+
+                if (device1 && device2) {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.id = connection.id;
+                    line.classList.add('connection-line', `${connection.type}-line`);
+                    
+                    this.updateConnectionPosition(line, device1, device2);
+                    
+                    svg.appendChild(line);
+                    this.connectionElements.set(connection.id, line);
+                }
+            }
+
+            updateConnectionPosition(line, device1, device2) {
+                const x1 = device1.position.x + 60; // Device center
+                const y1 = device1.position.y + 40;
+                const x2 = device2.position.x + 60;
+                const y2 = device2.position.y + 40;
+
+                line.setAttribute('x1', x1);
+                line.setAttribute('y1', y1);
+                line.setAttribute('x2', x2);
+                line.setAttribute('y2', y2);
+            }
+
+            removeConnectionElement(id) {
+                const element = this.connectionElements.get(id);
+                if (element) {
+                    element.remove();
+                    this.connectionElements.delete(id);
+                }
+            }
+
+            updateStats() {
+                const state = this.state.getState();
+                document.getElementById('device-count').textContent = state.devices.size;
+                document.getElementById('connection-count').textContent = state.connections.size;
+            }
+        }
+
+        // Main Application Class
+        class NetworkDiagramApp {
+            constructor() {
+                this.state = new NetworkState();
+                this.renderer = new RenderEngine(this.state);
+                this.draggedDeviceType = null;
+                this.connectionStart = null;
+
+                this.initializeEventListeners();
+                this.state.on('stateChange', () => this.renderer.updateStats());
+                
+                // Initialize with empty state
+                this.renderer.updateStats();
+                this.notify('Enterprise Network Designer v4.0 Ready', 'success');
+            }
+
+            initializeEventListeners() {
+                // Drag and drop for device creation
+                document.querySelectorAll('.device-item').forEach(item => {
+                    item.addEventListener('dragstart', (e) => {
+                        this.draggedDeviceType = e.target.dataset.deviceType || 
+                                                 e.target.closest('.device-item').dataset.deviceType;
+                    });
+                });
+
+                // Canvas drop zone
+                const canvas = document.getElementById('canvas');
+                canvas.addEventListener('dragover', (e) => e.preventDefault());
+                canvas.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (this.draggedDeviceType) {
+                        const rect = canvas.getBoundingClientRect();
+                        const zoom = this.state.getState().zoom;
+                        const position = {
+                            x: (e.clientX - rect.left) / zoom,
+                            y: (e.clientY - rect.top) / zoom
+                        };
+                        
+                        PerformanceMonitor.measure('createDevice', () => {
+                            const device = DeviceFactory.create(this.draggedDeviceType, position);
+                            this.state.addDevice(device);
+                        });
+                        
+                        this.draggedDeviceType = null;
+                    }
+                });
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey || e.metaKey) {
+                        switch(e.key) {
+                            case 'z':
+                                e.preventDefault();
+                                if (e.shiftKey) {
+                                    this.state.redo();
+                                } else {
+                                    this.state.undo();
+                                }
+                                break;
+                            case 's':
+                                e.preventDefault();
+                                this.save();
+                                break;
+                            case 'n':
+                                e.preventDefault();
+                                this.newDiagram();
+                                break;
+                        }
+                    }
+                    
+                    if (e.key === 'Delete') {
+                        const selectedDevice = this.state.getState().selectedDevice;
+                        if (selectedDevice) {
+                            this.state.removeDevice(selectedDevice);
+                        }
+                    }
+                });
+
+                // Canvas click for deselection
+                canvas.addEventListener('click', (e) => {
+                    if (e.target === canvas) {
+                        this.state.setState({ selectedDevice: null });
+                        document.querySelectorAll('.device-on-canvas.selected').forEach(el => {
+                            el.classList.remove('selected');
+                        });
+                    }
+                });
+
+                // Modal close on overlay click
+                document.getElementById('modal').addEventListener('click', (e) => {
+                    if (e.target.id === 'modal') {
+                        this.closeModal();
+                    }
+                });
+            }
+
+            // UI Actions
+            toggleSidebar() {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.toggle('collapsed');
+            }
+
+            toggleCategory(header) {
+                header.classList.toggle('collapsed');
+                const devices = header.nextElementSibling;
+                if (header.classList.contains('collapsed')) {
+                    devices.style.display = 'none';
+                } else {
+                    devices.style.display = 'block';
+                }
+            }
+
+            newDiagram() {
+                if (confirm('Create new diagram? Current work will be lost.')) {
+                    this.state.setState({
+                        devices: new Map(),
+                        connections: new Map(),
+                        selectedDevice: null
+                    });
+                    
+                    // Clear rendered elements
+                    document.getElementById('canvas').innerHTML = '<svg class="connection-svg" id="connections"></svg>';
+                    this.renderer.renderedElements.clear();
+                    this.renderer.connectionElements.clear();
+                    
+                    this.notify('New diagram created', 'success');
+                }
+            }
+
+            save() {
+                try {
+                    const state = this.state.getState();
+                    const diagramData = {
+                        version: '4.0',
+                        timestamp: new Date().toISOString(),
+                        devices: Array.from(state.devices.entries()).map(([id, device]) => ({ id, ...device })),
+                        connections: Array.from(state.connections.entries()).map(([id, conn]) => ({ id, ...conn })),
+                        viewport: state.viewport,
+                        zoom: state.zoom
+                    };
+
+                    const dataStr = JSON.stringify(diagramData, null, 2);
+                    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(dataBlob);
+                    
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `network_diagram_${new Date().toISOString().split('T')[0]}.json`;
+                    link.click();
+                    
+                    URL.revokeObjectURL(url);
+                    this.notify('Diagram saved successfully', 'success');
+                    
+                } catch (error) {
+                    ErrorHandler.handle(error, 'save');
+                }
+            }
+
+            export() {
+                try {
+                    // Implementation for export to PNG/SVG
+                    this.notify('Export functionality coming soon', 'warning');
+                } catch (error) {
+                    ErrorHandler.handle(error, 'export');
+                }
+            }
+
+            toggleConnectionMode() {
+                const currentMode = this.state.getState().connectionMode;
+                this.state.setState({ connectionMode: !currentMode });
+                
+                const btn = document.getElementById('connect-btn');
+                if (!currentMode) {
+                    btn.textContent = '❌ Cancel';
+                    btn.classList.add('active');
+                    this.notify('Connection mode active - Click two devices to connect', 'info');
+                } else {
+                    btn.textContent = '🔗 Connect';
+                    btn.classList.remove('active');
+                    this.connectionStart = null;
+                    this.notify('Connection mode disabled', 'info');
+                }
+            }
+
+            validate() {
+                try {
+                    const state = this.state.getState();
+                    const issues = [];
+                    
+                    // Check for isolated devices
+                    const connectedDevices = new Set();
+                    state.connections.forEach(conn => {
+                        connectedDevices.add(conn.device1);
+                        connectedDevices.add(conn.device2);
+                    });
+                    
+                    const isolatedDevices = Array.from(state.devices.values())
+                        .filter(device => !connectedDevices.has(device.id));
+                    
+                    if (isolatedDevices.length > 0) {
+                        issues.push(`Isolated devices: ${isolatedDevices.map(d => d.config.hostname).join(', ')}`);
+                    }
+
+                    // Validation results
+                    if (issues.length === 0) {
+                        this.notify('✅ Network validation passed - No issues found', 'success');
+                    } else {
+                        this.notify(`⚠️ Validation issues found:\n${issues.join('\n')}`, 'warning');
+                    }
+                    
+                } catch (error) {
+                    ErrorHandler.handle(error, 'validate');
+                }
+            }
+
+            zoomIn() {
+                const currentZoom = this.state.getState().zoom;
+                const newZoom = Math.min(currentZoom * 1.2, 3);
+                this.setZoom(newZoom);
+            }
+
+            zoomOut() {
+                const currentZoom = this.state.getState().zoom;
+                const newZoom = Math.max(currentZoom * 0.8, 0.2);
+                this.setZoom(newZoom);
+            }
+
+            setZoom(zoom) {
+                this.state.setState({ zoom });
+                const canvas = document.getElementById('canvas');
+                canvas.style.transform = `scale(${zoom})`;
+                document.getElementById('zoom-level').textContent = `${Math.round(zoom * 100)}%`;
+            }
+
+            openDeviceConfig(deviceId) {
+                const device = this.state.getState().devices.get(deviceId);
+                if (!device) return;
+
+                const modal = document.getElementById('modal');
+                const modalTitle = document.getElementById('modal-title');
+                const modalBody = document.getElementById('modal-body');
+
+                modalTitle.textContent = `Configure ${device.config.hostname}`;
+                
+                modalBody.innerHTML = `
+                    <form id="device-config-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Hostname:</label>
+                                <input type="text" class="form-input" id="hostname" value="${device.config.hostname}" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Type:</label>
+                                <input type="text" class="form-input" value="${device.type}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">IP Address:</label>
+                                <input type="text" class="form-input" id="ip" value="${device.config.ip || ''}" placeholder="192.168.1.1">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Status:</label>
+                                <select class="form-input" id="status">
+                                    <option value="up" ${device.status === 'up' ? 'selected' : ''}>Up</option>
+                                    <option value="down" ${device.status === 'down' ? 'selected' : ''}>Down</option>
+                                    <option value="warning" ${device.status === 'warning' ? 'selected' : ''}>Warning</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                            <button type="button" class="btn btn-secondary" onclick="app.closeModal()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                `;
+
+                // Form submission
+                document.getElementById('device-config-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const hostname = SecurityManager.sanitizeInput(document.getElementById('hostname').value);
+                    const ip = document.getElementById('ip').value;
+                    const status = document.getElementById('status').value;
+                    
+                    // Validation
+                    if (!SecurityManager.validateHostname(hostname)) {
+                        this.notify('Invalid hostname format', 'error');
+                        return;
+                    }
+                    
+                    if (ip && !SecurityManager.validateIP(ip)) {
+                        this.notify('Invalid IP address format', 'error');
+                        return;
+                    }
+
+                    // Update device
+                    this.state.updateDevice(deviceId, {
+                        config: { ...device.config, hostname, ip },
+                        status
+                    });
+                    
+                    this.closeModal();
+                    this.notify('Device configuration updated', 'success');
+                });
+
+                modal.classList.add('show');
+                modal.setAttribute('aria-hidden', 'false');
+            }
+
+            closeModal() {
+                const modal = document.getElementById('modal');
+                modal.classList.remove('show');
+                modal.setAttribute('aria-hidden', 'true');
+            }
+
+            notify(message, type = 'info') {
+                const notification = document.getElementById('notification');
+                const text = document.getElementById('notification-text');
+                
+                text.textContent = message;
+                notification.className = `notification ${type} show`;
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 5000);
+            }
+
+            setStatus(message) {
+                document.getElementById('status-text').textContent = message;
+            }
+        }
+
+        // Initialize Application
+        let app;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                app = new NetworkDiagramApp();
+                console.log('🚀 Enterprise Network Designer v4.0 Initialized');
+            } catch (error) {
+                ErrorHandler.handle(error, 'initialization');
+            }
+        });
+
+        // Global error handling
+        window.addEventListener('error', (e) => {
+            ErrorHandler.handle(e.error, 'global');
+        });
+
+        window.addEventListener('unhandledrejection', (e) => {
+            ErrorHandler.handle(e.reason, 'promise');
+        });
+    </script>
+</body>
+</html>

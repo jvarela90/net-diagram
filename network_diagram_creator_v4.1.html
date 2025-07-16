@@ -1,0 +1,2166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Diagram Creator Pro - Technical Edition</title>
+    <style>
+        :root {
+            --primary-color: #1a252f;
+            --secondary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --info-color: #17a2b8;
+            --bg-light: #ecf0f1;
+            --bg-dark: #34495e;
+            --text-light: #ffffff;
+            --text-dark: #2c3e50;
+            --border-radius: 6px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+            background: linear-gradient(135deg, #0f1419 0%, #1a252f 100%);
+            height: 100vh;
+            overflow: hidden;
+            color: var(--text-light);
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: var(--primary-color);
+            border: 1px solid #2c3e50;
+        }
+
+        /* Header */
+        .app-header {
+            background: var(--secondary-color);
+            color: var(--text-light);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--accent-color);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .app-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .system-info {
+            display: flex;
+            gap: 20px;
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            flex: 1;
+            background: var(--primary-color);
+        }
+
+        /* Technical Sidebar */
+        .sidebar {
+            width: 380px;
+            background: var(--secondary-color);
+            display: flex;
+            flex-direction: column;
+            border-right: 2px solid var(--accent-color);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar-header {
+            padding: 15px;
+            background: var(--bg-dark);
+            border-bottom: 1px solid #444;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .device-categories {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .category-section {
+            margin-bottom: 20px;
+        }
+
+        .category-title {
+            background: var(--bg-dark);
+            padding: 10px;
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .category-title:hover {
+            background: var(--accent-color);
+        }
+
+        .device-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .device-card {
+            background: var(--bg-dark);
+            border: 1px solid #444;
+            border-radius: var(--border-radius);
+            padding: 12px;
+            cursor: grab;
+            transition: var(--transition);
+            text-align: center;
+            position: relative;
+        }
+
+        .device-card:hover {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .device-card:active {
+            cursor: grabbing;
+        }
+
+        .device-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 10px;
+            color: white;
+            margin: 0 auto 6px;
+        }
+
+        .device-name {
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .device-specs {
+            font-size: 0.7em;
+            opacity: 0.8;
+            line-height: 1.2;
+        }
+
+        /* Workspace */
+        .workspace-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .technical-toolbar {
+            background: var(--bg-dark);
+            padding: 12px 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            border-bottom: 1px solid #444;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding-right: 15px;
+            border-right: 1px solid #555;
+        }
+
+        .toolbar-group:last-child {
+            border-right: none;
+        }
+
+        .toolbar-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.8em;
+            font-family: inherit;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .toolbar-btn:hover {
+            background: #2980b9;
+        }
+
+        .toolbar-btn.active {
+            background: var(--success-color);
+        }
+
+        .toolbar-select {
+            background: var(--secondary-color);
+            color: white;
+            border: 1px solid #555;
+            padding: 6px 10px;
+            border-radius: var(--border-radius);
+            font-size: 0.8em;
+            font-family: inherit;
+        }
+
+        /* Canvas */
+        .canvas-area {
+            flex: 1;
+            position: relative;
+            background: #0a0e13;
+            overflow: hidden;
+        }
+
+        .canvas-viewport {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 4000px;
+            height: 3000px;
+            background: 
+                linear-gradient(to right, #1a252f 1px, transparent 1px),
+                linear-gradient(to bottom, #1a252f 1px, transparent 1px);
+            background-size: 30px 30px;
+            background-color: #0a0e13;
+        }
+
+        /* Technical Device Representation */
+        .network-device {
+            position: absolute;
+            background: var(--secondary-color);
+            border: 2px solid var(--accent-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            cursor: move;
+            transition: var(--transition);
+            min-width: 140px;
+            font-size: 0.8em;
+            user-select: none;
+        }
+
+        .network-device:hover {
+            border-color: var(--success-color);
+            box-shadow: 0 6px 25px rgba(39, 174, 96, 0.3);
+        }
+
+        .network-device.selected {
+            border-color: var(--warning-color);
+            box-shadow: 0 0 20px rgba(243, 156, 18, 0.5);
+        }
+
+        .device-header {
+            background: var(--bg-dark);
+            padding: 8px 12px;
+            border-bottom: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .device-title {
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .device-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-up { background: var(--success-color); }
+        .status-down { background: var(--danger-color); }
+        .status-warning { background: var(--warning-color); }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .device-body {
+            padding: 10px;
+        }
+
+        .device-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .info-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 6px;
+            border-radius: 3px;
+            font-size: 0.7em;
+        }
+
+        .info-label {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .interfaces-section {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #444;
+        }
+
+        .interfaces-title {
+            font-size: 0.7em;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--accent-color);
+        }
+
+        .interface-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .interface-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2px 4px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 2px;
+            font-size: 0.65em;
+        }
+
+        .interface-name {
+            font-weight: 600;
+        }
+
+        .interface-status {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--success-color);
+        }
+
+        .interface-status.down {
+            background: var(--danger-color);
+        }
+
+        /* Enhanced Connections */
+        .connection-line {
+            stroke-width: 3;
+            fill: none;
+            pointer-events: stroke;
+        }
+
+        .connection-ethernet { stroke: var(--success-color); }
+        .connection-fiber { stroke: var(--warning-color); }
+        .connection-serial { stroke: var(--info-color); }
+        .connection-wireless { stroke: var(--accent-color); stroke-dasharray: 5,5; }
+
+        .connection-label {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.7em;
+            pointer-events: none;
+            border: 1px solid #555;
+        }
+
+        /* Technical Modal */
+        .technical-modal {
+            display: none;
+            position: fixed;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--secondary-color);
+            margin: 2% auto;
+            border-radius: var(--border-radius);
+            width: 95%;
+            max-width: 1200px;
+            max-height: 90vh;
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            background: var(--bg-dark);
+            padding: 15px 20px;
+            border-bottom: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-tabs {
+            display: flex;
+            background: var(--bg-dark);
+            border-bottom: 1px solid #444;
+        }
+
+        .modal-tab {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-family: inherit;
+            transition: var(--transition);
+            border-bottom: 3px solid transparent;
+        }
+
+        .modal-tab.active {
+            background: var(--secondary-color);
+            border-bottom-color: var(--accent-color);
+        }
+
+        .modal-tab:hover {
+            background: var(--secondary-color);
+        }
+
+        .modal-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .config-section {
+            margin-bottom: 25px;
+        }
+
+        .config-section h3 {
+            color: var(--accent-color);
+            margin-bottom: 12px;
+            font-size: 1em;
+            border-bottom: 1px solid #444;
+            padding-bottom: 6px;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .config-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: var(--border-radius);
+            border: 1px solid #444;
+        }
+
+        .config-label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--accent-color);
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .config-input {
+            width: 100%;
+            background: var(--primary-color);
+            color: white;
+            border: 1px solid #555;
+            padding: 8px;
+            border-radius: var(--border-radius);
+            font-size: 0.85em;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .config-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .interface-config {
+            border: 1px solid #555;
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .interface-header {
+            background: var(--bg-dark);
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .interface-body {
+            padding: 10px;
+            display: none;
+        }
+
+        .interface-body.active {
+            display: block;
+        }
+
+        .routing-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .routing-table th,
+        .routing-table td {
+            border: 1px solid #555;
+            padding: 8px;
+            text-align: left;
+            font-size: 0.8em;
+        }
+
+        .routing-table th {
+            background: var(--bg-dark);
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .routing-table tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .add-route-btn {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+
+        .status-bar {
+            background: var(--bg-dark);
+            padding: 10px 20px;
+            border-top: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85em;
+        }
+
+        .status-left {
+            display: flex;
+            gap: 20px;
+        }
+
+        .status-right {
+            display: flex;
+            gap: 15px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success-color);
+        }
+
+        /* Device Type Specific Colors */
+        .core-router-icon { background: linear-gradient(135deg, #8e44ad, #9b59b6); }
+        .edge-router-icon { background: linear-gradient(135deg, #e67e22, #f39c12); }
+        .l3-switch-icon { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+        .l2-switch-icon { background: linear-gradient(135deg, #16a085, #1abc9c); }
+        .firewall-icon { background: linear-gradient(135deg, #c0392b, #e74c3c); }
+        .loadbalancer-icon { background: linear-gradient(135deg, #7f8c8d, #95a5a6); }
+        .modem-icon { background: linear-gradient(135deg, #d35400, #e67e22); }
+        .ap-icon { background: linear-gradient(135deg, #2980b9, #3498db); }
+        .server-icon { background: linear-gradient(135deg, #34495e, #2c3e50); }
+        .pc-icon { background: linear-gradient(135deg, #5d6d7e, #85929e); }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .sidebar { width: 320px; }
+            .device-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--primary-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="app-header">
+            <div class="app-title">
+                <span>🔧</span>
+                <span>Network Diagram Creator Pro</span>
+                <span style="font-size: 0.7em; opacity: 0.8;">Technical Edition v3.0</span>
+            </div>
+            <div class="system-info">
+                <span>Uptime: <span id="uptime">00:00:00</span></span>
+                <span>Memory: <span id="memory-usage">0 MB</span></span>
+                <span>Objects: <span id="object-count">0</span></span>
+            </div>
+        </div>
+
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Technical Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    📡 Network Equipment Library
+                </div>
+                <div class="device-categories">
+                    <!-- Core Infrastructure -->
+                    <div class="category-section">
+                        <div class="category-title">
+                            <span>⚡</span>
+                            <span>CORE INFRASTRUCTURE</span>
+                        </div>
+                        <div class="device-grid">
+                            <div class="device-card" draggable="true" data-device-type="core-router">
+                                <div class="device-icon core-router-icon">CR</div>
+                                <div class="device-name">Core Router</div>
+                                <div class="device-specs">
+                                    BGP/OSPF<br>
+                                    48x 10G + 8x 40G<br>
+                                    Redundant PSU
+                                </div>
+                            </div>
+                            <div class="device-card" draggable="true" data-device-type="edge-router">
+                                <div class="device-icon edge-router-icon">ER</div>
+                                <div class="device-name">Edge Router</div>
+                                <div class="device-specs">
+                                    BGP/MPLS<br>
+                                    WAN Interfaces<br>
+                                    Firewall/VPN
+                                </div>
+                            </div>
+                            <div class="device-card" draggable="true" data-device-type="l3-switch">
+                                <div class="device-icon l3-switch-icon">L3</div>
+                                <div class="device-name">L3 Switch</div>
+                                <div class="device-specs">
+                                    Layer 3 Routing<br>
+                                    48x 1G + 4x 10G<br>
+                                    VLAN/STP/HSRP
+                                </div>
+                            </div>
+                            <div class="device-card" draggable="true" data-device-type="l2-switch">
+                                <div class="device-icon l2-switch-icon">L2</div>
+                                <div class="device-name">L2 Switch</div>
+                                <div class="device-specs">
+                                    Layer 2 Switching<br>
+                                    24x 1G + 2x 10G<br>
+                                    VLAN/STP/LACP
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security -->
+                    <div class="category-section">
+                        <div class="category-title">
+                            <span>🛡️</span>
+                            <span>SECURITY</span>
+                        </div>
+                        <div class="device-grid">
+                            <div class="device-card" draggable="true" data-device-type="firewall">
+                                <div class="device-icon firewall-icon">FW</div>
+                                <div class="device-name">Firewall</div>
+                                <div class="device-specs">
+                                    Stateful Inspection<br>
+                                    IPS/IDS Built-in<br>
+                                    VPN Gateway
+                                </div>
+                            </div>
+                            <div class="device-card" draggable="true" data-device-type="loadbalancer">
+                                <div class="device-icon loadbalancer-icon">LB</div>
+                                <div class="device-name">Load Balancer</div>
+                                <div class="device-specs">
+                                    L4/L7 Balancing<br>
+                                    SSL Termination<br>
+                                    Health Checks
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- WAN/Internet -->
+                    <div class="category-section">
+                        <div class="category-title">
+                            <span>🌐</span>
+                            <span>WAN/INTERNET</span>
+                        </div>
+                        <div class="device-grid">
+                            <div class="device-card" draggable="true" data-device-type="modem">
+                                <div class="device-icon modem-icon">M</div>
+                                <div class="device-name">Modem/CPE</div>
+                                <div class="device-specs">
+                                    NAT/PAT<br>
+                                    WAN: Public IP<br>
+                                    LAN: Private IP
+                                </div>
+                            </div>
+                            <div class="device-card" draggable="true" data-device-type="ap">
+                                <div class="device-icon ap-icon">AP</div>
+                                <div class="device-name">Access Point</div>
+                                <div class="device-specs">
+                                    802.11ac/ax<br>
+                                    Multiple SSIDs<br>
+                                    Enterprise Auth
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Servers -->
+                    <div class="category-section">
+                        <div class="category-title">
+                            <span>🖥️</span>
+                            <span>SERVERS</span>
+                        </div>
+                        <div class="device-grid">
+                            <div class="device-card" draggable="true" data-device-type="server">
+                                <div class="device-icon server-icon">SRV</div>
+                                <div class="device-name">Server</div>
+                                <div class="device-specs">
+                                    Dual NIC<br>
+                                    Service Ports<br>
+                                    OS Services
+                                </div>
+                            </div>
+                            <div class="device-card" draggable="true" data-device-type="pc">
+                                <div class="device-icon pc-icon">PC</div>
+                                <div class="device-name">Workstation</div>
+                                <div class="device-specs">
+                                    Client OS<br>
+                                    Single NIC<br>
+                                    DHCP/Static
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workspace -->
+            <div class="workspace-container">
+                <!-- Technical Toolbar -->
+                <div class="technical-toolbar">
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" onclick="newDiagram()">
+                            📄 New
+                        </button>
+                        <button class="toolbar-btn" onclick="saveDiagram()">
+                            💾 Save
+                        </button>
+                        <button class="toolbar-btn" onclick="loadDiagram()">
+                            📁 Load
+                        </button>
+                    </div>
+                    
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" id="connect-btn" onclick="toggleConnectionMode()">
+                            🔗 Connect
+                        </button>
+                        <select id="connection-type" class="toolbar-select">
+                            <option value="ethernet">Ethernet (1Gbps)</option>
+                            <option value="fiber">Fiber (10Gbps)</option>
+                            <option value="serial">Serial (2Mbps)</option>
+                            <option value="wireless">Wireless (300Mbps)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" onclick="validateNetwork()">
+                            ✅ Validate
+                        </button>
+                        <button class="toolbar-btn" onclick="generateConfig()">
+                            ⚙️ Config
+                        </button>
+                        <button class="toolbar-btn" onclick="clearDiagram()">
+                            🗑️ Clear
+                        </button>
+                    </div>
+
+                    <div class="toolbar-group">
+                        <span>View:</span>
+                        <button class="toolbar-btn" onclick="zoomIn()">🔍+</button>
+                        <span id="zoom-level">100%</span>
+                        <button class="toolbar-btn" onclick="zoomOut()">🔍-</button>
+                    </div>
+                </div>
+
+                <!-- Canvas Area -->
+                <div class="canvas-area">
+                    <div class="canvas-viewport" id="canvas-viewport">
+                        <div class="canvas-container" id="canvas-container">
+                            <svg id="connection-svg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Properties Modal -->
+        <div id="device-modal" class="technical-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="modal-title">Device Configuration</h3>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="modal-tabs">
+                    <button class="modal-tab active" onclick="switchTab('general')">General</button>
+                    <button class="modal-tab" onclick="switchTab('interfaces')">Interfaces</button>
+                    <button class="modal-tab" onclick="switchTab('routing')">Routing</button>
+                    <button class="modal-tab" onclick="switchTab('security')">Security</button>
+                    <button class="modal-tab" onclick="switchTab('services')">Services</button>
+                </div>
+                <div class="modal-body">
+                    <!-- General Tab -->
+                    <div id="general-tab" class="tab-content active">
+                        <div class="config-section">
+                            <h3>🔧 Device Information</h3>
+                            <div class="config-grid">
+                                <div class="config-item">
+                                    <label class="config-label">Hostname</label>
+                                    <input type="text" class="config-input" id="hostname" placeholder="device-hostname">
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">Device Type</label>
+                                    <input type="text" class="config-input" id="device-type" readonly>
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">Management IP</label>
+                                    <input type="text" class="config-input" id="mgmt-ip" placeholder="192.168.1.1">
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">SNMP Community</label>
+                                    <input type="text" class="config-input" id="snmp-community" placeholder="public">
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">Location</label>
+                                    <input type="text" class="config-input" id="location" placeholder="Building A, Floor 2">
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">Contact</label>
+                                    <input type="text" class="config-input" id="contact" placeholder="admin@company.com">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interfaces Tab -->
+                    <div id="interfaces-tab" class="tab-content">
+                        <div class="config-section">
+                            <h3>🔌 Network Interfaces</h3>
+                            <div id="interfaces-container">
+                                <!-- Interfaces will be populated dynamically -->
+                            </div>
+                            <button class="add-route-btn" onclick="addInterface()">+ Add Interface</button>
+                        </div>
+                    </div>
+
+                    <!-- Routing Tab -->
+                    <div id="routing-tab" class="tab-content">
+                        <div class="config-section">
+                            <h3>📊 Routing Configuration</h3>
+                            <div class="config-grid">
+                                <div class="config-item">
+                                    <label class="config-label">Default Gateway</label>
+                                    <input type="text" class="config-input" id="default-gateway" placeholder="192.168.1.1">
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">Routing Protocol</label>
+                                    <select class="config-input" id="routing-protocol">
+                                        <option value="static">Static</option>
+                                        <option value="ospf">OSPF</option>
+                                        <option value="bgp">BGP</option>
+                                        <option value="eigrp">EIGRP</option>
+                                        <option value="rip">RIP</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <h4 style="margin: 20px 0 10px 0; color: var(--accent-color);">Routing Table</h4>
+                            <table class="routing-table">
+                                <thead>
+                                    <tr>
+                                        <th>Network</th>
+                                        <th>Mask</th>
+                                        <th>Gateway</th>
+                                        <th>Metric</th>
+                                        <th>Interface</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="routing-table-body">
+                                    <!-- Routes will be populated dynamically -->
+                                </tbody>
+                            </table>
+                            <button class="add-route-btn" onclick="addRoute()">+ Add Route</button>
+                        </div>
+                    </div>
+
+                    <!-- Security Tab -->
+                    <div id="security-tab" class="tab-content">
+                        <div class="config-section">
+                            <h3>🛡️ Security Configuration</h3>
+                            <div class="config-grid">
+                                <div class="config-item">
+                                    <label class="config-label">Enable SSH</label>
+                                    <select class="config-input" id="ssh-enabled">
+                                        <option value="true">Enabled</option>
+                                        <option value="false">Disabled</option>
+                                    </select>
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">SSH Port</label>
+                                    <input type="number" class="config-input" id="ssh-port" value="22">
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">Enable Telnet</label>
+                                    <select class="config-input" id="telnet-enabled">
+                                        <option value="false">Disabled</option>
+                                        <option value="true">Enabled</option>
+                                    </select>
+                                </div>
+                                <div class="config-item">
+                                    <label class="config-label">ACL Rules</label>
+                                    <textarea class="config-input" id="acl-rules" rows="4" placeholder="permit tcp any any eq 80
+permit tcp any any eq 443
+deny ip any any"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Services Tab -->
+                    <div id="services-tab" class="tab-content">
+                        <div class="config-section">
+                            <h3>⚙️ Services Configuration</h3>
+                            <div id="services-container">
+                                <!-- Services will be populated based on device type -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="padding: 20px; border-top: 1px solid #444; display: flex; gap: 10px; justify-content: flex-end;">
+                    <button class="toolbar-btn" onclick="closeModal()">Cancel</button>
+                    <button class="toolbar-btn" onclick="saveDeviceConfig()" style="background: var(--success-color);">Save Configuration</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-left">
+                <div class="status-item">
+                    <div class="status-indicator"></div>
+                    <span id="status-text">System Ready</span>
+                </div>
+            </div>
+            <div class="status-right">
+                <div class="status-item">
+                    <span>Devices: <strong id="device-count">0</strong></span>
+                </div>
+                <div class="status-item">
+                    <span>Connections: <strong id="connection-count">0</strong></span>
+                </div>
+                <div class="status-item">
+                    <span>Zoom: <strong id="zoom-display">100%</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="file-input" style="display: none;" accept=".json" onchange="handleFileLoad(event)">
+
+    <script>
+        // Technical Network Diagram Creator - Advanced Version
+        class NetworkDevice {
+            constructor(type, x, y) {
+                this.id = `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                this.type = type;
+                this.x = x;
+                this.y = y;
+                this.hostname = `${type}-${Math.random().toString(36).substr(2, 4)}`;
+                this.mgmtIP = '';
+                this.snmpCommunity = 'public';
+                this.location = '';
+                this.contact = '';
+                this.status = 'up';
+                this.interfaces = [];
+                this.routes = [];
+                this.services = [];
+                this.security = {
+                    sshEnabled: true,
+                    sshPort: 22,
+                    telnetEnabled: false,
+                    aclRules: ''
+                };
+                
+                this.initializeDevice();
+            }
+
+            initializeDevice() {
+                switch(this.type) {
+                    case 'core-router':
+                        this.initializeCoreRouter();
+                        break;
+                    case 'edge-router':
+                        this.initializeEdgeRouter();
+                        break;
+                    case 'l3-switch':
+                        this.initializeL3Switch();
+                        break;
+                    case 'l2-switch':
+                        this.initializeL2Switch();
+                        break;
+                    case 'firewall':
+                        this.initializeFirewall();
+                        break;
+                    case 'loadbalancer':
+                        this.initializeLoadBalancer();
+                        break;
+                    case 'modem':
+                        this.initializeModem();
+                        break;
+                    case 'ap':
+                        this.initializeAccessPoint();
+                        break;
+                    case 'server':
+                        this.initializeServer();
+                        break;
+                    case 'pc':
+                        this.initializePC();
+                        break;
+                }
+            }
+
+            initializeCoreRouter() {
+                this.interfaces = [
+                    { name: 'GigabitEthernet0/1', type: 'ethernet', speed: '1000Mbps', status: 'up', ip: '', mask: '', vlan: '' },
+                    { name: 'GigabitEthernet0/2', type: 'ethernet', speed: '1000Mbps', status: 'up', ip: '', mask: '', vlan: '' },
+                    { name: 'TenGigabitEthernet0/1', type: 'fiber', speed: '10Gbps', status: 'up', ip: '', mask: '', vlan: '' },
+                    { name: 'TenGigabitEthernet0/2', type: 'fiber', speed: '10Gbps', status: 'up', ip: '', mask: '', vlan: '' }
+                ];
+                this.routes = [
+                    { network: '0.0.0.0', mask: '0.0.0.0', gateway: '192.168.1.1', metric: 1, interface: 'GigabitEthernet0/1' }
+                ];
+                this.services = [
+                    { name: 'OSPF', enabled: true, config: 'area 0' },
+                    { name: 'BGP', enabled: true, config: 'AS 65001' },
+                    { name: 'SNMP', enabled: true, config: 'v2c public' }
+                ];
+            }
+
+            initializeEdgeRouter() {
+                this.interfaces = [
+                    { name: 'GigabitEthernet0/1', type: 'ethernet', speed: '1000Mbps', status: 'up', ip: '', mask: '', vlan: '' },
+                    { name: 'Serial0/0', type: 'serial', speed: '2Mbps', status: 'up', ip: '', mask: '', vlan: '' },
+                    { name: 'Tunnel0', type: 'virtual', speed: '100Mbps', status: 'up', ip: '', mask: '', vlan: '' }
+                ];
+                this.services = [
+                    { name: 'BGP', enabled: true, config: 'AS 65001' },
+                    { name: 'VPN', enabled: true, config: 'IPSec' },
+                    { name: 'NAT', enabled: true, config: 'overload' }
+                ];
+            }
+
+            initializeL3Switch() {
+                this.interfaces = [];
+                for(let i = 1; i <= 48; i++) {
+                    this.interfaces.push({
+                        name: `GigabitEthernet0/${i}`,
+                        type: 'ethernet',
+                        speed: '1000Mbps',
+                        status: 'down',
+                        ip: '',
+                        mask: '',
+                        vlan: '1'
+                    });
+                }
+                // Add uplink interfaces
+                this.interfaces.push(
+                    { name: 'TenGigabitEthernet0/1', type: 'fiber', speed: '10Gbps', status: 'up', ip: '', mask: '', vlan: '' },
+                    { name: 'TenGigabitEthernet0/2', type: 'fiber', speed: '10Gbps', status: 'up', ip: '', mask: '', vlan: '' }
+                );
+                this.services = [
+                    { name: 'STP', enabled: true, config: 'rapid-pvst' },
+                    { name: 'VLAN', enabled: true, config: 'multiple VLANs' },
+                    { name: 'HSRP', enabled: true, config: 'group 1' }
+                ];
+            }
+
+            initializeL2Switch() {
+                this.interfaces = [];
+                for(let i = 1; i <= 24; i++) {
+                    this.interfaces.push({
+                        name: `FastEthernet0/${i}`,
+                        type: 'ethernet',
+                        speed: '100Mbps',
+                        status: 'down',
+                        ip: '',
+                        mask: '',
+                        vlan: '1'
+                    });
+                }
+                this.services = [
+                    { name: 'STP', enabled: true, config: 'pvst' },
+                    { name: 'VLAN', enabled: true, config: 'basic' }
+                ];
+            }
+
+            initializeFirewall() {
+                this.interfaces = [
+                    { name: 'Outside', type: 'ethernet', speed: '1000Mbps', status: 'up', ip: '', mask: '', vlan: '', zone: 'outside' },
+                    { name: 'Inside', type: 'ethernet', speed: '1000Mbps', status: 'up', ip: '', mask: '', vlan: '', zone: 'inside' },
+                    { name: 'DMZ', type: 'ethernet', speed: '1000Mbps', status: 'up', ip: '', mask: '', vlan: '', zone: 'dmz' }
+                ];
+                this.services = [
+                    { name: 'Firewall', enabled: true, config: 'stateful inspection' },
+                    { name: 'IPS', enabled: true, config: 'signature based' },
+                    { name: 'VPN', enabled: true, config: 'SSL/IPSec' }
+                ];
+                this.security.aclRules = `permit tcp any any eq 80
+permit tcp any any eq 443
+permit tcp any any eq 22
+deny ip any any`;
+            }
+
+            initializeLoadBalancer() {
+                this.interfaces = [
+                    { name: 'eth0', type: 'ethernet', speed: '1000Mbps', status: 'up', ip: '', mask: '', vlan: '' },
+                    { name: 'eth1', type: 'ethernet', speed: '1000Mbps', status: 'up', ip: '', mask: '', vlan: '' }
+                ];
+                this.services = [
+                    { name: 'HTTP Load Balancing', enabled: true, config: 'round-robin' },
+                    { name: 'HTTPS Load Balancing', enabled: true, config: 'least-connections' },
+                    { name: 'Health Check', enabled: true, config: 'TCP/HTTP' }
+                ];
+            }
+
+            initializeModem() {
+                this.interfaces = [
+                    { 
+                        name: 'WAN', 
+                        type: 'ethernet', 
+                        speed: '1000Mbps', 
+                        status: 'up', 
+                        ip: this.generatePublicIP(), 
+                        mask: '255.255.255.0', 
+                        vlan: '',
+                        description: 'Public IP from ISP'
+                    },
+                    { 
+                        name: 'LAN', 
+                        type: 'ethernet', 
+                        speed: '1000Mbps', 
+                        status: 'up', 
+                        ip: '192.168.1.1', 
+                        mask: '255.255.255.0', 
+                        vlan: '',
+                        description: 'Private IP for NAT'
+                    }
+                ];
+                this.services = [
+                    { name: 'NAT/PAT', enabled: true, config: 'overload on WAN interface' },
+                    { name: 'DHCP', enabled: true, config: 'pool 192.168.1.2-192.168.1.254' },
+                    { name: 'DNS Relay', enabled: true, config: '8.8.8.8, 8.8.4.4' }
+                ];
+            }
+
+            initializeAccessPoint() {
+                this.interfaces = [
+                    { name: 'eth0', type: 'ethernet', speed: '1000Mbps', status: 'up', ip: '', mask: '', vlan: '' },
+                    { name: 'wlan0', type: 'wireless', speed: '300Mbps', status: 'up', ip: '', mask: '', vlan: '' }
+                ];
+                this.services = [
+                    { name: 'SSID-Corporate', enabled: true, config: 'WPA2-Enterprise' },
+                    { name: 'SSID-Guest', enabled: true, config: 'WPA2-Personal' },
+                    { name: 'RADIUS', enabled: true, config: 'authentication server' }
+                ];
+            }
+
+            initializeServer() {
+                this.interfaces = [
+                    { name: 'eth0', type: 'ethernet', speed: '1000Mbps', status: 'up', ip: '', mask: '', vlan: '' },
+                    { name: 'eth1', type: 'ethernet', speed: '1000Mbps', status: 'down', ip: '', mask: '', vlan: '' }
+                ];
+                this.services = [
+                    { name: 'HTTP', enabled: true, config: 'port 80' },
+                    { name: 'HTTPS', enabled: true, config: 'port 443' },
+                    { name: 'SSH', enabled: true, config: 'port 22' }
+                ];
+            }
+
+            initializePC() {
+                this.interfaces = [
+                    { name: 'eth0', type: 'ethernet', speed: '1000Mbps', status: 'up', ip: '', mask: '', vlan: '' }
+                ];
+                this.services = [
+                    { name: 'DHCP Client', enabled: true, config: 'auto IP' },
+                    { name: 'DNS Client', enabled: true, config: 'auto DNS' }
+                ];
+            }
+
+            generatePublicIP() {
+                // Generate a realistic public IP address
+                const publicRanges = [
+                    '203.0.113', '198.51.100', '192.0.2', '203.0.113'
+                ];
+                const range = publicRanges[Math.floor(Math.random() * publicRanges.length)];
+                const lastOctet = Math.floor(Math.random() * 254) + 1;
+                return `${range}.${lastOctet}`;
+            }
+        }
+
+        class NetworkConnection {
+            constructor(device1, device2, type) {
+                this.id = `conn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                this.device1 = device1;
+                this.device2 = device2;
+                this.type = type;
+                this.status = 'up';
+                this.bandwidth = this.getBandwidth(type);
+                this.utilization = Math.floor(Math.random() * 30) + 10;
+                this.latency = Math.floor(Math.random() * 10) + 1;
+                this.errorRate = Math.random() * 0.1;
+            }
+
+            getBandwidth(type) {
+                const bandwidths = {
+                    'ethernet': '1 Gbps',
+                    'fiber': '10 Gbps',
+                    'serial': '2 Mbps',
+                    'wireless': '300 Mbps'
+                };
+                return bandwidths[type] || '1 Gbps';
+            }
+        }
+
+        // Global variables
+        let devices = [];
+        let connections = [];
+        let selectedDevice = null;
+        let connectionMode = false;
+        let connectionStart = null;
+        let currentZoom = 1;
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+        let startTime = Date.now();
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            startSystemMonitoring();
+        });
+
+        function initializeApp() {
+            // Initialize drag and drop
+            document.querySelectorAll('.device-card').forEach(card => {
+                card.addEventListener('dragstart', handleDragStart);
+            });
+
+            // Initialize canvas
+            const canvas = document.getElementById('canvas-container');
+            canvas.addEventListener('dragover', handleDragOver);
+            canvas.addEventListener('drop', handleDrop);
+            canvas.addEventListener('click', handleCanvasClick);
+
+            // Update stats
+            updateStats();
+        }
+
+        function handleDragStart(e) {
+            const deviceType = e.target.dataset.deviceType;
+            e.dataTransfer.setData('text/plain', deviceType);
+            e.dataTransfer.effectAllowed = 'copy';
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const deviceType = e.dataTransfer.getData('text/plain');
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / currentZoom;
+            const y = (e.clientY - rect.top) / currentZoom;
+            
+            createDevice(deviceType, x, y);
+        }
+
+        function createDevice(type, x, y) {
+            const device = new NetworkDevice(type, x, y);
+            devices.push(device);
+            renderDevice(device);
+            updateStats();
+            setStatus(`Created ${device.hostname} (${type})`);
+        }
+
+        function renderDevice(device) {
+            const deviceElement = document.createElement('div');
+            deviceElement.className = 'network-device';
+            deviceElement.id = device.id;
+            deviceElement.style.left = device.x + 'px';
+            deviceElement.style.top = device.y + 'px';
+
+            const interfaceList = device.interfaces.slice(0, 4).map(iface => 
+                `<div class="interface-item">
+                    <span class="interface-name">${iface.name}</span>
+                    <div class="interface-status ${iface.status}"></div>
+                </div>`
+            ).join('');
+
+            deviceElement.innerHTML = `
+                <div class="device-header">
+                    <div class="device-title">${device.hostname}</div>
+                    <div class="device-status status-${device.status}"></div>
+                </div>
+                <div class="device-body">
+                    <div class="device-info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Type</div>
+                            <div>${device.type}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Mgmt IP</div>
+                            <div>${device.mgmtIP || 'Not set'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Interfaces</div>
+                            <div>${device.interfaces.length}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Status</div>
+                            <div>${device.status.toUpperCase()}</div>
+                        </div>
+                    </div>
+                    <div class="interfaces-section">
+                        <div class="interfaces-title">Active Interfaces</div>
+                        <div class="interface-list">
+                            ${interfaceList}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Add event listeners
+            deviceElement.addEventListener('mousedown', (e) => handleDeviceMouseDown(e, device));
+            deviceElement.addEventListener('click', (e) => handleDeviceClick(e, device));
+            deviceElement.addEventListener('contextmenu', (e) => handleDeviceRightClick(e, device));
+
+            document.getElementById('canvas-container').appendChild(deviceElement);
+        }
+
+        function handleDeviceMouseDown(e, device) {
+            if (e.button === 0) {
+                isDragging = true;
+                selectedDevice = device;
+                
+                const rect = e.currentTarget.getBoundingClientRect();
+                dragOffset.x = e.clientX - rect.left;
+                dragOffset.y = e.clientY - rect.top;
+
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('mouseup', handleMouseUp);
+                
+                e.preventDefault();
+            }
+        }
+
+        function handleMouseMove(e) {
+            if (isDragging && selectedDevice) {
+                const canvas = document.getElementById('canvas-container');
+                const rect = canvas.getBoundingClientRect();
+                
+                const newX = (e.clientX - rect.left - dragOffset.x) / currentZoom;
+                const newY = (e.clientY - rect.top - dragOffset.y) / currentZoom;
+                
+                selectedDevice.x = Math.max(0, Math.min(newX, 3800));
+                selectedDevice.y = Math.max(0, Math.min(newY, 2800));
+                
+                const deviceElement = document.getElementById(selectedDevice.id);
+                deviceElement.style.left = selectedDevice.x + 'px';
+                deviceElement.style.top = selectedDevice.y + 'px';
+                
+                updateConnections();
+            }
+        }
+
+        function handleMouseUp() {
+            isDragging = false;
+            selectedDevice = null;
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        }
+
+        function handleDeviceClick(e, device) {
+            if (connectionMode) {
+                handleConnectionClick(device);
+            } else {
+                selectDevice(device);
+            }
+            e.stopPropagation();
+        }
+
+        function handleDeviceRightClick(e, device) {
+            e.preventDefault();
+            selectDevice(device);
+            openDeviceModal(device);
+        }
+
+        function selectDevice(device) {
+            // Clear previous selection
+            document.querySelectorAll('.network-device.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            selectedDevice = device;
+            document.getElementById(device.id).classList.add('selected');
+            setStatus(`Selected ${device.hostname} (${device.type})`);
+        }
+
+        function handleConnectionClick(device) {
+            if (!connectionStart) {
+                connectionStart = device;
+                document.getElementById(device.id).classList.add('selected');
+                setStatus(`Connecting from ${device.hostname} - Select target device`);
+            } else if (connectionStart.id !== device.id) {
+                createConnection(connectionStart, device);
+                clearSelection();
+                connectionStart = null;
+                setStatus('Connection created');
+            }
+        }
+
+        function createConnection(device1, device2) {
+            const connectionType = document.getElementById('connection-type').value;
+            const connection = new NetworkConnection(device1.id, device2.id, connectionType);
+            connections.push(connection);
+            renderConnection(connection);
+            updateStats();
+        }
+
+        function renderConnection(connection) {
+            const device1 = devices.find(d => d.id === connection.device1);
+            const device2 = devices.find(d => d.id === connection.device2);
+            
+            if (!device1 || !device2) return;
+
+            const svg = document.getElementById('connection-svg');
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            
+            line.id = connection.id;
+            line.classList.add('connection-line', `connection-${connection.type}`);
+            
+            const center1 = getDeviceCenter(device1);
+            const center2 = getDeviceCenter(device2);
+            
+            line.setAttribute('x1', center1.x);
+            line.setAttribute('y1', center1.y);
+            line.setAttribute('x2', center2.x);
+            line.setAttribute('y2', center2.y);
+            
+            svg.appendChild(line);
+
+            // Add connection label
+            const label = document.createElement('div');
+            label.className = 'connection-label';
+            label.id = `label_${connection.id}`;
+            label.textContent = `${connection.bandwidth} | ${connection.utilization}% | ${connection.latency}ms`;
+            
+            const midX = (center1.x + center2.x) / 2;
+            const midY = (center1.y + center2.y) / 2;
+            
+            label.style.left = midX + 'px';
+            label.style.top = midY + 'px';
+            
+            document.getElementById('canvas-container').appendChild(label);
+        }
+
+        function getDeviceCenter(device) {
+            return {
+                x: device.x + 70,
+                y: device.y + 60
+            };
+        }
+
+        function updateConnections() {
+            connections.forEach(connection => {
+                const device1 = devices.find(d => d.id === connection.device1);
+                const device2 = devices.find(d => d.id === connection.device2);
+                
+                if (device1 && device2) {
+                    const line = document.getElementById(connection.id);
+                    const label = document.getElementById(`label_${connection.id}`);
+                    
+                    if (line) {
+                        const center1 = getDeviceCenter(device1);
+                        const center2 = getDeviceCenter(device2);
+                        
+                        line.setAttribute('x1', center1.x);
+                        line.setAttribute('y1', center1.y);
+                        line.setAttribute('x2', center2.x);
+                        line.setAttribute('y2', center2.y);
+                        
+                        if (label) {
+                            const midX = (center1.x + center2.x) / 2;
+                            const midY = (center1.y + center2.y) / 2;
+                            label.style.left = midX + 'px';
+                            label.style.top = midY + 'px';
+                        }
+                    }
+                }
+            });
+        }
+
+        function toggleConnectionMode() {
+            connectionMode = !connectionMode;
+            const btn = document.getElementById('connect-btn');
+            
+            if (connectionMode) {
+                btn.textContent = '❌ Cancel';
+                btn.classList.add('active');
+                setStatus('Connection mode active - Select two devices');
+            } else {
+                btn.textContent = '🔗 Connect';
+                btn.classList.remove('active');
+                clearSelection();
+                connectionStart = null;
+                setStatus('Connection mode disabled');
+            }
+        }
+
+        function clearSelection() {
+            document.querySelectorAll('.network-device.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+            selectedDevice = null;
+        }
+
+        function handleCanvasClick(e) {
+            if (!connectionMode) {
+                clearSelection();
+            }
+        }
+
+        // Modal functions
+        function openDeviceModal(device) {
+            const modal = document.getElementById('device-modal');
+            const title = document.getElementById('modal-title');
+            
+            title.textContent = `${device.hostname} Configuration`;
+            
+            // Populate general tab
+            document.getElementById('hostname').value = device.hostname;
+            document.getElementById('device-type').value = device.type;
+            document.getElementById('mgmt-ip').value = device.mgmtIP;
+            document.getElementById('snmp-community').value = device.snmpCommunity;
+            document.getElementById('location').value = device.location;
+            document.getElementById('contact').value = device.contact;
+            
+            // Populate interfaces tab
+            populateInterfaces(device);
+            
+            // Populate routing tab
+            populateRouting(device);
+            
+            // Populate security tab
+            populateSecurity(device);
+            
+            // Populate services tab
+            populateServices(device);
+            
+            modal.style.display = 'block';
+        }
+
+        function populateInterfaces(device) {
+            const container = document.getElementById('interfaces-container');
+            container.innerHTML = '';
+            
+            device.interfaces.forEach((iface, index) => {
+                const interfaceDiv = document.createElement('div');
+                interfaceDiv.className = 'interface-config';
+                interfaceDiv.innerHTML = `
+                    <div class="interface-header" onclick="toggleInterface(${index})">
+                        <span>${iface.name} (${iface.type} - ${iface.speed})</span>
+                        <span>${iface.status.toUpperCase()}</span>
+                    </div>
+                    <div class="interface-body" id="interface-body-${index}">
+                        <div class="config-grid">
+                            <div class="config-item">
+                                <label class="config-label">IP Address</label>
+                                <input type="text" class="config-input" value="${iface.ip}" onchange="updateInterface(${index}, 'ip', this.value)">
+                            </div>
+                            <div class="config-item">
+                                <label class="config-label">Subnet Mask</label>
+                                <input type="text" class="config-input" value="${iface.mask}" onchange="updateInterface(${index}, 'mask', this.value)">
+                            </div>
+                            <div class="config-item">
+                                <label class="config-label">VLAN</label>
+                                <input type="text" class="config-input" value="${iface.vlan}" onchange="updateInterface(${index}, 'vlan', this.value)">
+                            </div>
+                            <div class="config-item">
+                                <label class="config-label">Status</label>
+                                <select class="config-input" onchange="updateInterface(${index}, 'status', this.value)">
+                                    <option value="up" ${iface.status === 'up' ? 'selected' : ''}>Up</option>
+                                    <option value="down" ${iface.status === 'down' ? 'selected' : ''}>Down</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(interfaceDiv);
+            });
+        }
+
+        function populateRouting(device) {
+            document.getElementById('default-gateway').value = device.routes.length > 0 ? device.routes[0].gateway : '';
+            
+            const tbody = document.getElementById('routing-table-body');
+            tbody.innerHTML = '';
+            
+            device.routes.forEach((route, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${route.network}</td>
+                    <td>${route.mask}</td>
+                    <td>${route.gateway}</td>
+                    <td>${route.metric}</td>
+                    <td>${route.interface}</td>
+                    <td><button onclick="deleteRoute(${index})" style="background: var(--danger-color); color: white; border: none; padding: 4px 8px; border-radius: 3px;">Delete</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function populateSecurity(device) {
+            document.getElementById('ssh-enabled').value = device.security.sshEnabled.toString();
+            document.getElementById('ssh-port').value = device.security.sshPort;
+            document.getElementById('telnet-enabled').value = device.security.telnetEnabled.toString();
+            document.getElementById('acl-rules').value = device.security.aclRules;
+        }
+
+        function populateServices(device) {
+            const container = document.getElementById('services-container');
+            container.innerHTML = '';
+            
+            device.services.forEach((service, index) => {
+                const serviceDiv = document.createElement('div');
+                serviceDiv.className = 'config-item';
+                serviceDiv.innerHTML = `
+                    <label class="config-label">${service.name}</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select class="config-input" style="flex: 1;" onchange="updateService(${index}, 'enabled', this.value === 'true')">
+                            <option value="true" ${service.enabled ? 'selected' : ''}>Enabled</option>
+                            <option value="false" ${!service.enabled ? 'selected' : ''}>Disabled</option>
+                        </select>
+                        <input type="text" class="config-input" style="flex: 2;" value="${service.config}" onchange="updateService(${index}, 'config', this.value)" placeholder="Configuration">
+                    </div>
+                `;
+                container.appendChild(serviceDiv);
+            });
+        }
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.modal-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function toggleInterface(index) {
+            const body = document.getElementById(`interface-body-${index}`);
+            body.classList.toggle('active');
+        }
+
+        function updateInterface(index, field, value) {
+            if (selectedDevice) {
+                selectedDevice.interfaces[index][field] = value;
+            }
+        }
+
+        function updateService(index, field, value) {
+            if (selectedDevice) {
+                selectedDevice.services[index][field] = value;
+            }
+        }
+
+        function addInterface() {
+            if (selectedDevice) {
+                const newInterface = {
+                    name: `Interface${selectedDevice.interfaces.length + 1}`,
+                    type: 'ethernet',
+                    speed: '1000Mbps',
+                    status: 'down',
+                    ip: '',
+                    mask: '',
+                    vlan: ''
+                };
+                selectedDevice.interfaces.push(newInterface);
+                populateInterfaces(selectedDevice);
+            }
+        }
+
+        function addRoute() {
+            if (selectedDevice) {
+                const newRoute = {
+                    network: '0.0.0.0',
+                    mask: '0.0.0.0',
+                    gateway: '',
+                    metric: 1,
+                    interface: ''
+                };
+                selectedDevice.routes.push(newRoute);
+                populateRouting(selectedDevice);
+            }
+        }
+
+        function deleteRoute(index) {
+            if (selectedDevice) {
+                selectedDevice.routes.splice(index, 1);
+                populateRouting(selectedDevice);
+            }
+        }
+
+        function saveDeviceConfig() {
+            if (!selectedDevice) return;
+            
+            // Save general config
+            selectedDevice.hostname = document.getElementById('hostname').value;
+            selectedDevice.mgmtIP = document.getElementById('mgmt-ip').value;
+            selectedDevice.snmpCommunity = document.getElementById('snmp-community').value;
+            selectedDevice.location = document.getElementById('location').value;
+            selectedDevice.contact = document.getElementById('contact').value;
+            
+            // Save security config
+            selectedDevice.security.sshEnabled = document.getElementById('ssh-enabled').value === 'true';
+            selectedDevice.security.sshPort = parseInt(document.getElementById('ssh-port').value);
+            selectedDevice.security.telnetEnabled = document.getElementById('telnet-enabled').value === 'true';
+            selectedDevice.security.aclRules = document.getElementById('acl-rules').value;
+            
+            // Update device visualization
+            const deviceElement = document.getElementById(selectedDevice.id);
+            if (deviceElement) {
+                deviceElement.querySelector('.device-title').textContent = selectedDevice.hostname;
+                // Update management IP display
+                const mgmtIPElement = deviceElement.querySelector('.device-info-grid .info-item:nth-child(2) div:last-child');
+                if (mgmtIPElement) {
+                    mgmtIPElement.textContent = selectedDevice.mgmtIP || 'Not set';
+                }
+            }
+            
+            closeModal();
+            setStatus(`Configuration saved for ${selectedDevice.hostname}`);
+        }
+
+        function closeModal() {
+            document.getElementById('device-modal').style.display = 'none';
+        }
+
+        // Toolbar functions
+        function newDiagram() {
+            if (devices.length > 0 && !confirm('Create new diagram? Current work will be lost.')) {
+                return;
+            }
+            clearDiagram();
+        }
+
+        function clearDiagram() {
+            devices.forEach(device => {
+                const element = document.getElementById(device.id);
+                if (element) element.remove();
+            });
+            
+            connections.forEach(connection => {
+                const element = document.getElementById(connection.id);
+                const label = document.getElementById(`label_${connection.id}`);
+                if (element) element.remove();
+                if (label) label.remove();
+            });
+            
+            devices = [];
+            connections = [];
+            selectedDevice = null;
+            connectionStart = null;
+            
+            updateStats();
+            setStatus('Diagram cleared');
+        }
+
+        function saveDiagram() {
+            const data = {
+                version: '3.0',
+                timestamp: new Date().toISOString(),
+                devices: devices,
+                connections: connections
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `network-diagram-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            setStatus('Diagram saved');
+        }
+
+        function loadDiagram() {
+            document.getElementById('file-input').click();
+        }
+
+        function handleFileLoad(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    clearDiagram();
+                    
+                    // Load devices
+                    if (data.devices) {
+                        devices = data.devices.map(deviceData => {
+                            const device = new NetworkDevice(deviceData.type, deviceData.x, deviceData.y);
+                            Object.assign(device, deviceData);
+                            return device;
+                        });
+                        devices.forEach(device => renderDevice(device));
+                    }
+                    
+                    // Load connections
+                    if (data.connections) {
+                        connections = data.connections;
+                        connections.forEach(connection => renderConnection(connection));
+                    }
+                    
+                    updateStats();
+                    setStatus('Diagram loaded successfully');
+                } catch (error) {
+                    setStatus('Error loading diagram: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function validateNetwork() {
+            const issues = [];
+            
+            // Check for devices without management IP
+            const devicesWithoutMgmtIP = devices.filter(d => !d.mgmtIP);
+            if (devicesWithoutMgmtIP.length > 0) {
+                issues.push(`${devicesWithoutMgmtIP.length} devices without management IP`);
+            }
+            
+            // Check for duplicate IP addresses
+            const ipAddresses = devices.map(d => d.mgmtIP).filter(ip => ip);
+            const duplicateIPs = ipAddresses.filter((ip, index) => ipAddresses.indexOf(ip) !== index);
+            if (duplicateIPs.length > 0) {
+                issues.push(`Duplicate IP addresses: ${[...new Set(duplicateIPs)].join(', ')}`);
+            }
+            
+            // Check for isolated devices
+            const connectedDevices = new Set();
+            connections.forEach(conn => {
+                connectedDevices.add(conn.device1);
+                connectedDevices.add(conn.device2);
+            });
+            const isolatedDevices = devices.filter(d => !connectedDevices.has(d.id));
+            if (isolatedDevices.length > 0) {
+                issues.push(`${isolatedDevices.length} isolated devices`);
+            }
+            
+            if (issues.length === 0) {
+                setStatus('✅ Network validation passed');
+            } else {
+                setStatus(`⚠️ Validation issues: ${issues.join(', ')}`);
+            }
+        }
+
+        function generateConfig() {
+            if (!selectedDevice) {
+                setStatus('Select a device to generate configuration');
+                return;
+            }
+            
+            let config = `! Configuration for ${selectedDevice.hostname}\n`;
+            config += `! Generated on ${new Date().toISOString()}\n\n`;
+            
+            // Add hostname
+            config += `hostname ${selectedDevice.hostname}\n`;
+            
+            // Add management IP
+            if (selectedDevice.mgmtIP) {
+                config += `ip address ${selectedDevice.mgmtIP} 255.255.255.0\n`;
+            }
+            
+            // Add interfaces
+            selectedDevice.interfaces.forEach(iface => {
+                if (iface.ip) {
+                    config += `interface ${iface.name}\n`;
+                    config += ` ip address ${iface.ip} ${iface.mask}\n`;
+                    config += ` no shutdown\n`;
+                }
+            });
+            
+            // Add routes
+            selectedDevice.routes.forEach(route => {
+                config += `ip route ${route.network} ${route.mask} ${route.gateway}\n`;
+            });
+            
+            // Add services
+            selectedDevice.services.forEach(service => {
+                if (service.enabled) {
+                    config += `! Service: ${service.name}\n`;
+                    config += `! Config: ${service.config}\n`;
+                }
+            });
+            
+            // Download config
+            const blob = new Blob([config], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${selectedDevice.hostname}-config.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            setStatus(`Configuration generated for ${selectedDevice.hostname}`);
+        }
+
+        // Zoom functions
+        function zoomIn() {
+            currentZoom = Math.min(currentZoom * 1.2, 3);
+            updateZoom();
+        }
+
+        function zoomOut() {
+            currentZoom = Math.max(currentZoom * 0.8, 0.3);
+            updateZoom();
+        }
+
+        function updateZoom() {
+            const container = document.getElementById('canvas-container');
+            container.style.transform = `scale(${currentZoom})`;
+            
+            const zoomPercent = Math.round(currentZoom * 100);
+            document.getElementById('zoom-level').textContent = `${zoomPercent}%`;
+            document.getElementById('zoom-display').textContent = `${zoomPercent}%`;
+        }
+
+        // Utility functions
+        function updateStats() {
+            document.getElementById('device-count').textContent = devices.length;
+            document.getElementById('connection-count').textContent = connections.length;
+            document.getElementById('object-count').textContent = devices.length + connections.length;
+        }
+
+        function setStatus(message) {
+            document.getElementById('status-text').textContent = message;
+        }
+
+        function startSystemMonitoring() {
+            setInterval(() => {
+                // Update uptime
+                const uptime = Date.now() - startTime;
+                const hours = Math.floor(uptime / 3600000);
+                const minutes = Math.floor((uptime % 3600000) / 60000);
+                const seconds = Math.floor((uptime % 60000) / 1000);
+                document.getElementById('uptime').textContent = 
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Update memory usage (simulated)
+                const memoryUsage = Math.floor(Math.random() * 50) + 30;
+                document.getElementById('memory-usage').textContent = `${memoryUsage} MB`;
+                
+                // Update connection metrics (simulated)
+                connections.forEach(connection => {
+                    connection.utilization = Math.max(5, Math.min(80, connection.utilization + (Math.random() - 0.5) * 10));
+                    connection.latency = Math.max(1, Math.min(100, connection.latency + (Math.random() - 0.5) * 2));
+                    
+                    const label = document.getElementById(`label_${connection.id}`);
+                    if (label) {
+                        label.textContent = `${connection.bandwidth} | ${Math.round(connection.utilization)}% | ${Math.round(connection.latency)}ms`;
+                    }
+                });
+            }, 1000);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey) {
+                switch(e.key) {
+                    case 'n':
+                        e.preventDefault();
+                        newDiagram();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        saveDiagram();
+                        break;
+                    case 'o':
+                        e.preventDefault();
+                        loadDiagram();
+                        break;
+                }
+            }
+            
+            if (e.key === 'Escape') {
+                if (connectionMode) {
+                    toggleConnectionMode();
+                }
+                closeModal();
+                clearSelection();
+            }
+            
+            if (e.key === 'Delete' && selectedDevice) {
+                // Delete selected device
+                devices = devices.filter(d => d.id !== selectedDevice.id);
+                connections = connections.filter(c => c.device1 !== selectedDevice.id && c.device2 !== selectedDevice.id);
+                
+                const element = document.getElementById(selectedDevice.id);
+                if (element) element.remove();
+                
+                // Remove related connections
+                connections.forEach(conn => {
+                    if (conn.device1 === selectedDevice.id || conn.device2 === selectedDevice.id) {
+                        const connElement = document.getElementById(conn.id);
+                        const labelElement = document.getElementById(`label_${conn.id}`);
+                        if (connElement) connElement.remove();
+                        if (labelElement) labelElement.remove();
+                    }
+                });
+                
+                selectedDevice = null;
+                updateStats();
+                setStatus('Device deleted');
+            }
+        });
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('device-modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+    </script>
+</body>
+</html>

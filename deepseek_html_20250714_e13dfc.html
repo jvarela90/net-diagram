@@ -1,0 +1,3278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Diagram Creator Pro - Enterprise Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #0f3460;
+            --highlight: #e94560;
+            --success: #00d4aa;
+            --warning: #ff6b35;
+            --info: #4a90e2;
+            --danger: #e74c3c;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --border: #e1e5e9;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            height: 100vh;
+            overflow: hidden;
+            color: var(--light);
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: var(--light);
+            margin: 8px;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        /* Enhanced Header */
+        .app-header {
+            background: var(--primary);
+            color: var(--light);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+
+        .app-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .version-badge {
+            background: var(--highlight);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: 600;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .header-btn {
+            background: var(--accent);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .header-btn:hover {
+            background: var(--highlight);
+            transform: translateY(-1px);
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            flex: 1;
+            background: #f5f7fa;
+            color: var(--dark);
+        }
+
+        /* Advanced Sidebar */
+        .sidebar {
+            width: 360px;
+            background: white;
+            border-right: 3px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px var(--shadow);
+        }
+
+        .sidebar-header {
+            background: var(--accent);
+            color: white;
+            padding: 15px;
+            font-weight: 600;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            background: var(--secondary);
+        }
+
+        .sidebar-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: var(--light);
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            font-size: 12px;
+        }
+
+        .sidebar-tab.active {
+            background: white;
+            color: var(--dark);
+            border-bottom-color: var(--highlight);
+        }
+
+        .sidebar-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .search-filter {
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .device-category {
+            margin-bottom: 25px;
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: var(--accent);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .category-toggle {
+            transition: transform 0.3s ease;
+        }
+
+        .category-header.collapsed .category-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .category-devices {
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .category-header.collapsed + .category-devices {
+            max-height: 0 !important;
+        }
+
+        .device-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin: 6px 0;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: grab;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .device-item:hover {
+            border-color: var(--accent);
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .device-item:active {
+            cursor: grabbing;
+        }
+
+        .device-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 11px;
+            color: white;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .device-details {
+            flex: 1;
+        }
+
+        .device-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .device-specs {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 2px;
+        }
+
+        .device-interfaces {
+            font-size: 10px;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        /* Workspace */
+        .workspace-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toolbar {
+            background: white;
+            padding: 15px 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            border-bottom: 2px solid var(--border);
+            box-shadow: 0 2px 5px var(--shadow);
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding-right: 20px;
+            border-right: 1px solid var(--border);
+        }
+
+        .toolbar-group:last-child {
+            border-right: none;
+        }
+
+        .toolbar-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .toolbar-btn:hover {
+            background: var(--highlight);
+            transform: translateY(-1px);
+        }
+
+        .toolbar-btn.active {
+            background: var(--highlight);
+            box-shadow: 0 0 0 2px rgba(233, 69, 96, 0.3);
+        }
+
+        .toolbar-select {
+            padding: 8px 12px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 12px;
+            background: white;
+        }
+
+        .toolbar-select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* Canvas */
+        .canvas-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: #fafbfc;
+        }
+
+        .canvas-viewport {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 4000px;
+            height: 3000px;
+            background: 
+                linear-gradient(90deg, rgba(26, 26, 46, 0.03) 1px, transparent 1px),
+                linear-gradient(180deg, rgba(26, 26, 46, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            transform-origin: 0 0;
+        }
+
+        /* Enhanced Device Rendering */
+        .device-on-canvas {
+            position: absolute;
+            background: white;
+            border: 3px solid var(--accent);
+            border-radius: 12px;
+            padding: 15px;
+            cursor: move;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            min-width: 140px;
+            min-height: 120px;
+            transition: all 0.3s ease;
+            user-select: none;
+            font-size: 11px;
+        }
+
+        .device-on-canvas:hover {
+            border-color: var(--highlight);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .device-on-canvas.selected {
+            border-color: var(--highlight);
+            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.3);
+        }
+
+        .device-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .device-canvas-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 10px;
+            color: white;
+            margin-right: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .device-title {
+            flex: 1;
+        }
+
+        .device-name-canvas {
+            font-weight: 700;
+            font-size: 12px;
+            color: var(--dark);
+        }
+
+        .device-type-canvas {
+            font-size: 9px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .device-status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
+
+        .status-up { background: var(--success); animation: pulse 2s infinite; }
+        .status-down { background: var(--danger); }
+        .status-warning { background: var(--warning); animation: pulse 2s infinite; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .device-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            margin-bottom: 8px;
+            font-size: 9px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 4px;
+            background: #f8f9fa;
+            border-radius: 3px;
+        }
+
+        .info-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .info-value {
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .device-interfaces-list {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+        }
+
+        .interface-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2px 0;
+            font-size: 8px;
+        }
+
+        .interface-name {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .interface-status {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-left: 4px;
+        }
+
+        .interface-up { background: var(--success); }
+        .interface-down { background: var(--danger); }
+
+        /* Enhanced Connections */
+        .connection-line {
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .connection-label {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 600;
+            color: var(--dark);
+            border: 1px solid var(--border);
+            pointer-events: none;
+            z-index: 15;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Technical Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 2% auto;
+            border-radius: 12px;
+            width: 95%;
+            max-width: 1200px;
+            max-height: 90vh;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            background: var(--primary);
+            color: white;
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-body {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .modal-sidebar {
+            width: 200px;
+            background: #f8f9fa;
+            border-right: 1px solid var(--border);
+            padding: 0;
+        }
+
+        .modal-tab {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            border: none;
+            background: none;
+            text-align: left;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .modal-tab:hover {
+            background: #e9ecef;
+        }
+
+        .modal-tab.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .modal-content-area {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 13px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .interface-config {
+            background: #f8f9fa;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .interface-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .interface-name-input {
+            font-weight: 600;
+            background: white;
+        }
+
+        .interface-remove {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .add-interface-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .config-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+
+        .config-table th,
+        .config-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .config-table th {
+            background: var(--accent);
+            color: white;
+            font-weight: 600;
+        }
+
+        .config-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            background: var(--primary);
+            color: white;
+            padding: 12px 25px;
+            display: grid;
+            grid-template-columns: 1fr auto auto auto auto;
+            gap: 25px;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 15px 20px;
+            z-index: 3000;
+            max-width: 400px;
+            transform: translateX(450px);
+            transition: transform 0.4s ease;
+            border-left: 4px solid var(--info);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success { border-left-color: var(--success); }
+        .notification.warning { border-left-color: var(--warning); }
+        .notification.error { border-left-color: var(--danger); }
+
+        /* Device Type Colors */
+        .router-icon { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .core-router-icon { background: linear-gradient(135deg, #8e44ad, #732d91); }
+        .edge-router-icon { background: linear-gradient(135deg, #e67e22, #d35400); }
+        .switch-icon { background: linear-gradient(135deg, #27ae60, #229954); }
+        .l3-switch-icon { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .managed-switch-icon { background: linear-gradient(135deg, #16a085, #138d75); }
+        .firewall-icon { background: linear-gradient(135deg, #e74c3c, #cb4335); }
+        .utm-icon { background: linear-gradient(135deg, #ad1457, #880e4f); }
+        .ips-icon { background: linear-gradient(135deg, #d32f2f, #b71c1c); }
+        .waf-icon { background: linear-gradient(135deg, #7b1fa2, #4a148c); }
+        .loadbalancer-icon { background: linear-gradient(135deg, #1976d2, #0d47a1); }
+        .modem-icon { background: linear-gradient(135deg, #ff9800, #f57c00); }
+        .ont-icon { background: linear-gradient(135deg, #ff5722, #d84315); }
+        .ap-icon { background: linear-gradient(135deg, #4caf50, #388e3c); }
+        .controller-icon { background: linear-gradient(135deg, #009688, #00695c); }
+        .server-icon { background: linear-gradient(135deg, #607d8b, #455a64); }
+        .web-server-icon { background: linear-gradient(135deg, #4caf50, #388e3c); }
+        .db-server-icon { background: linear-gradient(135deg, #9c27b0, #7b1fa2); }
+        .dns-server-icon { background: linear-gradient(135deg, #3f51b5, #303f9f); }
+        .mail-server-icon { background: linear-gradient(135deg, #2196f3, #1976d2); }
+        .dhcp-server-icon { background: linear-gradient(135deg, #795548, #5d4037); }
+        .pc-icon { background: linear-gradient(135deg, #78909c, #546e7a); }
+        .laptop-icon { background: linear-gradient(135deg, #8d6e63, #6d4c41); }
+        .mobile-icon { background: linear-gradient(135deg, #ffc107, #ff8f00); }
+        .printer-icon { background: linear-gradient(135deg, #424242, #212121); }
+        .scanner-icon { background: linear-gradient(135deg, #37474f, #263238); }
+        .ip-phone-icon { background: linear-gradient(135deg, #00796b, #004d40); }
+        .camera-icon { background: linear-gradient(135deg, #5d4037, #3e2723); }
+        .nvr-icon { background: linear-gradient(135deg, #455a64, #263238); }
+        .ups-icon { background: linear-gradient(135deg, #6a1b9a, #4a148c); }
+        .pdu-icon { background: linear-gradient(135deg, #bf360c, #8d1e04); }
+        .nas-icon { background: linear-gradient(135deg, #f57c00, #e65100); }
+        .san-icon { background: linear-gradient(135deg, #5d4037, #3e2723); }
+
+        /* Connection Styles */
+        .ethernet-line { stroke: #27ae60; stroke-width: 4; }
+        .fiber-line { stroke: #f39c12; stroke-width: 4; }
+        .serial-line { stroke: #9b59b6; stroke-width: 3; }
+        .coaxial-line { stroke: #34495e; stroke-width: 4; }
+        .wireless-line { stroke: #3498db; stroke-width: 3; stroke-dasharray: 8,4; }
+        .console-line { stroke: #e74c3c; stroke-width: 2; stroke-dasharray: 4,2; }
+
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .sidebar { width: 320px; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar { width: 280px; }
+            .toolbar { flex-direction: column; }
+            .toolbar-group { border-right: none; border-bottom: 1px solid var(--border); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="app-header">
+            <div class="app-title">
+                <span>🔧</span>
+                <span>Professional Network Diagram Creator</span>
+                <div class="version-badge">Enterprise v1.0</div>
+            </div>
+            <div class="header-controls">
+                <button class="header-btn" id="tech-mode-btn">⚙️ Modo Técnico</button>
+                <button class="header-btn" onclick="validateNetwork()">✅ Validar Red</button>
+                <button class="header-btn" onclick="generateConfig()">📋 Config</button>
+                <button class="header-btn" onclick="showHelp()">❓ Ayuda</button>
+            </div>
+        </div>
+
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Enhanced Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    🌐 Equipos de Red Profesionales
+                </div>
+                
+                <div class="sidebar-tabs">
+                    <button class="sidebar-tab active" onclick="switchSidebarTab('devices')">Dispositivos</button>
+                    <button class="sidebar-tab" onclick="switchSidebarTab('templates')">Plantillas</button>
+                    <button class="sidebar-tab" onclick="switchSidebarTab('config')">Config</button>
+                </div>
+
+                <div class="sidebar-content">
+                    <!-- Devices Tab -->
+                    <div id="devices-tab" class="tab-content active">
+                        <div class="search-filter">
+                            <input type="text" class="search-input" placeholder="🔍 Buscar dispositivos..." onkeyup="filterDevices(this.value)">
+                        </div>
+                        
+                        <!-- Routers & Layer 3 -->
+                        <div class="device-category">
+                            <div class="category-header" onclick="toggleCategory(this)">
+                                <span>🔀 ROUTERS & CAPA 3</span>
+                                <span class="category-toggle">▼</span>
+                            </div>
+                            <div class="category-devices" style="max-height: 400px;">
+                                <div class="device-item" draggable="true" data-device-type="core-router">
+                                    <div class="device-icon core-router-icon">CR</div>
+                                    <div class="device-details">
+                                        <div class="device-name">Core Router</div>
+                                        <div class="device-specs">BGP, OSPF, MPLS</div>
+                                        <div class="device-interfaces">10GE × 48, 100GE × 4</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="edge-router">
+                                    <div class="device-icon edge-router-icon">ER</div>
+                                    <div class="device-details">
+                                        <div class="device-name">Edge Router</div>
+                                        <div class="device-specs">BGP, NAT, Firewall</div>
+                                        <div class="device-interfaces">GE × 8, Serial × 4</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="router">
+                                    <div class="device-icon router-icon">R</div>
+                                    <div class="device-details">
+                                        <div class="device-name">Router</div>
+                                        <div class="device-specs">RIP, OSPF, Static</div>
+                                        <div class="device-interfaces">FE × 4, Serial × 2</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="l3-switch">
+                                    <div class="device-icon l3-switch-icon">L3</div>
+                                    <div class="device-details">
+                                        <div class="device-name">L3 Switch</div>
+                                        <div class="device-specs">VLAN, STP, OSPF</div>
+                                        <div class="device-interfaces">GE × 24, SFP+ × 4</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Switches & Layer 2 -->
+                        <div class="device-category">
+                            <div class="category-header" onclick="toggleCategory(this)">
+                                <span>🔄 SWITCHES & CAPA 2</span>
+                                <span class="category-toggle">▼</span>
+                            </div>
+                            <div class="category-devices" style="max-height: 400px;">
+                                <div class="device-item" draggable="true" data-device-type="managed-switch">
+                                    <div class="device-icon managed-switch-icon">MS</div>
+                                    <div class="device-details">
+                                        <div class="device-name">Managed Switch</div>
+                                        <div class="device-specs">VLAN, QoS, SNMP</div>
+                                        <div class="device-interfaces">GE × 48, SFP × 4</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="switch">
+                                    <div class="device-icon switch-icon">SW</div>
+                                    <div class="device-details">
+                                        <div class="device-name">Unmanaged Switch</div>
+                                        <div class="device-specs">Plug & Play</div>
+                                        <div class="device-interfaces">FE × 24</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security Appliances -->
+                        <div class="device-category">
+                            <div class="category-header" onclick="toggleCategory(this)">
+                                <span>🛡️ SEGURIDAD</span>
+                                <span class="category-toggle">▼</span>
+                            </div>
+                            <div class="category-devices" style="max-height: 400px;">
+                                <div class="device-item" draggable="true" data-device-type="firewall">
+                                    <div class="device-icon firewall-icon">FW</div>
+                                    <div class="device-details">
+                                        <div class="device-name">Firewall</div>
+                                        <div class="device-specs">Stateful, NAT, VPN</div>
+                                        <div class="device-interfaces">GE × 8, DMZ × 2</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="utm">
+                                    <div class="device-icon utm-icon">UTM</div>
+                                    <div class="device-details">
+                                        <div class="device-name">UTM</div>
+                                        <div class="device-specs">FW, IPS, AV, Web Filter</div>
+                                        <div class="device-interfaces">GE × 6, WiFi</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="ips">
+                                    <div class="device-icon ips-icon">IPS</div>
+                                    <div class="device-details">
+                                        <div class="device-name">IPS/IDS</div>
+                                        <div class="device-specs">DPI, Threat Detection</div>
+                                        <div class="device-interfaces">Monitor × 4</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="waf">
+                                    <div class="device-icon waf-icon">WAF</div>
+                                    <div class="device-details">
+                                        <div class="device-name">Web App Firewall</div>
+                                        <div class="device-specs">HTTP/HTTPS, SSL Offload</div>
+                                        <div class="device-interfaces">GE × 4</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- WAN & Access -->
+                        <div class="device-category">
+                            <div class="category-header" onclick="toggleCategory(this)">
+                                <span>🌐 WAN & ACCESO</span>
+                                <span class="category-toggle">▼</span>
+                            </div>
+                            <div class="category-devices" style="max-height: 400px;">
+                                <div class="device-item" draggable="true" data-device-type="modem">
+                                    <div class="device-icon modem-icon">MDM</div>
+                                    <div class="device-details">
+                                        <div class="device-name">Cable Modem</div>
+                                        <div class="device-specs">DOCSIS 3.1, NAT</div>
+                                        <div class="device-interfaces">Coax, GE × 4, USB</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="ont">
+                                    <div class="device-icon ont-icon">ONT</div>
+                                    <div class="device-details">
+                                        <div class="device-name">ONT Fiber</div>
+                                        <div class="device-specs">GPON, NAT, VoIP</div>
+                                        <div class="device-interfaces">Fiber, GE × 4, Tel × 2</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="ap">
+                                    <div class="device-icon ap-icon">AP</div>
+                                    <div class="device-details">
+                                        <div class="device-name">Access Point</div>
+                                        <div class="device-specs">WiFi 6, MU-MIMO</div>
+                                        <div class="device-interfaces">PoE, 2.4/5GHz</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="controller">
+                                    <div class="device-icon controller-icon">WLC</div>
+                                    <div class="device-details">
+                                        <div class="device-name">WiFi Controller</div>
+                                        <div class="device-specs">CAPWAP, Roaming</div>
+                                        <div class="device-interfaces">GE × 4, Console</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Servers -->
+                        <div class="device-category">
+                            <div class="category-header" onclick="toggleCategory(this)">
+                                <span>🖥️ SERVIDORES</span>
+                                <span class="category-toggle">▼</span>
+                            </div>
+                            <div class="category-devices" style="max-height: 400px;">
+                                <div class="device-item" draggable="true" data-device-type="web-server">
+                                    <div class="device-icon web-server-icon">WEB</div>
+                                    <div class="device-details">
+                                        <div class="device-name">Web Server</div>
+                                        <div class="device-specs">Apache, Nginx, IIS</div>
+                                        <div class="device-interfaces">GE × 2, iLO</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="db-server">
+                                    <div class="device-icon db-server-icon">DB</div>
+                                    <div class="device-details">
+                                        <div class="device-name">Database Server</div>
+                                        <div class="device-specs">MySQL, PostgreSQL, SQL</div>
+                                        <div class="device-interfaces">10GE × 2, iDRAC</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="dns-server">
+                                    <div class="device-icon dns-server-icon">DNS</div>
+                                    <div class="device-details">
+                                        <div class="device-name">DNS Server</div>
+                                        <div class="device-specs">BIND, Authoritative</div>
+                                        <div class="device-interfaces">GE × 2</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="dhcp-server">
+                                    <div class="device-icon dhcp-server-icon">DHCP</div>
+                                    <div class="device-details">
+                                        <div class="device-name">DHCP Server</div>
+                                        <div class="device-specs">ISC DHCP, Reservations</div>
+                                        <div class="device-interfaces">GE × 1</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="mail-server">
+                                    <div class="device-icon mail-server-icon">MAIL</div>
+                                    <div class="device-details">
+                                        <div class="device-name">Mail Server</div>
+                                        <div class="device-specs">Exchange, Postfix</div>
+                                        <div class="device-interfaces">GE × 2, RAID</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- End Devices -->
+                        <div class="device-category">
+                            <div class="category-header" onclick="toggleCategory(this)">
+                                <span>💻 DISPOSITIVOS FINALES</span>
+                                <span class="category-toggle">▼</span>
+                            </div>
+                            <div class="category-devices" style="max-height: 400px;">
+                                <div class="device-item" draggable="true" data-device-type="pc">
+                                    <div class="device-icon pc-icon">PC</div>
+                                    <div class="device-details">
+                                        <div class="device-name">Desktop PC</div>
+                                        <div class="device-specs">Windows, DHCP Client</div>
+                                        <div class="device-interfaces">GE × 1, WiFi</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="laptop">
+                                    <div class="device-icon laptop-icon">LAP</div>
+                                    <div class="device-details">
+                                        <div class="device-name">Laptop</div>
+                                        <div class="device-specs">Mobile, WiFi Primary</div>
+                                        <div class="device-interfaces">GE × 1, WiFi 6</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="mobile">
+                                    <div class="device-icon mobile-icon">MOB</div>
+                                    <div class="device-details">
+                                        <div class="device-name">Mobile Device</div>
+                                        <div class="device-specs">iOS, Android</div>
+                                        <div class="device-interfaces">WiFi, Cellular</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="printer">
+                                    <div class="device-icon printer-icon">PRT</div>
+                                    <div class="device-details">
+                                        <div class="device-name">Network Printer</div>
+                                        <div class="device-specs">IPP, SNMP</div>
+                                        <div class="device-interfaces">GE × 1, WiFi</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="ip-phone">
+                                    <div class="device-icon ip-phone-icon">IP</div>
+                                    <div class="device-details">
+                                        <div class="device-name">IP Phone</div>
+                                        <div class="device-specs">SIP, PoE</div>
+                                        <div class="device-interfaces">PoE, PC Port</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Infrastructure -->
+                        <div class="device-category">
+                            <div class="category-header" onclick="toggleCategory(this)">
+                                <span>🏗️ INFRAESTRUCTURA</span>
+                                <span class="category-toggle">▼</span>
+                            </div>
+                            <div class="category-devices" style="max-height: 400px;">
+                                <div class="device-item" draggable="true" data-device-type="loadbalancer">
+                                    <div class="device-icon loadbalancer-icon">LB</div>
+                                    <div class="device-details">
+                                        <div class="device-name">Load Balancer</div>
+                                        <div class="device-specs">F5, HAProxy, Round Robin</div>
+                                        <div class="device-interfaces">10GE × 4</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="nas">
+                                    <div class="device-icon nas-icon">NAS</div>
+                                    <div class="device-details">
+                                        <div class="device-name">NAS</div>
+                                        <div class="device-specs">RAID, NFS, SMB</div>
+                                        <div class="device-interfaces">10GE × 2, iSCSI</div>
+                                    </div>
+                                </div>
+                                <div class="device-item" draggable="true" data-device-type="ups">
+                                    <div class="device-icon ups-icon">UPS</div>
+                                    <div class="device-details">
+                                        <div class="device-name">UPS</div>
+                                        <div class="device-specs">Battery Backup, SNMP</div>
+                                        <div class="device-interfaces">Serial, Network</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Templates Tab -->
+                    <div id="templates-tab" class="tab-content">
+                        <h3 style="margin-bottom: 20px;">🏗️ Plantillas Técnicas</h3>
+                        <div class="template-grid">
+                            <div class="template-card">
+                                <div class="template-name">Red Empresarial</div>
+                                <div class="template-description">Firewall, Switches, Servidores</div>
+                            </div>
+                            <div class="template-card">
+                                <div class="template-name">Centro de Datos</div>
+                                <div class="template-description">Core Switch, Servidores, Balanceadores</div>
+                            </div>
+                            <div class="template-card">
+                                <div class="template-name">Sucursal</div>
+                                <div class="template-description">Router, Switch, Access Points</div>
+                            </div>
+                            <div class="template-card">
+                                <div class="template-name">Red Doméstica</div>
+                                <div class="template-description">Modem, Router, Dispositivos</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Config Tab -->
+                    <div id="config-tab" class="tab-content">
+                        <h3 style="margin-bottom: 20px;">⚙️ Configuración</h3>
+                        <div class="config-section">
+                            <h4 class="section-title">Preferencias de Usuario</h4>
+                            <div class="form-group">
+                                <label class="form-label">Modo Oscuro:</label>
+                                <select class="form-input" id="dark-mode">
+                                    <option value="auto">Automático</option>
+                                    <option value="on">Activado</option>
+                                    <option value="off">Desactivado</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Zoom Predeterminado:</label>
+                                <select class="form-input" id="default-zoom">
+                                    <option value="100">100%</option>
+                                    <option value="125">125%</option>
+                                    <option value="150">150%</option>
+                                    <option value="75">75%</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workspace -->
+            <div class="workspace-container">
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" onclick="newDiagram()">📄 Nuevo</button>
+                        <button class="toolbar-btn" onclick="saveDiagram()">💾 Guardar</button>
+                        <button class="toolbar-btn" onclick="document.getElementById('file-input').click()">📁 Cargar</button>
+                    </div>
+                    
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" id="connect-btn" onclick="toggleConnectionMode()">🔗 Conectar</button>
+                        <select id="connection-type" class="toolbar-select">
+                            <option value="ethernet">Ethernet (Cat6)</option>
+                            <option value="fiber">Fibra Óptica (SM/MM)</option>
+                            <option value="serial">Serial (RS232/RS485)</option>
+                            <option value="coaxial">Coaxial (RG6/RG59)</option>
+                            <option value="wireless">Inalámbrico (802.11)</option>
+                            <option value="console">Console (RJ45/USB)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" onclick="autoArrange()">🎯 Auto-organizar</button>
+                        <button class="toolbar-btn" onclick="validateTopology()">✅ Validar</button>
+                        <button class="toolbar-btn" onclick="generateConfig()">📋 Config CLI</button>
+                    </div>
+                    
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" onclick="exportDiagram()">📸 Exportar</button>
+                        <button class="toolbar-btn" onclick="clearDiagram()">🗑️ Limpiar</button>
+                    </div>
+
+                    <div style="margin-left: auto;">
+                        <button class="toolbar-btn" onclick="zoomOut()">🔍-</button>
+                        <span id="zoom-level" style="margin: 0 10px; font-weight: 600;">100%</span>
+                        <button class="toolbar-btn" onclick="zoomIn()">🔍+</button>
+                    </div>
+                </div>
+
+                <!-- Canvas -->
+                <div class="canvas-area">
+                    <div class="canvas-viewport" id="canvas-viewport">
+                        <div class="canvas-container" id="canvas-container">
+                            <svg id="connection-svg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-indicator"></div>
+                <span id="status-text">Sistema listo - Red profesional</span>
+            </div>
+            <div class="status-item">
+                <span>Dispositivos: <strong id="device-count">0</strong></span>
+            </div>
+            <div class="status-item">
+                <span>Conexiones: <strong id="connection-count">0</strong></span>
+            </div>
+            <div class="status-item">
+                <span>Subredes: <strong id="subnet-count">0</strong></span>
+            </div>
+            <div class="status-item">
+                <span>Zoom: <strong id="zoom-display">100%</strong></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technical Properties Modal -->
+    <div id="properties-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">Configuración Técnica del Dispositivo</h3>
+                <button class="modal-close" onclick="closePropertiesModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-sidebar">
+                    <button class="modal-tab active" onclick="switchModalTab('general')">📋 General</button>
+                    <button class="modal-tab" onclick="switchModalTab('interfaces')">🔌 Interfaces</button>
+                    <button class="modal-tab" onclick="switchModalTab('routing')">🔀 Enrutamiento</button>
+                    <button class="modal-tab" onclick="switchModalTab('security')">🛡️ Seguridad</button>
+                    <button class="modal-tab" onclick="switchModalTab('monitoring')">📊 Monitoreo</button>
+                </div>
+                <div class="modal-content-area">
+                    <form id="properties-form">
+                        <!-- General Tab -->
+                        <div id="general-tab" class="tab-content active">
+                            <div class="form-section">
+                                <h3 class="section-title">Información General</h3>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label">Hostname:</label>
+                                        <input type="text" id="device-hostname" class="form-input" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Tipo de Dispositivo:</label>
+                                        <input type="text" id="device-type-display" class="form-input" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Modelo:</label>
+                                        <input type="text" id="device-model" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Fabricante:</label>
+                                        <input type="text" id="device-vendor" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Número de Serie:</label>
+                                        <input type="text" id="device-serial" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Versión de Software:</label>
+                                        <input type="text" id="device-software" class="form-input">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h3 class="section-title">Ubicación y Rack</h3>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label">Ubicación:</label>
+                                        <input type="text" id="device-location" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Rack/Gabinete:</label>
+                                        <input type="text" id="device-rack" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Unidad de Rack (U):</label>
+                                        <input type="number" id="device-rack-unit" class="form-input" min="1" max="42">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Asset Tag:</label>
+                                        <input type="text" id="device-asset-tag" class="form-input">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Interfaces Tab -->
+                        <div id="interfaces-tab" class="tab-content">
+                            <div class="form-section">
+                                <h3 class="section-title">Configuración de Interfaces</h3>
+                                <div id="interfaces-container">
+                                    <!-- Interfaces will be dynamically populated -->
+                                </div>
+                                <button type="button" class="add-interface-btn" onclick="addInterface()">+ Agregar Interfaz</button>
+                            </div>
+                        </div>
+
+                        <!-- Routing Tab -->
+                        <div id="routing-tab" class="tab-content">
+                            <div class="form-section">
+                                <h3 class="section-title">Configuración de Enrutamiento</h3>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label">Protocolo de Enrutamiento:</label>
+                                        <select id="routing-protocol" class="form-input">
+                                            <option value="">Sin enrutamiento dinámico</option>
+                                            <option value="rip">RIP v2</option>
+                                            <option value="ospf">OSPF</option>
+                                            <option value="eigrp">EIGRP</option>
+                                            <option value="bgp">BGP</option>
+                                            <option value="static">Solo rutas estáticas</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Router ID:</label>
+                                        <input type="text" id="router-id" class="form-input" placeholder="1.1.1.1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">ASN (BGP):</label>
+                                        <input type="number" id="bgp-asn" class="form-input" min="1" max="65535">
+                                    </div>
+                                </div>
+                                
+                                <h4 style="margin: 20px 0 10px 0;">Rutas Estáticas</h4>
+                                <table class="config-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Red Destino</th>
+                                            <th>Máscara</th>
+                                            <th>Next Hop</th>
+                                            <th>Métrica</th>
+                                            <th>Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="static-routes-table">
+                                        <!-- Static routes will be added here -->
+                                    </tbody>
+                                </table>
+                                <button type="button" class="add-interface-btn" onclick="addStaticRoute()">+ Agregar Ruta</button>
+                            </div>
+                        </div>
+
+                        <!-- Security Tab -->
+                        <div id="security-tab" class="tab-content">
+                            <div class="form-section">
+                                <h3 class="section-title">Configuración de Seguridad</h3>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label">Método de Autenticación:</label>
+                                        <select id="auth-method" class="form-input">
+                                            <option value="local">Local</option>
+                                            <option value="radius">RADIUS</option>
+                                            <option value="tacacs">TACACS+</option>
+                                            <option value="ldap">LDAP</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Usuario Admin:</label>
+                                        <input type="text" id="admin-username" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">SNMP Community:</label>
+                                        <input type="text" id="snmp-community" class="form-input" value="public">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">SSH Versión:</label>
+                                        <select id="ssh-version" class="form-input">
+                                            <option value="2">SSH v2</option>
+                                            <option value="1">SSH v1</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Monitoring Tab -->
+                        <div id="monitoring-tab" class="tab-content">
+                            <div class="form-section">
+                                <h3 class="section-title">Estado y Monitoreo</h3>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label">Estado Operacional:</label>
+                                        <select id="device-status" class="form-input">
+                                            <option value="up">🟢 Operacional</option>
+                                            <option value="down">🔴 Fuera de Servicio</option>
+                                            <option value="warning">🟡 Con Advertencias</option>
+                                            <option value="maintenance">🔵 En Mantenimiento</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">CPU (%):</label>
+                                        <input type="number" id="device-cpu" class="form-input" min="0" max="100">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Memoria (%):</label>
+                                        <input type="number" id="device-memory" class="form-input" min="0" max="100">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Temperatura (°C):</label>
+                                        <input type="number" id="device-temperature" class="form-input" min="0" max="100">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Uptime:</label>
+                                        <input type="text" id="device-uptime" class="form-input" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Última Actualización:</label>
+                                        <input type="datetime-local" id="last-update" class="form-input">
+                                    </div>
+                                </div>
+                                
+                                <h4 style="margin: 20px 0 10px 0;">Alertas Activas</h4>
+                                <textarea id="device-alerts" class="form-input form-textarea" placeholder="Alertas y logs del sistema..." readonly></textarea>
+                            </div>
+                        </div>
+
+                        <div style="padding: 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end;">
+                            <button type="button" class="toolbar-btn" style="background: var(--danger);" onclick="deleteSelectedDevice()">🗑️ Eliminar</button>
+                            <button type="button" class="toolbar-btn" style="background: #6c757d;" onclick="closePropertiesModal()">Cancelar</button>
+                            <button type="submit" class="toolbar-btn">💾 Guardar Configuración</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="file-input" style="display: none;" accept=".json" onchange="loadDiagram(event)">
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Global Variables
+        let devices = [];
+        let connections = [];
+        let selectedDevice = null;
+        let connectionMode = false;
+        let draggedDeviceType = null;
+        let deviceCounter = 0;
+        let connectionCounter = 0;
+        let currentZoom = 1;
+        let connectionStart = null;
+        let technicalMode = false;
+
+        // Device Specifications Database
+        const DEVICE_SPECS = {
+            'core-router': {
+                type: 'Core Router',
+                defaultInterfaces: [
+                    { name: 'GigabitEthernet0/0/0', type: 'ethernet', speed: '10000', status: 'up' },
+                    { name: 'GigabitEthernet0/0/1', type: 'ethernet', speed: '10000', status: 'up' },
+                    { name: 'TenGigabitEthernet0/1/0', type: 'fiber', speed: '100000', status: 'up' },
+                    { name: 'TenGigabitEthernet0/1/1', type: 'fiber', speed: '100000', status: 'down' }
+                ],
+                services: ['ospf', 'bgp', 'mpls'],
+                defaultConfig: {
+                    routingProtocol: 'ospf',
+                    routerId: '1.1.1.1'
+                }
+            },
+            'edge-router': {
+                type: 'Edge Router',
+                defaultInterfaces: [
+                    { name: 'GigabitEthernet0/0', type: 'ethernet', speed: '1000', status: 'up' },
+                    { name: 'GigabitEthernet0/1', type: 'ethernet', speed: '1000', status: 'up' },
+                    { name: 'Serial0/0/0', type: 'serial', speed: '2048', status: 'up' },
+                    { name: 'Serial0/0/1', type: 'serial', speed: '2048', status: 'down' }
+                ],
+                services: ['nat', 'dhcp', 'firewall'],
+                defaultConfig: {
+                    natEnabled: true,
+                    dhcpEnabled: true
+                }
+            },
+            'modem': {
+                type: 'Cable Modem',
+                defaultInterfaces: [
+                    { 
+                        name: 'Cable0/0', 
+                        type: 'coaxial', 
+                        speed: '1000', 
+                        status: 'up', 
+                        ip: generatePublicIP(), 
+                        mask: '255.255.255.0',
+                        description: 'Public IP from ISP'
+                    },
+                    { 
+                        name: 'GigabitEthernet0/0', 
+                        type: 'ethernet', 
+                        speed: '1000', 
+                        status: 'up', 
+                        ip: '192.168.1.1', 
+                        mask: '255.255.255.0',
+                        description: 'Private IP for NAT'
+                    }
+                ],
+                services: ['nat', 'dhcp', 'firewall'],
+                defaultConfig: {
+                    natEnabled: true,
+                    dhcpEnabled: true,
+                    dhcpPool: '192.168.1.100-192.168.1.254',
+                    wanInterface: 'Cable0/0',
+                    lanInterface: 'GigabitEthernet0/0'
+                }
+            },
+            'ont': {
+                type: 'ONT Fiber',
+                defaultInterfaces: [
+                    { 
+                        name: 'PON0/0', 
+                        type: 'fiber', 
+                        speed: '2500', 
+                        status: 'up', 
+                        ip: generatePublicIP(), 
+                        mask: '255.255.255.0' 
+                    },
+                    { 
+                        name: 'GigabitEthernet0/0', 
+                        type: 'ethernet', 
+                        speed: '1000', 
+                        status: 'up', 
+                        ip: '192.168.1.1', 
+                        mask: '255.255.255.0' 
+                    }
+                ],
+                services: ['nat', 'dhcp', 'voip'],
+                defaultConfig: {
+                    natEnabled: true,
+                    dhcpEnabled: true,
+                    voipEnabled: true
+                }
+            },
+            'l3-switch': {
+                type: 'Layer 3 Switch',
+                defaultInterfaces: [
+                    { name: 'VLAN1', type: 'svi', speed: '1000', status: 'up', ip: '192.168.1.1' },
+                    { name: 'GigabitEthernet1/0/1', type: 'ethernet', speed: '1000', status: 'up', vlan: 1 },
+                    { name: 'GigabitEthernet1/0/24', type: 'ethernet', speed: '1000', status: 'up', vlan: 'trunk' }
+                ],
+                services: ['ospf', 'vlan', 'stp'],
+                defaultConfig: {
+                    routingProtocol: 'ospf',
+                    stpEnabled: true
+                }
+            },
+            'managed-switch': {
+                type: 'Managed Switch',
+                defaultInterfaces: [
+                    { name: 'GigabitEthernet1/0/1', type: 'ethernet', speed: '1000', status: 'up', vlan: 1 },
+                    { name: 'GigabitEthernet1/0/24', type: 'ethernet', speed: '1000', status: 'up', vlan: 'trunk' },
+                    { name: 'Management0', type: 'ethernet', speed: '100', status: 'up', ip: '192.168.1.10' }
+                ],
+                services: ['vlan', 'stp', 'snmp'],
+                defaultConfig: {
+                    stpEnabled: true,
+                    snmpEnabled: true
+                }
+            },
+            'firewall': {
+                type: 'Next-Gen Firewall',
+                defaultInterfaces: [
+                    { name: 'GigabitEthernet0/0', type: 'ethernet', speed: '1000', status: 'up', zone: 'outside' },
+                    { name: 'GigabitEthernet0/1', type: 'ethernet', speed: '1000', status: 'up', zone: 'inside' },
+                    { name: 'GigabitEthernet0/2', type: 'ethernet', speed: '1000', status: 'up', zone: 'dmz' }
+                ],
+                services: ['firewall', 'nat', 'ips', 'vpn'],
+                defaultConfig: {
+                    firewallEnabled: true,
+                    ipsEnabled: true,
+                    vpnEnabled: true
+                }
+            }
+        };
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            initializeEventListeners();
+            updateStats();
+            showNotification('Sistema profesional inicializado', 'success');
+            setStatus('Red profesional lista - Selecciona dispositivos técnicos');
+        }
+
+        function initializeEventListeners() {
+            const workspace = document.getElementById('canvas-container');
+            const techModeBtn = document.getElementById('tech-mode-btn');
+
+            // Drag and drop
+            document.querySelectorAll('.device-item').forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+            });
+
+            workspace.addEventListener('dragover', handleDragOver);
+            workspace.addEventListener('drop', handleDrop);
+            workspace.addEventListener('click', handleWorkspaceClick);
+            workspace.addEventListener('contextmenu', e => e.preventDefault());
+
+            // Forms
+            document.getElementById('properties-form').addEventListener('submit', handlePropertiesSubmit);
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', handleKeyboard);
+
+            // Tech mode button
+            techModeBtn.addEventListener('click', toggleTechnicalMode);
+
+            updateZoomDisplay();
+        }
+
+        function handleDragStart(e) {
+            draggedDeviceType = e.target.dataset.deviceType;
+            e.dataTransfer.effectAllowed = 'copy';
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            if (draggedDeviceType) {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / currentZoom;
+                const y = (e.clientY - rect.top) / currentZoom;
+                
+                createTechnicalDevice(draggedDeviceType, x, y);
+                draggedDeviceType = null;
+            }
+        }
+
+        function createTechnicalDevice(type, x, y) {
+            const specs = DEVICE_SPECS[type] || DEVICE_SPECS['router'];
+            
+            const device = {
+                id: `device_${++deviceCounter}`,
+                type: type,
+                x: x,
+                y: y,
+                
+                // Basic Info
+                hostname: generateHostname(type, deviceCounter),
+                model: getDefaultModel(type),
+                vendor: getDefaultVendor(type),
+                serial: generateSerial(),
+                software: getDefaultSoftware(type),
+                
+                // Location
+                location: '',
+                rack: '',
+                rackUnit: '',
+                assetTag: '',
+                
+                // Network Interfaces
+                interfaces: JSON.parse(JSON.stringify(specs.defaultInterfaces)),
+                
+                // Routing
+                routingProtocol: specs.defaultConfig?.routingProtocol || '',
+                routerId: specs.defaultConfig?.routerId || '',
+                bgpAsn: '',
+                staticRoutes: [],
+                
+                // Services
+                services: specs.services || [],
+                dhcpEnabled: specs.defaultConfig?.dhcpEnabled || false,
+                dhcpPool: specs.defaultConfig?.dhcpPool || '',
+                dhcpNetmask: '255.255.255.0',
+                dhcpGateway: '',
+                dhcpDns1: '8.8.8.8',
+                dhcpDns2: '8.8.4.4',
+                natEnabled: specs.defaultConfig?.natEnabled || false,
+                natWanInterface: specs.defaultConfig?.wanInterface || '',
+                natLanInterface: specs.defaultConfig?.lanInterface || '',
+                
+                // Security
+                authMethod: 'local',
+                adminUsername: 'admin',
+                snmpCommunity: 'public',
+                sshVersion: '2',
+                
+                // Monitoring
+                status: 'up',
+                cpu: Math.floor(Math.random() * 30) + 5,
+                memory: Math.floor(Math.random() * 40) + 10,
+                temperature: Math.floor(Math.random() * 20) + 25,
+                uptime: generateUptime(),
+                lastUpdate: new Date().toISOString(),
+                alerts: '',
+            };
+
+            devices.push(device);
+            renderTechnicalDevice(device);
+            updateStats();
+            setStatus(`${device.hostname} agregado - ${specs.type}`);
+            showNotification(`Dispositivo ${device.hostname} configurado`, 'success');
+        }
+
+        function generateHostname(type, counter) {
+            const prefixes = {
+                'core-router': 'CORE-RTR',
+                'edge-router': 'EDGE-RTR',
+                'router': 'RTR',
+                'l3-switch': 'L3SW',
+                'managed-switch': 'SW',
+                'switch': 'SW',
+                'firewall': 'FW',
+                'modem': 'MODEM',
+                'ont': 'ONT',
+                'ap': 'AP',
+                'controller': 'WLC',
+                'web-server': 'WEB-SRV',
+                'db-server': 'DB-SRV',
+                'dns-server': 'DNS-SRV',
+                'dhcp-server': 'DHCP-SRV',
+                'mail-server': 'MAIL-SRV',
+                'pc': 'PC',
+                'laptop': 'LAP',
+                'mobile': 'MOB',
+                'printer': 'PRT',
+                'ip-phone': 'PHONE',
+                'loadbalancer': 'LB',
+                'nas': 'NAS',
+                'ups': 'UPS'
+            };
+            return `${prefixes[type] || 'DEV'}-${String(counter).padStart(3, '0')}`;
+        }
+
+        function getDefaultModel(type) {
+            const models = {
+                'core-router': 'Cisco ASR 9000',
+                'edge-router': 'Cisco ISR 4000',
+                'router': 'Cisco 2900',
+                'l3-switch': 'Cisco Catalyst 3850',
+                'managed-switch': 'Cisco Catalyst 2960',
+                'firewall': 'Cisco ASA 5500',
+                'modem': 'ARRIS SB8200',
+                'ont': 'Huawei HG8245H',
+                'ap': 'Cisco Aironet 2800',
+                'controller': 'Cisco WLC 5500'
+            };
+            return models[type] || 'Generic Device';
+        }
+
+        function getDefaultVendor(type) {
+            const vendors = {
+                'core-router': 'Cisco',
+                'edge-router': 'Cisco',
+                'router': 'Cisco',
+                'l3-switch': 'Cisco',
+                'managed-switch': 'Cisco',
+                'firewall': 'Cisco',
+                'modem': 'ARRIS',
+                'ont': 'Huawei',
+                'ap': 'Cisco',
+                'controller': 'Cisco'
+            };
+            return vendors[type] || 'Generic';
+        }
+
+        function getDefaultSoftware(type) {
+            const software = {
+                'core-router': 'IOS XR 7.3.2',
+                'edge-router': 'IOS 15.7(3)M5',
+                'router': 'IOS 15.1(4)M12',
+                'l3-switch': 'IOS 16.09.05',
+                'managed-switch': 'IOS 15.2(7)E3',
+                'firewall': 'ASA 9.14(2)',
+                'modem': 'SB8200-8.2.0.3-GA',
+                'ont': 'V5R020C00S125',
+                'ap': 'AireOS 8.10.151.0',
+                'controller': 'AireOS 8.10.151.0'
+            };
+            return software[type] || 'Unknown';
+        }
+
+        function generateSerial() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 10; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function generatePublicIP() {
+            // Generate realistic public IP address
+            return `${Math.floor(Math.random() * 223) + 1}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 254) + 1}`;
+        }
+
+        function generateUptime() {
+            const days = Math.floor(Math.random() * 365);
+            const hours = Math.floor(Math.random() * 24);
+            const minutes = Math.floor(Math.random() * 60);
+            return `${days}d ${hours}h ${minutes}m`;
+        }
+
+        function renderTechnicalDevice(device) {
+            const deviceElement = document.createElement('div');
+            deviceElement.className = `device-on-canvas status-${device.status}`;
+            deviceElement.id = device.id;
+            deviceElement.style.left = device.x + 'px';
+            deviceElement.style.top = device.y + 'px';
+
+            const specs = DEVICE_SPECS[device.type] || DEVICE_SPECS['router'];
+            const activeInterfaces = device.interfaces.filter(iface => iface.status === 'up').length;
+            const totalInterfaces = device.interfaces.length;
+
+            deviceElement.innerHTML = `
+                <div class="device-header">
+                    <div class="device-canvas-icon ${device.type}-icon">${getDeviceIcon(device.type)}</div>
+                    <div class="device-title">
+                        <div class="device-name-canvas">${device.hostname}</div>
+                        <div class="device-type-canvas">${specs.type}</div>
+                    </div>
+                    <div class="device-status-indicator status-${device.status}"></div>
+                </div>
+                
+                <div class="device-info-grid">
+                    <div class="info-item">
+                        <span class="info-label">IP:</span>
+                        <span class="info-value">${getManagementIP(device)}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">CPU:</span>
+                        <span class="info-value">${device.cpu}%</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">MEM:</span>
+                        <span class="info-value">${device.memory}%</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">TEMP:</span>
+                        <span class="info-value">${device.temperature}°C</span>
+                    </div>
+                </div>
+                
+                <div class="device-interfaces-list">
+                    <div style="font-size: 9px; font-weight: 600; margin-bottom: 4px;">
+                        Interfaces: ${activeInterfaces}/${totalInterfaces} UP
+                    </div>
+                    ${device.interfaces.slice(0, 3).map(iface => `
+                        <div class="interface-item">
+                            <span class="interface-name">${iface.name}</span>
+                            <div class="interface-status interface-${iface.status}"></div>
+                        </div>
+                    `).join('')}
+                    ${device.interfaces.length > 3 ? `<div style="font-size: 8px; color: #666;">+${device.interfaces.length - 3} más...</div>` : ''}
+                </div>
+            `;
+
+            // Event listeners
+            deviceElement.addEventListener('mousedown', (e) => handleDeviceMouseDown(e, device));
+            deviceElement.addEventListener('click', (e) => handleDeviceClick(e, device));
+            deviceElement.addEventListener('contextmenu', (e) => handleDeviceRightClick(e, device));
+
+            document.getElementById('canvas-container').appendChild(deviceElement);
+        }
+
+        function getManagementIP(device) {
+            // Find management interface or first interface with IP
+            const mgmtInterface = device.interfaces.find(iface => 
+                iface.name.toLowerCase().includes('management') || 
+                iface.name.toLowerCase().includes('mgmt') ||
+                iface.ip
+            );
+            
+            if (mgmtInterface && mgmtInterface.ip) {
+                return mgmtInterface.ip;
+            }
+            
+            // For modems/ONTs, show the private network IP
+            if (device.type === 'modem' || device.type === 'ont') {
+                return device.interfaces.find(iface => iface.name.includes('Gigabit'))?.ip || '192.168.1.1';
+            }
+            
+            return 'DHCP';
+        }
+
+        function getDeviceIcon(type) {
+            const icons = {
+                'core-router': 'CR', 'edge-router': 'ER', 'router': 'R',
+                'l3-switch': 'L3', 'managed-switch': 'MS', 'switch': 'SW',
+                'firewall': 'FW', 'modem': 'MDM', 'ont': 'ONT', 'ap': 'AP', 
+                'controller': 'WLC', 'web-server': 'WEB', 'db-server': 'DB', 
+                'dns-server': 'DNS', 'dhcp-server': 'DHCP', 'mail-server': 'MAIL',
+                'pc': 'PC', 'laptop': 'LAP', 'mobile': 'MOB',
+                'printer': 'PRT', 'ip-phone': 'IP',
+                'loadbalancer': 'LB', 'nas': 'NAS', 'ups': 'UPS'
+            };
+            return icons[type] || 'DEV';
+        }
+
+        function handleDeviceMouseDown(e, device) {
+            if (e.button === 0) {
+                selectedDevice = device;
+                // Add drag handling logic here
+                e.preventDefault();
+            }
+        }
+
+        function handleDeviceClick(e, device) {
+            if (connectionMode) {
+                handleConnectionClick(device);
+            } else {
+                selectDevice(device);
+            }
+            e.stopPropagation();
+        }
+
+        function handleDeviceRightClick(e, device) {
+            e.preventDefault();
+            selectDevice(device);
+            openTechnicalPropertiesModal(device);
+        }
+
+        function selectDevice(device) {
+            clearSelection();
+            selectedDevice = device;
+            document.getElementById(device.id).classList.add('selected');
+            setStatus(`${device.hostname} seleccionado - ${device.model} (${device.status.toUpperCase()})`);
+        }
+
+        function clearSelection() {
+            document.querySelectorAll('.device-on-canvas.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+            selectedDevice = null;
+        }
+
+        function openTechnicalPropertiesModal(device) {
+            const modal = document.getElementById('properties-modal');
+            const modalTitle = document.getElementById('modal-title');
+            
+            modalTitle.textContent = `Configuración Técnica: ${device.hostname}`;
+            
+            // Populate General tab
+            document.getElementById('device-hostname').value = device.hostname;
+            document.getElementById('device-type-display').value = device.type;
+            document.getElementById('device-model').value = device.model;
+            document.getElementById('device-vendor').value = device.vendor;
+            document.getElementById('device-serial').value = device.serial;
+            document.getElementById('device-software').value = device.software;
+            document.getElementById('device-location').value = device.location;
+            document.getElementById('device-rack').value = device.rack;
+            document.getElementById('device-rack-unit').value = device.rackUnit;
+            document.getElementById('device-asset-tag').value = device.assetTag;
+
+            // Populate Interfaces
+            populateInterfaces(device);
+
+            // Populate Routing
+            document.getElementById('routing-protocol').value = device.routingProtocol;
+            document.getElementById('router-id').value = device.routerId;
+            document.getElementById('bgp-asn').value = device.bgpAsn;
+            populateStaticRoutes(device);
+
+            // Populate Services
+            document.getElementById('dhcp-enabled').checked = device.dhcpEnabled;
+            document.getElementById('dhcp-pool').value = device.dhcpPool;
+            document.getElementById('dhcp-netmask').value = device.dhcpNetmask;
+            document.getElementById('dhcp-gateway').value = device.dhcpGateway;
+            document.getElementById('dhcp-dns1').value = device.dhcpDns1;
+            document.getElementById('dhcp-dns2').value = device.dhcpDns2;
+            document.getElementById('nat-enabled').checked = device.natEnabled;
+            document.getElementById('nat-wan-interface').value = device.natWanInterface;
+            document.getElementById('nat-lan-interface').value = device.natLanInterface;
+
+            // Populate interface selectors for NAT
+            populateInterfaceSelectors(device);
+
+            // Populate Security
+            document.getElementById('auth-method').value = device.authMethod;
+            document.getElementById('admin-username').value = device.adminUsername;
+            document.getElementById('snmp-community').value = device.snmpCommunity;
+            document.getElementById('ssh-version').value = device.sshVersion;
+
+            // Populate Monitoring
+            document.getElementById('device-status').value = device.status;
+            document.getElementById('device-cpu').value = device.cpu;
+            document.getElementById('device-memory').value = device.memory;
+            document.getElementById('device-temperature').value = device.temperature;
+            document.getElementById('device-uptime').value = device.uptime;
+            document.getElementById('last-update').value = device.lastUpdate;
+            document.getElementById('device-alerts').value = device.alerts;
+
+            modal.style.display = 'block';
+        }
+
+        function closePropertiesModal() {
+            document.getElementById('properties-modal').style.display = 'none';
+        }
+
+        function switchModalTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.modal-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+
+        function populateInterfaces(device) {
+            const container = document.getElementById('interfaces-container');
+            container.innerHTML = '';
+
+            device.interfaces.forEach((iface, index) => {
+                const interfaceDiv = document.createElement('div');
+                interfaceDiv.className = 'interface-config';
+                interfaceDiv.innerHTML = `
+                    <div class="interface-header">
+                        <input type="text" class="form-input interface-name-input" value="${iface.name}" 
+                               onchange="updateInterfaceName(${index}, this.value)">
+                        <button type="button" class="interface-remove" onclick="removeInterface(${index})">✕</button>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Tipo:</label>
+                            <select class="form-input" onchange="updateInterfaceType(${index}, this.value)">
+                                <option value="ethernet" ${iface.type === 'ethernet' ? 'selected' : ''}>Ethernet</option>
+                                <option value="fiber" ${iface.type === 'fiber' ? 'selected' : ''}>Fibra Óptica</option>
+                                <option value="serial" ${iface.type === 'serial' ? 'selected' : ''}>Serial</option>
+                                <option value="wireless" ${iface.type === 'wireless' ? 'selected' : ''}>Inalámbrico</option>
+                                <option value="svi" ${iface.type === 'svi' ? 'selected' : ''}>SVI (VLAN)</option>
+                                <option value="loopback" ${iface.type === 'loopback' ? 'selected' : ''}>Loopback</option>
+                                <option value="tunnel" ${iface.type === 'tunnel' ? 'selected' : ''}>Túnel</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Velocidad (Mbps):</label>
+                            <input type="number" class="form-input" value="${iface.speed}" 
+                                   onchange="updateInterfaceSpeed(${index}, this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Estado:</label>
+                            <select class="form-input" onchange="updateInterfaceStatus(${index}, this.value)">
+                                <option value="up" ${iface.status === 'up' ? 'selected' : ''}>UP</option>
+                                <option value="down" ${iface.status === 'down' ? 'selected' : ''}>DOWN</option>
+                                <option value="admin-down" ${iface.status === 'admin-down' ? 'selected' : ''}>Admin DOWN</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Dirección IP:</label>
+                            <input type="text" class="form-input" value="${iface.ip || ''}" placeholder="192.168.1.1/24"
+                                   onchange="updateInterfaceIP(${index}, this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">VLAN:</label>
+                            <input type="text" class="form-input" value="${iface.vlan || ''}" placeholder="1 o trunk"
+                                   onchange="updateInterfaceVLAN(${index}, this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Descripción:</label>
+                            <input type="text" class="form-input" value="${iface.description || ''}" 
+                                   placeholder="Descripción de la interfaz"
+                                   onchange="updateInterfaceDescription(${index}, this.value)">
+                        </div>
+                    </div>
+                `;
+                container.appendChild(interfaceDiv);
+            });
+        }
+
+        function addInterface() {
+            if (!selectedDevice) return;
+
+            const newInterface = {
+                name: `Interface${selectedDevice.interfaces.length + 1}`,
+                type: 'ethernet',
+                speed: '1000',
+                status: 'down',
+                ip: '',
+                vlan: '',
+                description: ''
+            };
+
+            selectedDevice.interfaces.push(newInterface);
+            populateInterfaces(selectedDevice);
+        }
+
+        function removeInterface(index) {
+            if (!selectedDevice) return;
+            selectedDevice.interfaces.splice(index, 1);
+            populateInterfaces(selectedDevice);
+        }
+
+        function updateInterfaceName(index, value) {
+            if (selectedDevice && selectedDevice.interfaces[index]) {
+                selectedDevice.interfaces[index].name = value;
+            }
+        }
+
+        function updateInterfaceType(index, value) {
+            if (selectedDevice && selectedDevice.interfaces[index]) {
+                selectedDevice.interfaces[index].type = value;
+            }
+        }
+
+        function updateInterfaceSpeed(index, value) {
+            if (selectedDevice && selectedDevice.interfaces[index]) {
+                selectedDevice.interfaces[index].speed = value;
+            }
+        }
+
+        function updateInterfaceStatus(index, value) {
+            if (selectedDevice && selectedDevice.interfaces[index]) {
+                selectedDevice.interfaces[index].status = value;
+            }
+        }
+
+        function updateInterfaceIP(index, value) {
+            if (selectedDevice && selectedDevice.interfaces[index]) {
+                selectedDevice.interfaces[index].ip = value;
+            }
+        }
+
+        function updateInterfaceVLAN(index, value) {
+            if (selectedDevice && selectedDevice.interfaces[index]) {
+                selectedDevice.interfaces[index].vlan = value;
+            }
+        }
+
+        function updateInterfaceDescription(index, value) {
+            if (selectedDevice && selectedDevice.interfaces[index]) {
+                selectedDevice.interfaces[index].description = value;
+            }
+        }
+
+        function populateInterfaceSelectors(device) {
+            const wanSelect = document.getElementById('nat-wan-interface');
+            const lanSelect = document.getElementById('nat-lan-interface');
+            
+            wanSelect.innerHTML = '<option value="">Seleccionar interfaz</option>';
+            lanSelect.innerHTML = '<option value="">Seleccionar interfaz</option>';
+            
+            device.interfaces.forEach(iface => {
+                const option1 = new Option(iface.name, iface.name);
+                const option2 = new Option(iface.name, iface.name);
+                wanSelect.add(option1);
+                lanSelect.add(option2);
+            });
+        }
+
+        function populateStaticRoutes(device) {
+            const tbody = document.getElementById('static-routes-table');
+            tbody.innerHTML = '';
+            
+            (device.staticRoutes || []).forEach((route, index) => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><input type="text" class="form-input" value="${route.network}" style="width: 100px;"></td>
+                    <td><input type="text" class="form-input" value="${route.mask}" style="width: 100px;"></td>
+                    <td><input type="text" class="form-input" value="${route.nextHop}" style="width: 100px;"></td>
+                    <td><input type="number" class="form-input" value="${route.metric}" style="width: 60px;"></td>
+                    <td><button type="button" class="interface-remove" onclick="removeStaticRoute(${index})">✕</button></td>
+                `;
+            });
+        }
+
+        function addStaticRoute() {
+            if (!selectedDevice) return;
+            
+            if (!selectedDevice.staticRoutes) {
+                selectedDevice.staticRoutes = [];
+            }
+            
+            selectedDevice.staticRoutes.push({
+                network: '0.0.0.0',
+                mask: '0.0.0.0',
+                nextHop: '192.168.1.1',
+                metric: 1
+            });
+            
+            populateStaticRoutes(selectedDevice);
+        }
+
+        function removeStaticRoute(index) {
+            if (selectedDevice && selectedDevice.staticRoutes) {
+                selectedDevice.staticRoutes.splice(index, 1);
+                populateStaticRoutes(selectedDevice);
+            }
+        }
+
+        function handlePropertiesSubmit(e) {
+            e.preventDefault();
+            if (!selectedDevice) return;
+
+            // Update device properties from form
+            selectedDevice.hostname = document.getElementById('device-hostname').value;
+            selectedDevice.model = document.getElementById('device-model').value;
+            selectedDevice.vendor = document.getElementById('device-vendor').value;
+            selectedDevice.serial = document.getElementById('device-serial').value;
+            selectedDevice.software = document.getElementById('device-software').value;
+            selectedDevice.location = document.getElementById('device-location').value;
+            selectedDevice.rack = document.getElementById('device-rack').value;
+            selectedDevice.rackUnit = document.getElementById('device-rack-unit').value;
+            selectedDevice.assetTag = document.getElementById('device-asset-tag').value;
+
+            // Update routing
+            selectedDevice.routingProtocol = document.getElementById('routing-protocol').value;
+            selectedDevice.routerId = document.getElementById('router-id').value;
+            selectedDevice.bgpAsn = document.getElementById('bgp-asn').value;
+
+            // Update services
+            selectedDevice.dhcpEnabled = document.getElementById('dhcp-enabled').checked;
+            selectedDevice.dhcpPool = document.getElementById('dhcp-pool').value;
+            selectedDevice.dhcpNetmask = document.getElementById('dhcp-netmask').value;
+            selectedDevice.dhcpGateway = document.getElementById('dhcp-gateway').value;
+            selectedDevice.dhcpDns1 = document.getElementById('dhcp-dns1').value;
+            selectedDevice.dhcpDns2 = document.getElementById('dhcp-dns2').value;
+            selectedDevice.natEnabled = document.getElementById('nat-enabled').checked;
+            selectedDevice.natWanInterface = document.getElementById('nat-wan-interface').value;
+            selectedDevice.natLanInterface = document.getElementById('nat-lan-interface').value;
+
+            // Update security
+            selectedDevice.authMethod = document.getElementById('auth-method').value;
+            selectedDevice.adminUsername = document.getElementById('admin-username').value;
+            selectedDevice.snmpCommunity = document.getElementById('snmp-community').value;
+            selectedDevice.sshVersion = document.getElementById('ssh-version').value;
+
+            // Update monitoring
+            selectedDevice.status = document.getElementById('device-status').value;
+            selectedDevice.cpu = parseInt(document.getElementById('device-cpu').value);
+            selectedDevice.memory = parseInt(document.getElementById('device-memory').value);
+            selectedDevice.temperature = parseInt(document.getElementById('device-temperature').value);
+            selectedDevice.alerts = document.getElementById('device-alerts').value;
+
+            // Re-render device
+            const deviceElement = document.getElementById(selectedDevice.id);
+            if (deviceElement) {
+                deviceElement.remove();
+                renderTechnicalDevice(selectedDevice);
+            }
+
+            closePropertiesModal();
+            setStatus(`Configuración de ${selectedDevice.hostname} actualizada`);
+            showNotification('Configuración técnica actualizada', 'success');
+        }
+
+        function deleteSelectedDevice() {
+            if (!selectedDevice) return;
+            
+            if (confirm(`¿Eliminar ${selectedDevice.hostname}? Se perderán todas las configuraciones.`)) {
+                // Remove connections
+                connections = connections.filter(connection => {
+                    if (connection.device1 === selectedDevice.id || connection.device2 === selectedDevice.id) {
+                        const connectionElement = document.getElementById(connection.id);
+                        const labelElement = document.getElementById(`label_${connection.id}`);
+                        if (connectionElement) connectionElement.remove();
+                        if (labelElement) labelElement.remove();
+                        return false;
+                    }
+                    return true;
+                });
+                
+                // Remove device
+                devices = devices.filter(d => d.id !== selectedDevice.id);
+                const deviceElement = document.getElementById(selectedDevice.id);
+                if (deviceElement) deviceElement.remove();
+                
+                closePropertiesModal();
+                selectedDevice = null;
+                updateStats();
+                setStatus('Dispositivo eliminado');
+                showNotification('Dispositivo eliminado del diagrama', 'info');
+            }
+        }
+
+        // Sidebar Functions
+        function switchSidebarTab(tabName) {
+            document.querySelectorAll('.sidebar-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            document.querySelectorAll('#devices-tab, #templates-tab, #config-tab').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+
+        function toggleCategory(header) {
+            header.classList.toggle('collapsed');
+            const devices = header.nextElementSibling;
+            if (header.classList.contains('collapsed')) {
+                devices.style.maxHeight = '0';
+            } else {
+                devices.style.maxHeight = devices.scrollHeight + 'px';
+            }
+        }
+
+        function filterDevices(searchTerm) {
+            const deviceItems = document.querySelectorAll('.device-item');
+            const term = searchTerm.toLowerCase();
+            
+            deviceItems.forEach(item => {
+                const deviceName = item.querySelector('.device-name').textContent.toLowerCase();
+                const deviceSpecs = item.querySelector('.device-specs').textContent.toLowerCase();
+                
+                if (deviceName.includes(term) || deviceSpecs.includes(term)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Connection Functions
+        function toggleConnectionMode() {
+            connectionMode = !connectionMode;
+            const btn = document.getElementById('connect-btn');
+            
+            if (connectionMode) {
+                btn.textContent = '❌ Cancelar';
+                btn.classList.add('active');
+                setStatus('Modo conexión: Selecciona dos dispositivos');
+            } else {
+                btn.textContent = '🔗 Conectar';
+                btn.classList.remove('active');
+                clearSelection();
+                connectionStart = null;
+                setStatus('Modo conexión desactivado');
+            }
+        }
+
+        function handleConnectionClick(device) {
+            if (!connectionStart) {
+                connectionStart = device;
+                document.getElementById(device.id).classList.add('selected');
+                setStatus(`Conectando desde ${device.hostname} - Selecciona destino`);
+            } else if (connectionStart.id !== device.id) {
+                createTechnicalConnection(connectionStart, device);
+                clearSelection();
+                connectionStart = null;
+                setStatus('Conexión técnica establecida');
+            }
+        }
+
+        function createTechnicalConnection(device1, device2) {
+            const connectionType = document.getElementById('connection-type').value;
+            
+            const connection = {
+                id: `connection_${++connectionCounter}`,
+                device1: device1.id,
+                device2: device2.id,
+                type: connectionType,
+                bandwidth: getConnectionBandwidth(connectionType),
+                status: 'up',
+                protocol: getConnectionProtocol(connectionType),
+                encapsulation: getConnectionEncapsulation(connectionType),
+                vlan: '',
+                cost: getConnectionCost(connectionType)
+            };
+
+            connections.push(connection);
+            renderTechnicalConnection(connection);
+            updateStats();
+            showNotification(`Conexión ${connectionType} creada: ${device1.hostname} ↔ ${device2.hostname}`, 'success');
+        }
+
+        function getConnectionBandwidth(type) {
+            const bandwidths = {
+                'ethernet': '1 Gbps',
+                'fiber': '10 Gbps',
+                'serial': '2 Mbps',
+                'coaxial': '100 Mbps',
+                'wireless': '300 Mbps',
+                'console': '9600 bps'
+            };
+            return bandwidths[type] || '1 Gbps';
+        }
+
+        function getConnectionProtocol(type) {
+            const protocols = {
+                'ethernet': 'IEEE 802.3',
+                'fiber': 'IEEE 802.3z',
+                'serial': 'PPP/HDLC',
+                'coaxial': 'DOCSIS',
+                'wireless': 'IEEE 802.11',
+                'console': 'RS-232'
+            };
+            return protocols[type] || 'Unknown';
+        }
+
+        function getConnectionEncapsulation(type) {
+            const encapsulations = {
+                'ethernet': 'Ethernet II',
+                'fiber': 'Ethernet II',
+                'serial': 'PPP',
+                'coaxial': 'DOCSIS',
+                'wireless': '802.11',
+                'console': 'ASCII'
+            };
+            return encapsulations[type] || 'Unknown';
+        }
+
+        function getConnectionCost(type) {
+            const costs = {
+                'ethernet': 10,
+                'fiber': 1,
+                'serial': 64,
+                'coaxial': 20,
+                'wireless': 30,
+                'console': 999
+            };
+            return costs[type] || 10;
+        }
+
+        function renderTechnicalConnection(connection) {
+            const device1 = devices.find(d => d.id === connection.device1);
+            const device2 = devices.find(d => d.id === connection.device2);
+            
+            if (!device1 || !device2) return;
+
+            const svg = document.getElementById('connection-svg');
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            
+            line.id = connection.id;
+            line.classList.add(`${connection.type}-line`);
+            
+            const device1Center = getDeviceCenter(device1);
+            const device2Center = getDeviceCenter(device2);
+            
+            line.setAttribute('x1', device1Center.x);
+            line.setAttribute('y1', device1Center.y);
+            line.setAttribute('x2', device2Center.x);
+            line.setAttribute('y2', device2Center.y);
+            line.setAttribute('stroke-dasharray', connection.status === 'down' ? '10,5' : 'none');
+            
+            svg.appendChild(line);
+
+            // Add technical connection label
+            const label = document.createElement('div');
+            label.className = 'connection-label';
+            label.id = `label_${connection.id}`;
+            label.innerHTML = `
+                <div style="font-weight: 600;">${connection.bandwidth}</div>
+                <div style="font-size: 8px;">${connection.protocol}</div>
+            `;
+            
+            const midX = (device1Center.x + device2Center.x) / 2;
+            const midY = (device1Center.y + device2Center.y) / 2;
+            
+            label.style.left = midX + 'px';
+            label.style.top = midY + 'px';
+            
+            document.getElementById('canvas-container').appendChild(label);
+        }
+
+        function getDeviceCenter(device) {
+            return {
+                x: device.x + 70,
+                y: device.y + 60
+            };
+        }
+
+        // Technical Validation
+        function validateNetwork() {
+            const issues = [];
+            const warnings = [];
+            
+            // Check for isolated devices
+            const connectedDevices = new Set();
+            connections.forEach(conn => {
+                connectedDevices.add(conn.device1);
+                connectedDevices.add(conn.device2);
+            });
+            
+            const isolatedDevices = devices.filter(device => !connectedDevices.has(device.id));
+            if (isolatedDevices.length > 0) {
+                issues.push(`Dispositivos aislados: ${isolatedDevices.map(d => d.hostname).join(', ')}`);
+            }
+
+            // Check IP addressing
+            const ipConflicts = [];
+            const usedIPs = new Map();
+            
+            devices.forEach(device => {
+                device.interfaces.forEach(iface => {
+                    if (iface.ip && iface.ip !== 'DHCP' && iface.ip !== 'DHCP_PUBLIC') {
+                        const ip = iface.ip.split('/')[0];
+                        if (usedIPs.has(ip)) {
+                            ipConflicts.push(ip);
+                        } else {
+                            usedIPs.set(ip, device.hostname);
+                        }
+                    }
+                });
+            });
+            
+            if (ipConflicts.length > 0) {
+                issues.push(`Conflictos de IP: ${ipConflicts.join(', ')}`);
+            }
+
+            // Check routing protocols
+            const routingDevices = devices.filter(d => d.routingProtocol && d.routingProtocol !== '');
+            if (routingDevices.length > 1) {
+                const protocols = [...new Set(routingDevices.map(d => d.routingProtocol))];
+                if (protocols.length > 1) {
+                    warnings.push(`Múltiples protocolos de enrutamiento: ${protocols.join(', ')}`);
+                }
+            }
+
+            // Check DHCP servers
+            const dhcpServers = devices.filter(d => d.dhcpEnabled);
+            if (dhcpServers.length > 1) {
+                warnings.push(`Múltiples servidores DHCP detectados: ${dhcpServers.map(d => d.hostname).join(', ')}`);
+            } else if (dhcpServers.length === 0 && devices.length > 2) {
+                warnings.push('No se detectó servidor DHCP en la red');
+            }
+
+            // Check NAT configuration
+            const natDevices = devices.filter(d => d.natEnabled);
+            natDevices.forEach(device => {
+                if (!device.natWanInterface || !device.natLanInterface) {
+                    issues.push(`NAT mal configurado en ${device.hostname}: interfaces WAN/LAN no definidas`);
+                }
+            });
+
+            // Check interface status
+            devices.forEach(device => {
+                const downInterfaces = device.interfaces.filter(iface => iface.status === 'down');
+                if (downInterfaces.length > 0) {
+                    warnings.push(`${device.hostname}: ${downInterfaces.length} interfaces inactivas`);
+                }
+            });
+
+            // Display results
+            if (issues.length === 0 && warnings.length === 0) {
+                showNotification('✅ Red validada correctamente - Sin problemas detectados', 'success');
+                setStatus('Validación completada - Red técnicamente correcta');
+            } else {
+                let message = '';
+                if (issues.length > 0) {
+                    message += `❌ ERRORES:\n${issues.map(issue => `• ${issue}`).join('\n')}\n\n`;
+                }
+                if (warnings.length > 0) {
+                    message += `⚠️ ADVERTENCIAS:\n${warnings.map(warning => `• ${warning}`).join('\n')}`;
+                }
+                showNotification(message, issues.length > 0 ? 'error' : 'warning');
+                setStatus(`Validación: ${issues.length} error(es), ${warnings.length} advertencia(s)`);
+            }
+        }
+
+        function generateConfig() {
+            if (!selectedDevice) {
+                showNotification('Selecciona un dispositivo para generar configuración', 'warning');
+                return;
+            }
+
+            const config = generateDeviceConfig(selectedDevice);
+            
+            // Create and download config file
+            const blob = new Blob([config], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${selectedDevice.hostname}_config.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showNotification(`Configuración generada para ${selectedDevice.hostname}`, 'success');
+        }
+
+        function generateDeviceConfig(device) {
+            let config = '';
+            
+            // Header
+            config += `!\n! Configuration for ${device.hostname}\n`;
+            config += `! Generated on ${new Date().toLocaleString()}\n`;
+            config += `! Device: ${device.model} (${device.vendor})\n!\n\n`;
+
+            // Basic configuration
+            config += `hostname ${device.hostname}\n`;
+            if (device.software) {
+                config += `! Software: ${device.software}\n`;
+            }
+            config += '\n';
+
+            // Interfaces
+            config += '! Interface Configuration\n';
+            device.interfaces.forEach(iface => {
+                config += `interface ${iface.name}\n`;
+                if (iface.description) {
+                    config += ` description ${iface.description}\n`;
+                }
+                if (iface.ip && iface.ip !== 'DHCP') {
+                    config += ` ip address ${iface.ip}\n`;
+                }
+                if (iface.status === 'up') {
+                    config += ` no shutdown\n`;
+                } else {
+                    config += ` shutdown\n`;
+                }
+                if (iface.vlan && iface.vlan !== 'trunk') {
+                    config += ` switchport access vlan ${iface.vlan}\n`;
+                } else if (iface.vlan === 'trunk') {
+                    config += ` switchport mode trunk\n`;
+                }
+                config += '!\n';
+            });
+
+            // Routing
+            if (device.routingProtocol) {
+                config += '! Routing Configuration\n';
+                switch (device.routingProtocol) {
+                    case 'ospf':
+                        config += `router ospf 1\n`;
+                        if (device.routerId) {
+                            config += ` router-id ${device.routerId}\n`;
+                        }
+                        break;
+                    case 'bgp':
+                        if (device.bgpAsn) {
+                            config += `router bgp ${device.bgpAsn}\n`;
+                            if (device.routerId) {
+                                config += ` bgp router-id ${device.routerId}\n`;
+                            }
+                        }
+                        break;
+                    case 'rip':
+                        config += `router rip\n version 2\n`;
+                        break;
+                }
+                config += '!\n';
+            }
+
+            // Static routes
+            if (device.staticRoutes && device.staticRoutes.length > 0) {
+                config += '! Static Routes\n';
+                device.staticRoutes.forEach(route => {
+                    config += `ip route ${route.network} ${route.mask} ${route.nextHop}\n`;
+                });
+                config += '!\n';
+            }
+
+            // DHCP
+            if (device.dhcpEnabled) {
+                config += '! DHCP Configuration\n';
+                config += `ip dhcp pool LAN\n`;
+                if (device.dhcpPool) {
+                    const [start, end] = device.dhcpPool.split('-');
+                    config += ` network ${start.substring(0, start.lastIndexOf('.'))}.0 ${device.dhcpNetmask}\n`;
+                }
+                if (device.dhcpGateway) {
+                    config += ` default-router ${device.dhcpGateway}\n`;
+                }
+                config += ` dns-server ${device.dhcpDns1} ${device.dhcpDns2}\n`;
+                config += '!\n';
+            }
+
+            // NAT
+            if (device.natEnabled) {
+                config += '! NAT Configuration\n';
+                if (device.natWanInterface && device.natLanInterface) {
+                    config += `interface ${device.natWanInterface}\n ip nat outside\n!\n`;
+                    config += `interface ${device.natLanInterface}\n ip nat inside\n!\n`;
+                    config += `access-list 1 permit 192.168.0.0 0.0.255.255\n`;
+                    config += `ip nat inside source list 1 interface ${device.natWanInterface} overload\n`;
+                }
+                config += '!\n';
+            }
+
+            // Security
+            config += '! Security Configuration\n';
+            config += `username ${device.adminUsername} privilege 15 secret cisco\n`;
+            config += `enable secret cisco\n`;
+            config += `ip ssh version ${device.sshVersion}\n`;
+            if (device.snmpCommunity) {
+                config += `snmp-server community ${device.snmpCommunity} RO\n`;
+            }
+            config += 'line vty 0 4\n login local\n transport input ssh\n!\n';
+
+            config += '!\n! End of Configuration\n';
+
+            return config;
+        }
+
+        // Utility Functions
+        function autoArrange() {
+            if (devices.length === 0) {
+                showNotification('No hay dispositivos para organizar', 'warning');
+                return;
+            }
+
+            // Group devices by type
+            const deviceGroups = {
+                routers: devices.filter(d => d.type.includes('router')),
+                switches: devices.filter(d => d.type.includes('switch')),
+                security: devices.filter(d => ['firewall', 'utm', 'ips', 'waf'].includes(d.type)),
+                servers: devices.filter(d => d.type.includes('server')),
+                endpoints: devices.filter(d => ['pc', 'laptop', 'mobile', 'printer', 'ip-phone'].includes(d.type)),
+                infrastructure: devices.filter(d => ['modem', 'ont', 'ap', 'controller', 'loadbalancer', 'nas', 'ups'].includes(d.type))
+            };
+
+            let yOffset = 100;
+            const spacing = 200;
+
+            Object.keys(deviceGroups).forEach(groupName => {
+                const groupDevices = deviceGroups[groupName];
+                if (groupDevices.length === 0) return;
+
+                const xSpacing = Math.min(250, 3000 / Math.max(groupDevices.length, 1));
+                const startX = (3000 - (groupDevices.length - 1) * xSpacing) / 2;
+
+                groupDevices.forEach((device, index) => {
+                    device.x = startX + index * xSpacing;
+                    device.y = yOffset;
+                    
+                    const deviceElement = document.getElementById(device.id);
+                    if (deviceElement) {
+                        deviceElement.style.left = device.x + 'px';
+                        deviceElement.style.top = device.y + 'px';
+                    }
+                });
+
+                yOffset += spacing;
+            });
+
+            updateConnections();
+            setStatus('Dispositivos organizados por tipo');
+            showNotification('Red organizada automáticamente', 'success');
+        }
+
+        function updateConnections() {
+            connections.forEach(connection => {
+                const device1 = devices.find(d => d.id === connection.device1);
+                const device2 = devices.find(d => d.id === connection.device2);
+                
+                if (device1 && device2) {
+                    const line = document.getElementById(connection.id);
+                    const label = document.getElementById(`label_${connection.id}`);
+                    
+                    if (line) {
+                        const device1Center = getDeviceCenter(device1);
+                        const device2Center = getDeviceCenter(device2);
+                        
+                        line.setAttribute('x1', device1Center.x);
+                        line.setAttribute('y1', device1Center.y);
+                        line.setAttribute('x2', device2Center.x);
+                        line.setAttribute('y2', device2Center.y);
+                        
+                        if (label) {
+                            const midX = (device1Center.x + device2Center.x) / 2;
+                            const midY = (device1Center.y + device2Center.y) / 2;
+                            label.style.left = midX + 'px';
+                            label.style.top = midY + 'px';
+                        }
+                    }
+                }
+            });
+        }
+
+        // File Management
+        function newDiagram() {
+            if (devices.length > 0 || connections.length > 0) {
+                if (confirm('¿Crear nuevo diagrama? Se perderán todas las configuraciones.')) {
+                    clearDiagram();
+                    showNotification('Nuevo diagrama técnico creado', 'info');
+                }
+            }
+        }
+
+        function clearDiagram() {
+            devices.forEach(device => {
+                const element = document.getElementById(device.id);
+                if (element) element.remove();
+            });
+            
+            connections.forEach(connection => {
+                const element = document.getElementById(connection.id);
+                const label = document.getElementById(`label_${connection.id}`);
+                if (element) element.remove();
+                if (label) label.remove();
+            });
+            
+            devices = [];
+            connections = [];
+            selectedDevice = null;
+            connectionStart = null;
+            deviceCounter = 0;
+            connectionCounter = 0;
+            
+            updateStats();
+            setStatus('Diagrama técnico limpiado');
+        }
+
+        function saveDiagram() {
+            const diagramData = {
+                version: '1.0-enterprise',
+                metadata: {
+                    createdAt: new Date().toISOString(),
+                    title: 'Professional Network Diagram',
+                    description: 'Technical network infrastructure diagram',
+                    deviceCount: devices.length,
+                    connectionCount: connections.length
+                },
+                devices: devices,
+                connections: connections,
+                settings: {
+                    zoom: currentZoom
+                }
+            };
+            
+            const dataStr = JSON.stringify(diagramData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const filename = `technical_network_${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', filename);
+            linkElement.click();
+            
+            setStatus('Diagrama técnico guardado');
+            showNotification(`Diagrama guardado: ${filename}`, 'success');
+        }
+
+        function loadDiagram(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const diagramData = JSON.parse(e.target.result);
+                    
+                    clearDiagram();
+                    
+                    if (diagramData.devices) {
+                        devices = diagramData.devices;
+                        devices.forEach(device => {
+                            renderTechnicalDevice(device);
+                        });
+                        deviceCounter = Math.max(...devices.map(d => parseInt(d.id.split('_')[1]))) || 0;
+                    }
+                    
+                    if (diagramData.connections) {
+                        connections = diagramData.connections;
+                        connections.forEach(connection => {
+                            renderTechnicalConnection(connection);
+                        });
+                        connectionCounter = Math.max(...connections.map(c => parseInt(c.id.split('_')[1]))) || 0;
+                    }
+                    
+                    if (diagramData.settings && diagramData.settings.zoom) {
+                        currentZoom = diagramData.settings.zoom;
+                        updateZoom();
+                    }
+                    
+                    updateStats();
+                    setStatus('Diagrama técnico cargado');
+                    showNotification('Diagrama técnico cargado exitosamente', 'success');
+                    
+                } catch (error) {
+                    showNotification('Error al cargar diagrama: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function exportDiagram() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = 4000;
+            canvas.height = 3000;
+            
+            // Background
+            ctx.fillStyle = '#fafbfc';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Grid
+            ctx.strokeStyle = 'rgba(26, 26, 46, 0.05)';
+            ctx.lineWidth = 1;
+            for (let x = 0; x <= canvas.width; x += 30) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y <= canvas.height; y += 30) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            // Draw connections
+            connections.forEach(connection => {
+                const device1 = devices.find(d => d.id === connection.device1);
+                const device2 = devices.find(d => d.id === connection.device2);
+                
+                if (device1 && device2) {
+                    const center1 = getDeviceCenter(device1);
+                    const center2 = getDeviceCenter(device2);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(center1.x, center1.y);
+                    ctx.lineTo(center2.x, center2.y);
+                    
+                    const colors = {
+                        'ethernet': '#27ae60',
+                        'fiber': '#f39c12',
+                        'serial': '#9b59b6',
+                        'coaxial': '#34495e',
+                        'wireless': '#3498db',
+                        'console': '#e74c3c'
+                    };
+                    ctx.strokeStyle = colors[connection.type] || '#000000';
+                    ctx.lineWidth = 4;
+                    ctx.stroke();
+                    
+                    // Connection label
+                    const midX = (center1.x + center2.x) / 2;
+                    const midY = (center1.y + center2.y) / 2;
+                    
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                    ctx.fillRect(midX - 30, midY - 12, 60, 24);
+                    
+                    ctx.fillStyle = '#333';
+                    ctx.font = '10px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(connection.bandwidth, midX, midY - 2);
+                    ctx.fillText(connection.protocol, midX, midY + 10);
+                }
+            });
+            
+            // Draw devices
+            devices.forEach(device => {
+                const x = device.x;
+                const y = device.y;
+                
+                // Device background
+                ctx.fillStyle = 'white';
+                ctx.fillRect(x, y, 140, 120);
+                
+                // Device border
+                const statusColors = {
+                    'up': '#00d4aa',
+                    'down': '#e74c3c',
+                    'warning': '#ff6b35',
+                    'maintenance': '#4a90e2'
+                };
+                ctx.strokeStyle = statusColors[device.status] || '#1a1a2e';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x, y, 140, 120);
+                
+                // Device icon
+                const iconColor = getDeviceIconColor(device.type);
+                ctx.fillStyle = iconColor;
+                ctx.fillRect(x + 8, y + 8, 32, 32);
+                
+                // Icon text
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 10px monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(getDeviceIcon(device.type), x + 24, y + 28);
+                
+                // Device name
+                ctx.fillStyle = '#1a1a2e';
+                ctx.font = 'bold 12px monospace';
+                ctx.fillText(device.hostname, x + 70, y + 25);
+                
+                // Device type
+                ctx.fillStyle = '#666';
+                ctx.font = '9px monospace';
+                ctx.fillText(DEVICE_SPECS[device.type]?.type || device.type, x + 70, y + 40);
+                
+                // Management IP
+                ctx.fillStyle = '#333';
+                ctx.font = '10px monospace';
+                ctx.fillText(`IP: ${getManagementIP(device)}`, x + 10, y + 60);
+                
+                // Status indicators
+                ctx.fillText(`CPU: ${device.cpu}%`, x + 10, y + 75);
+                ctx.fillText(`MEM: ${device.memory}%`, x + 10, y + 90);
+                ctx.fillText(`${device.temperature}°C`, x + 10, y + 105);
+                
+                // Interface count
+                const activeInterfaces = device.interfaces.filter(iface => iface.status === 'up').length;
+                ctx.fillText(`IF: ${activeInterfaces}/${device.interfaces.length}`, x + 80, y + 75);
+                
+                // Model
+                ctx.font = '8px monospace';
+                ctx.fillText(device.model, x + 80, y + 90);
+            });
+            
+            // Title and metadata
+            ctx.fillStyle = '#1a1a2e';
+            ctx.font = 'bold 24px monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText('Professional Network Diagram', 30, 50);
+            
+            ctx.font = '14px monospace';
+            ctx.fillText(`Generated: ${new Date().toLocaleString()}`, 30, 80);
+            ctx.fillText(`Devices: ${devices.length} | Connections: ${connections.length}`, 30, 100);
+            
+            // Download
+            const link = document.createElement('a');
+            link.download = `technical_network_${new Date().toISOString().split('T')[0]}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            setStatus('Diagrama exportado como imagen técnica');
+            showNotification('Diagrama técnico exportado', 'success');
+        }
+
+        function getDeviceIconColor(type) {
+            // Return the same gradient colors as CSS but as solid color for canvas
+            const colors = {
+                'core-router': '#8e44ad', 'edge-router': '#e67e22', 'router': '#e74c3c',
+                'l3-switch': '#2ecc71', 'managed-switch': '#16a085', 'switch': '#27ae60',
+                'firewall': '#e74c3c', 'modem': '#ff9800', 'ont': '#ff5722', 'ap': '#4caf50', 
+                'controller': '#009688', 'web-server': '#4caf50', 'db-server': '#9c27b0', 
+                'dns-server': '#3f51b5', 'dhcp-server': '#795548', 'mail-server': '#2196f3',
+                'pc': '#78909c', 'laptop': '#8d6e63', 'mobile': '#ffc107',
+                'printer': '#424242', 'ip-phone': '#00796b',
+                'loadbalancer': '#1976d2', 'nas': '#f57c00', 'ups': '#6a1b9a'
+            };
+            return colors[type] || '#1a1a2e';
+        }
+
+        // Zoom Functions
+        function zoomIn() {
+            currentZoom = Math.min(currentZoom * 1.25, 3);
+            updateZoom();
+        }
+
+        function zoomOut() {
+            currentZoom = Math.max(currentZoom * 0.8, 0.25);
+            updateZoom();
+        }
+
+        function updateZoom() {
+            const container = document.getElementById('canvas-container');
+            container.style.transform = `scale(${currentZoom})`;
+            updateZoomDisplay();
+        }
+
+        function updateZoomDisplay() {
+            const zoomPercent = Math.round(currentZoom * 100);
+            document.getElementById('zoom-level').textContent = `${zoomPercent}%`;
+            document.getElementById('zoom-display').textContent = `${zoomPercent}%`;
+        }
+
+        // Utility Functions
+        function updateStats() {
+            document.getElementById('device-count').textContent = devices.length;
+            document.getElementById('connection-count').textContent = connections.length;
+            
+            // Count subnets
+            const subnets = new Set();
+            devices.forEach(device => {
+                device.interfaces.forEach(iface => {
+                    if (iface.ip && iface.ip.includes('/')) {
+                        const network = iface.ip.split('/')[0].split('.').slice(0, 3).join('.');
+                        subnets.add(network);
+                    }
+                });
+            });
+            document.getElementById('subnet-count').textContent = subnets.size;
+        }
+
+        function setStatus(message) {
+            document.getElementById('status-text').textContent = message;
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+
+        function handleWorkspaceClick(e) {
+            if (!connectionMode) {
+                clearSelection();
+            }
+        }
+
+        function handleKeyboard(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'n':
+                        e.preventDefault();
+                        newDiagram();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        saveDiagram();
+                        break;
+                    case 'o':
+                        e.preventDefault();
+                        document.getElementById('file-input').click();
+                        break;
+                    case '=':
+                    case '+':
+                        e.preventDefault();
+                        zoomIn();
+                        break;
+                    case '-':
+                        e.preventDefault();
+                        zoomOut();
+                        break;
+                }
+            }
+            
+            if (e.key === 'Escape') {
+                if (connectionMode) {
+                    toggleConnectionMode();
+                }
+                clearSelection();
+                closePropertiesModal();
+            }
+            
+            if (e.key === 'Delete' && selectedDevice) {
+                deleteSelectedDevice();
+            }
+        }
+
+        function toggleTechnicalMode() {
+            technicalMode = !technicalMode;
+            const btn = document.getElementById('tech-mode-btn');
+            
+            if (technicalMode) {
+                btn.textContent = '⚙️ Modo Técnico (ACTIVO)';
+                showNotification('Modo técnico avanzado activo', 'info');
+            } else {
+                btn.textContent = '⚙️ Modo Técnico';
+            }
+        }
+
+        function showHelp() {
+            const helpContent = `Professional Network Diagram Creator - Enterprise Edition
+
+CARACTERÍSTICAS TÉCNICAS:
+• Especificaciones reales de equipos de red
+• Configuración detallada de interfaces
+• Protocolos de enrutamiento (OSPF, BGP, RIP)
+• Servicios de red (DHCP, NAT, Firewall)
+• Validación técnica de topología
+• Generación de configuraciones CLI
+
+CONTROLES:
+• Arrastrar: Mover dispositivos de la biblioteca
+• Click derecho: Propiedades técnicas
+• Modo conexión: Conectar con especificaciones
+• Validar: Verificar configuración de red
+• Config: Generar archivos de configuración
+
+DISPOSITIVOS ESPECIALIZADOS:
+• Routers con protocolos de enrutamiento
+• Switches con VLANs y STP
+• Firewalls con zonas de seguridad
+• Servidores con servicios específicos
+
+Para soporte técnico avanzado, consulte la documentación.`;
+            
+            showNotification(helpContent, 'info');
+        }
+
+        // Initialize connection line styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .ethernet-line { stroke: #27ae60; stroke-width: 4; }
+            .fiber-line { stroke: #f39c12; stroke-width: 4; }
+            .serial-line { stroke: #9b59b6; stroke-width: 3; }
+            .coaxial-line { stroke: #34495e; stroke-width: 4; }
+            .wireless-line { stroke: #3498db; stroke-width: 3; stroke-dasharray: 8,4; }
+            .console-line { stroke: #e74c3c; stroke-width: 2; stroke-dasharray: 4,2; }
+        `;
+        document.head.appendChild(style);
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('properties-modal');
+            if (event.target === modal) {
+                closePropertiesModal();
+            }
+        };
+    </script>
+</body>
+</html>

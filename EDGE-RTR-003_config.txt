@@ -1,0 +1,39 @@
+!
+! Configuration for EDGE-RTR-003
+! Generated on 14/7/2025, 12:32:53
+! Device: Cisco ISR 4000 (Cisco)
+!
+
+hostname EDGE-RTR-003
+! Software: IOS 15.7(3)M5
+
+! Interface Configuration
+interface GigabitEthernet0/0
+ no shutdown
+!
+interface GigabitEthernet0/1
+ no shutdown
+!
+interface Serial0/0/0
+ no shutdown
+!
+interface Serial0/0/1
+ shutdown
+!
+! DHCP Configuration
+ip dhcp pool LAN
+ dns-server 8.8.8.8 8.8.4.4
+!
+! NAT Configuration
+!
+! Security Configuration
+username admin privilege 15 secret cisco
+enable secret cisco
+ip ssh version 2
+snmp-server community public RO
+line vty 0 4
+ login local
+ transport input ssh
+!
+!
+! End of Configuration
