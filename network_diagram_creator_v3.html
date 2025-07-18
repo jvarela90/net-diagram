@@ -12,9 +12,9 @@
             --success-color: #27ae60;
             --warning-color: #f39c12;
             --bg-light: #ecf0f1;
-            --bg-dark: #34495e;
+            --bg-dark: #172274;
             --text-light: #ffffff;
-            --text-dark: #2c3e50;
+            --text-dark: #2564a3;
             --border-radius: 8px;
             --transition: all 0.3s ease;
         }
@@ -87,6 +87,7 @@
             display: flex;
             flex: 1;
             background: var(--bg-light);
+            overflow: hidden;
         }
 
         /* Advanced Sidebar */
@@ -97,6 +98,7 @@
             display: flex;
             flex-direction: column;
             border-right: 3px solid var(--secondary-color);
+             overflow: hidden;
         }
 
         .sidebar-tabs {
@@ -114,6 +116,10 @@
             color: var(--text-light);
             transition: var(--transition);
             border-bottom: 3px solid transparent;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .sidebar-tab.active {
@@ -240,6 +246,7 @@
             display: flex;
             flex-direction: column;
             background: var(--bg-light);
+            overflow: hidden;
         }
 
         .advanced-toolbar {
@@ -277,6 +284,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            white-space: nowrap;
         }
 
         .toolbar-btn:hover {
@@ -299,6 +307,7 @@
             background: var(--primary-color);
             color: white;
             font-size: 13px;
+            min-width: 120px;
         }
 
         .zoom-controls {
@@ -387,10 +396,22 @@
             color: white;
         }
 
+        .tooltip {
+                position: absolute;
+                background: rgba(0,0,0,0.8);
+                color: white;
+                padding: 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                z-index: 1000;
+                max-width: 300px;
+            }
+
         /* Advanced Device Styling */
         .device-on-canvas {
             position: absolute;
-            background: white;
+            /*background: white;*/
+            background: rgba(255, 255, 255, 0.85); /* 85% de opacidad */
             border: 3px solid var(--secondary-color);
             border-radius: var(--border-radius);
             padding: 12px;
@@ -401,6 +422,7 @@
             font-size: 12px;
             transition: var(--transition);
             user-select: none;
+            z-index: 20;
         }
 
         .device-on-canvas:hover {
@@ -465,13 +487,38 @@
             line-height: 1.3;
         }
 
-        .device-metrics {
+        /*.device-metrics {
             margin-top: 6px;
             padding: 4px;
             background: rgba(0, 0, 0, 0.05);
             border-radius: 4px;
             font-size: 9px;
-        }
+        }*/
+        .device-interfaces {
+                margin-top: 8px;
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 4px;
+                font-size: 9px;
+            }
+
+            .interface-item {
+                padding: 2px;
+                border-radius: 2px;
+                background: rgba(0, 0, 0, 0.05);
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                text-align: center;
+            }
+
+            .interface-connected {
+                background: rgba(46, 204, 113, 0.2);
+            }
+
+            .interface-disabled {
+                opacity: 0.5;
+            }
 
         /* Enhanced Connections */
         .connection-line {
@@ -726,6 +773,85 @@
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        
+        /* Cable Label Tool */
+        .cable-label-tool {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                background: white;
+                padding: 20px;
+                border-radius: var(--border-radius);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                margin-top: 20px;
+        }
+
+        .cable-label-preview {
+                display: flex;
+                justify-content: space-between;
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: var(--border-radius);
+                font-family: monospace;
+                font-size: 16px;
+                border: 1px solid #dee2e6;
+                text-align: center;
+        }
+
+        .cable-label-direction {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                color: #6c757d;
+        }
+
+        .cable-label-form {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+        }
+
+        .cable-label-section {
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: var(--border-radius);
+        }
+
+        .cable-label-section h4 {
+                margin-bottom: 10px;
+                padding-bottom: 5px;
+                border-bottom: 1px solid #dee2e6;
+        }
+
+        /* Interface Selection */
+        .interface-selection {
+                position: absolute;
+                background: white;
+                border-radius: var(--border-radius);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+                padding: 15px;
+                min-width: 250px;
+                z-index: 200;
+        }
+
+        .interface-option {
+                padding: 8px;
+                margin: 4px 0;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: var(--transition);
+                border: 1px solid #eee;
+        }
+
+        .interface-option:hover {
+                background: #f0f8ff;
+        }
+
+        .interface-option.disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+        }
 
         /* Responsive */
         @media (max-width: 1200px) {
@@ -736,7 +862,22 @@
         @media (max-width: 768px) {
             .sidebar { width: 240px; }
             .advanced-toolbar { flex-direction: column; align-items: stretch; }
-            .toolbar-group { border-right: none; border-bottom: 1px solid #555; padding: 10px 0; }
+            .toolbar-group { 
+                border-right: none; 
+                border-bottom: 1px solid #555;
+                padding: 10px 0; 
+                width: 100%;
+            }
+            .toolbar-btn {
+                flex: 1;
+            }
+            .status-bar {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .cable-label-form {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* Device Type Specific Colors */
@@ -823,6 +964,26 @@
         .notification.warning { border-left: 4px solid var(--warning-color); }
         .notification.error { border-left: 4px solid var(--accent-color); }
         .notification.info { border-left: 4px solid var(--secondary-color); }
+        /* Help Modal */
+        .help-content {
+            line-height: 1.6;
+        }
+        .help-section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .help-section h3 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        .help-example {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-family: monospace;
+        }
     </style>
 </head>
 <body>
@@ -849,6 +1010,7 @@
                     <button class="sidebar-tab active" onclick="switchSidebarTab('devices')">📱 Dispositivos</button>
                     <button class="sidebar-tab" onclick="switchSidebarTab('templates')">📋 Plantillas</button>
                     <button class="sidebar-tab" onclick="switchSidebarTab('layers')">🏗️ Capas</button>
+                    <button class="sidebar-tab" onclick="switchSidebarTab('cable-labels')">🏷️ Etiquetas</button>
                 </div>
 
                 <div class="sidebar-content">
@@ -1270,9 +1432,80 @@
                             <p style="color: #ccc; font-size: 12px; margin-top: 8px;">Los nuevos dispositivos se añadirán a esta capa</p>
                         </div>
                     </div>
+
+                    <!-- Cable Labels Tab -->
+                    <div id="cable-labels-tab" class="tab-content">
+                        <h3 style="color: white; margin-bottom: 20px;">🏷️ Generador de Etiquetas</h3>
+                        <div class="cable-label-tool">
+                            <div class="cable-label-preview">
+                                <span id="origin-label">E1H8RA1U6SW4F23</span>
+                                <span class="cable-label-direction">↔</span>
+                                <span id="destination-label">E1H3RA2U9RT2F3</span>
+                            </div>
+                            <div class="cable-label-form">
+                                <div class="cable-label-section">
+                                    <h4>Origen</h4>
+                                    <div class="form-group">
+                                        <label for="origin-building">Edificio:</label>
+                                        <input type="text" id="origin-building" value="E1" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="origin-room">Habitación:</label>
+                                        <input type="text" id="origin-room" value="H8" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="origin-rack">Rack:</label>
+                                        <input type="text" id="origin-rack" value="RA1" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="origin-unit">Unidad:</label>
+                                        <input type="text" id="origin-unit" value="U6" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="origin-device">Equipo:</label>
+                                        <input type="text" id="origin-device" value="SW4" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="origin-interface">Interfaz:</label>
+                                        <input type="text" id="origin-interface" value="F23" oninput="updateCableLabel()">
+                                    </div>
+                                </div>
+                                <div class="cable-label-section">
+                                    <h4>Destino</h4>
+                                    <div class="form-group">
+                                        <label for="destination-building">Edificio:</label>
+                                        <input type="text" id="destination-building" value="E1" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="destination-room">Habitación:</label>
+                                        <input type="text" id="destination-room" value="H3" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="destination-rack">Rack:</label>
+                                        <input type="text" id="destination-rack" value="RA2" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="destination-unit">Unidad:</label>
+                                        <input type="text" id="destination-unit" value="U9" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="destination-device">Equipo:</label>
+                                        <input type="text" id="destination-device" value="RT2" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="destination-interface">Interfaz:</label>
+                                        <input type="text" id="destination-interface" value="F3" oninput="updateCableLabel()">
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="toolbar-btn" onclick="printCableLabel()">
+                                <span>🖨️</span> Imprimir Etiqueta
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-
+       
             <!-- Workspace Container -->
             <div class="workspace-container">
                 <!-- Advanced Toolbar -->
@@ -1353,6 +1586,7 @@
 
                 <!-- Monitoring Panel -->
                 <div class="monitoring-panel hidden" id="monitoring-panel">
+                    <!-- Contenido de monitoreo... -->
                     <div class="monitoring-header">
                         <h4>📊 Monitor de Red</h4>
                         <button onclick="toggleMonitoring()" style="background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
@@ -1407,6 +1641,7 @@
 
     <!-- Enhanced Properties Modal -->
     <div id="properties-modal" class="modal">
+         <!-- Contenido del modal... -->
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modal-title">Propiedades del Dispositivo</h3>
@@ -1589,6 +1824,161 @@
         </div>
     </div>
 
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Ayuda - Network Diagram Creator Pro</h3>
+                <span class="close" onclick="closeHelpModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="modal-tabs">
+                    <button class="modal-tab active" onclick="switchHelpTab('basics')">📋 Conceptos Básicos</button>
+                    <button class="modal-tab" onclick="switchHelpTab('interfaces')">🔌 Interfaces</button>
+                    <button class="modal-tab" onclick="switchHelpTab('connections')">🔗 Conexiones</button>
+                    <button class="modal-tab" onclick="switchHelpTab('labels')">🏷️ Etiquetas</button>
+                </div>
+                    
+                <div class="help-content">
+                    <div id="basics-tab" class="tab-content active">
+                        <div class="help-section">
+                            <h3>Creando un Diagrama</h3>
+                            <p>Para crear un diagrama de red:</p>
+                            <ol>
+                                <li>Arrastra dispositivos desde el panel izquierdo al área de trabajo</li>
+                                <li>Haz clic en el botón "Conectar" en la barra de herramientas</li>
+                                <li>Selecciona un dispositivo de origen y luego un dispositivo de destino</li>
+                                <li>Selecciona las interfaces específicas para la conexión</li>
+                                <li>Usa el panel de capas para organizar tu diagrama jerárquicamente</li>
+                            </ol>
+                        </div>
+                           
+                        <div class="help-section">
+                            <h3>Atajos de Teclado</h3>
+                            <ul>
+                                <li><strong>Ctrl + N:</strong> Nuevo diagrama</li>
+                                <li><strong>Ctrl + S:</strong> Guardar diagrama</li>
+                                <li><strong>Ctrl + O:</strong> Abrir diagrama existente</li>
+                                <li><strong>Ctrl + + / -:</strong> Zoom in/out</li>
+                                <li><strong>Delete:</strong> Eliminar dispositivo seleccionado</li>
+                                <li><strong>C:</strong> Activar/desactivar modo conexión</li>
+                            </ul>
+                        </div>
+                    </div>
+                        
+                    <div id="interfaces-tab" class="tab-content">
+                        <div class="help-section">
+                            <h3>Configuración de Interfaces</h3>
+                            <p>Cada dispositivo puede tener múltiples interfaces de red. Puedes configurar:</p>
+                            <ul>
+                                <li>Tipo de interfaz (Ethernet, Fiber, Serial, etc.)</li>
+                                <li>Dirección IP y máscara de subred</li>
+                                <li>Gateway y VLAN</li>
+                                <li>Estado (habilitada/deshabilitada)</li>
+                            </ul>
+                            <p>Para configurar interfaces:</p>
+                            <ol>
+                                <li>Haz clic derecho en un dispositivo y selecciona "Propiedades"</li>
+                                <li>Ve a la pestaña "Interfaces"</li>
+                                <li>Agrega, edita o elimina interfaces según sea necesario</li>
+                            </ol>
+                        </div>
+                            
+                        <div class="help-section">
+                            <h3>Tipos de Interfaces Compatibles</h3>
+                            <table style="width:100%; border-collapse: collapse;">
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Compatible con</th>
+                                </tr>
+                                <tr>
+                                    <td>Ethernet</td>
+                                    <td>Ethernet, FastEthernet, GigabitEthernet</td>
+                                </tr>
+                                <tr>
+                                    <td>Fiber</td>
+                                    <td>Fiber, SFP, SFP+</td>
+                                </tr>
+                                <tr>
+                                    <td>Serial</td>
+                                    <td>Serial, RS-232</td>
+                                </tr>
+                                <tr>
+                                    <td>Coaxial</td>
+                                    <td>Coaxial, BNC</td>
+                                </tr>
+                                <tr>
+                                    <td>Telephonic</td>
+                                    <td>RJ11, RJ12</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                        
+                    <div id="connections-tab" class="tab-content">
+                        <div class="help-section">
+                            <h3>Creando Conexiones</h3>
+                            <p>Para conectar dispositivos:</p>
+                            <ol>
+                                <li>Activa el modo conexión con el botón 🔗 o presionando C</li>
+                                <li>Selecciona el primer dispositivo (origen)</li>
+                                <li>Selecciona la interfaz de origen</li>
+                                <li>Selecciona el segundo dispositivo (destino)</li>
+                                <li>Selecciona la interfaz de destino</li>
+                            </ol>
+                            <p>El sistema validará automáticamente la compatibilidad de las interfaces.</p>
+                        </div>
+                            
+                        <div class="help-section">
+                            <h3>Validación de Conexiones</h3>
+                            <p>El sistema verificará:</p>
+                            <ul>
+                                <li>Compatibilidad de tipos de interfaz</li>
+                                <li>Disponibilidad de interfaces (no conectadas previamente)</li>
+                                <li>Estado de las interfaces (deben estar habilitadas)</li>
+                            </ul>
+                            <p>Si una conexión no es válida, se mostrará un mensaje de error explicando el motivo.</p>
+                        </div>
+                    </div>
+                        
+                    <div id="labels-tab" class="tab-content">
+                        <div class="help-section">
+                            <h3>Generando Etiquetas de Cableado</h3>
+                            <p>La herramienta de etiquetas te permite generar códigos estándar para identificar cables:</p>
+                            <ol>
+                                <li>Ve a la pestaña "Etiquetas" en el panel izquierdo</li>
+                                <li>Completa los campos para origen y destino</li>
+                                <li>El formato se generará automáticamente</li>
+                                <li>Haz clic en "Imprimir Etiqueta" para obtener una versión imprimible</li>
+                            </ol>
+                        </div>
+                            
+                        <div class="help-section">
+                            <h3>Formato de Etiquetas</h3>
+                            <p>El formato estándar es:</p>
+                            <div class="help-example">
+                                [Edificio][Habitación][Rack][Unidad][Dispositivo][Interfaz]
+                            </div>
+                            <p>Ejemplo:</p>
+                            <div class="help-example">
+                                E1H8RA1U6SW4F23 → E1H3RA2U9RT2F3
+                            </div>
+                            <p>Donde:</p>
+                            <ul>
+                                <li><strong>E1</strong>: Edificio 1</li>
+                                <li><strong>H8</strong>: Habitación 8</li>
+                                <li><strong>RA1</strong>: Rack 1</li>
+                                <li><strong>U6</strong>: Unidad 6</li>
+                                <li><strong>SW4</strong>: Switch 4</li>
+                                <li><strong>F23</strong>: Puerto FastEthernet 23</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Hidden file input -->
     <input type="file" id="file-input" style="display: none;" accept=".json" onchange="loadDiagram(event)">
 
@@ -1614,10 +2004,15 @@
         };
         let monitoringEnabled = false;
         let connectionStart = null;
+        let connectionStartInterface = null;
+        let interfaceSelectionActive = false;
 
         // Initialize Application
         document.addEventListener('DOMContentLoaded', function() {
             initializeEventListeners();
+            // Inicializar la etiqueta
+            updateCableLabel();
+            updateZoom();
             updateStats();
             startMonitoringSimulation();
             showNotification('¡Bienvenido a Network Diagram Creator Pro!', 'success');
@@ -1691,6 +2086,7 @@
                 description: '',
                 notes: '',
                 status: 'up',
+                
                 cpu: Math.floor(Math.random() * 50) + 10,
                 memory: Math.floor(Math.random() * 60) + 20,
                 bandwidth: Math.floor(Math.random() * 40) + 10,
@@ -1744,7 +2140,8 @@
                 'san': 'SAN',
                 'iot-device': 'IOT',
                 'sensor': 'SNS',
-                'camera': 'CAM'
+                'camera': 'CAM',
+                'loadbalancer': 'LB'
             };
             return `${prefixes[type] || 'DEV'}-${String(counter).padStart(3, '0')}`;
         }
@@ -1815,7 +2212,7 @@
                 'mail-server': 'MS', 'pc': 'PC', 'notebook': 'NB',
                 'printer': 'PR', 'phone': 'PH', 'nas': 'NAS',
                 'san': 'SAN', 'iot-device': 'IoT', 'sensor': 'SN',
-                'camera': 'CAM'
+                'camera': 'CAM', 'loadbalancer': 'LB'
             };
             return icons[type] || 'D';
         }
@@ -2018,7 +2415,6 @@
                 tab.classList.remove('active');
             });
             event.target.classList.add('active');
-
             // Update tab content
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');

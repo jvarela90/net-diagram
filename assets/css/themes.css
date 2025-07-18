@@ -1,0 +1,92 @@
+/* themes.css - Variables y temas */
+
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --accent-color: #e74c3c;
+    --success-color: #27ae60;
+    --warning-color: #f39c12;
+    --bg-light: #ecf0f1;
+    --bg-dark: #34495e;
+    --text-light: #ffffff;
+    --text-dark: #2c3e50;
+    --border-radius: 8px;
+    --transition: all 0.3s ease;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+    --primary-color: #1a1a1a;
+    --secondary-color: #4a9eff;
+    --bg-light: #2d2d2d;
+    --bg-dark: #1a1a1a;
+    --text-light: #ffffff;
+    --text-dark: #e0e0e0;
+}
+
+/* Device Type Colors */
+.router-icon { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+.core-router-icon { background: linear-gradient(135deg, #8e44ad, #732d91); }
+.edge-router-icon { background: linear-gradient(135deg, #e67e22, #d35400); }
+.switch-icon { background: linear-gradient(135deg, #27ae60, #229954); }
+.l3-switch-icon { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+.hub-icon { background: linear-gradient(135deg, #3498db, #2980b9); }
+.firewall-icon { background: linear-gradient(135deg, #e74c3c, #cb4335); }
+.ips-icon { background: linear-gradient(135deg, #ad1457, #880e4f); }
+.waf-icon { background: linear-gradient(135deg, #d32f2f, #b71c1c); }
+.loadbalancer-icon { background: linear-gradient(135deg, #7b1fa2, #4a148c); }
+.vpn-icon { background: linear-gradient(135deg, #1976d2, #0d47a1); }
+.modem-icon { background: linear-gradient(135deg, #ff9800, #f57c00); }
+.ap-icon { background: linear-gradient(135deg, #4caf50, #388e3c); }
+.controller-icon { background: linear-gradient(135deg, #009688, #00695c); }
+.pc-icon { background: linear-gradient(135deg, #607d8b, #455a64); }
+.notebook-icon { background: linear-gradient(135deg, #795548, #5d4037); }
+.server-icon { background: linear-gradient(135deg, #ff5722, #d84315); }
+.dns-server-icon { background: linear-gradient(135deg, #3f51b5, #303f9f); }
+.web-server-icon { background: linear-gradient(135deg, #4caf50, #388e3c); }
+.db-server-icon { background: linear-gradient(135deg, #9c27b0, #7b1fa2); }
+.mail-server-icon { background: linear-gradient(135deg, #2196f3, #1976d2); }
+.printer-icon { background: linear-gradient(135deg, #424242, #212121); }
+.nas-icon { background: linear-gradient(135deg, #ff9800, #ef6c00); }
+.san-icon { background: linear-gradient(135deg, #795548, #5d4037); }
+.iot-device-icon { background: linear-gradient(135deg, #00bcd4, #0097a7); }
+.sensor-icon { background: linear-gradient(135deg, #4caf50, #2e7d32); }
+.camera-icon { background: linear-gradient(135deg, #9e9e9e, #616161); }
+.phone-icon { background: linear-gradient(135deg, #607d8b, #37474f); }
+
+/* Layer backgrounds */
+.layer-isp { background-color: rgba(142, 68, 173, 0.1); }
+.layer-wan { background-color: rgba(231, 76, 60, 0.1); }
+.layer-core { background-color: rgba(52, 152, 219, 0.1); }
+.layer-distribution { background-color: rgba(46, 204, 113, 0.1); }
+.layer-access { background-color: rgba(243, 156, 18, 0.1); }
+.layer-dmz { background-color: rgba(230, 126, 34, 0.1); }
+.layer-user { background-color: rgba(155, 89, 182, 0.1); }
+.layer-iot { background-color: rgba(26, 188, 156, 0.1); }
+
+/* Connection line styles */
+.utp-line { stroke: #27ae60; stroke-width: 4; }
+.fiber-line { stroke: #f39c12; stroke-width: 4; }
+.serial-line { stroke: #9b59b6; stroke-width: 4; }
+.coaxial-line { stroke: #34495e; stroke-width: 4; }
+.wireless-line { stroke: #3498db; stroke-width: 4; stroke-dasharray: 5,5; }
+
+/* Status colors */
+.status-up { background: var(--success-color); }
+.status-down { background: var(--accent-color); }
+.status-warning { background: var(--warning-color); }
+
+/* Animations */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in { animation: fadeIn 0.3s ease; }
+.pulse { animation: pulse 2s infinite; }

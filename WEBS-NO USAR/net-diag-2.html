@@ -1,0 +1,3213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Diagram Creator Pro - Enhanced</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --bg-light: #ecf0f1;
+            --bg-dark: #34495e;
+            --text-light: #ffffff;
+            --text-dark: #2c3e50;
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            margin: 8px;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .app-header {
+            background: var(--primary-color);
+            color: var(--text-light);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+
+        .app-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .theme-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            background: var(--secondary-color);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            flex: 1;
+            background: var(--bg-light);
+            overflow: hidden;
+        }
+
+        /* Advanced Sidebar */
+        .sidebar {
+            width: 320px;
+            background: var(--primary-color);
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            border-right: 3px solid var(--secondary-color);
+            overflow: hidden;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            background: var(--bg-dark);
+            flex-shrink: 0;
+        }
+
+        .sidebar-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: var(--text-light);
+            transition: var(--transition);
+            border-bottom: 3px solid transparent;
+        }
+
+        .sidebar-tab.active {
+            background: var(--primary-color);
+            border-bottom-color: var(--secondary-color);
+        }
+
+        .sidebar-tab:hover {
+            background: var(--primary-color);
+        }
+
+        .sidebar-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        .sidebar-content::-webkit-scrollbar,
+        .canvas-viewport::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-track,
+        .canvas-viewport::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-thumb,
+        .canvas-viewport::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-thumb:hover,
+        .canvas-viewport::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .device-category {
+            margin-bottom: 25px;
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: var(--bg-dark);
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .category-header h3 {
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-toggle {
+            font-size: 12px;
+            transform: rotate(0deg);
+            transition: var(--transition);
+        }
+
+        .category-header.collapsed .category-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .category-devices {
+            max-height: 500px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .category-header.collapsed + .category-devices {
+            max-height: 0;
+        }
+
+        .device-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin: 6px 0;
+            background: var(--bg-dark);
+            border-radius: var(--border-radius);
+            cursor: grab;
+            transition: var(--transition);
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .device-item:hover {
+            background: var(--secondary-color);
+            transform: translateX(5px);
+            border-color: #2980b9;
+        }
+
+        .device-item:active {
+            cursor: grabbing;
+        }
+
+        .device-icon {
+            width: 32px;
+            height: 32px;
+            margin-right: 12px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 11px;
+            color: white;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .device-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .device-name {
+            font-weight: bold;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .device-description {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Workspace */
+        .workspace-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-light);
+            overflow: hidden;
+        }
+
+        .advanced-toolbar {
+            background: var(--bg-dark);
+            color: var(--text-light);
+            padding: 15px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            border-bottom: 3px solid var(--secondary-color);
+            flex-shrink: 0;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 0 15px;
+            border-right: 1px solid #555;
+        }
+
+        .toolbar-group:last-child {
+            border-right: none;
+        }
+
+        .toolbar-btn {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 13px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .toolbar-btn:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        .toolbar-btn:active {
+            transform: translateY(0);
+        }
+
+        .toolbar-btn.active {
+            background: var(--accent-color);
+        }
+
+        .toolbar-select {
+            padding: 8px;
+            border-radius: var(--border-radius);
+            border: none;
+            background: var(--primary-color);
+            color: white;
+            font-size: 13px;
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .zoom-level {
+            font-size: 14px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        /* Canvas Area */
+        .canvas-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: white;
+        }
+
+        .canvas-viewport {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 3000px;
+            height: 2000px;
+            background: 
+                radial-gradient(circle, #bdc3c7 1px, transparent 1px);
+            background-size: 25px 25px;
+            transform-origin: 0 0;
+            transition: transform 0.2s ease;
+        }
+
+        /* Layer System */
+        .layer-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            font-size: 12px;
+            z-index: 100;
+        }
+
+        /* Advanced Device Styling */
+        .device-on-canvas {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.85);
+            border: 3px solid var(--secondary-color);
+            border-radius: var(--border-radius);
+            padding: 12px;
+            cursor: move;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            min-width: 120px;
+            text-align: center;
+            font-size: 12px;
+            transition: var(--transition);
+            user-select: none;
+        }
+
+        .device-on-canvas:hover {
+            border-color: #2980b9;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .device-on-canvas.selected {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 20px rgba(231, 76, 60, 0.4);
+        }
+
+        .device-on-canvas.status-down {
+            border-color: var(--accent-color);
+            opacity: 0.7;
+        }
+
+        .device-on-canvas.status-warning {
+            border-color: var(--warning-color);
+        }
+
+        .device-on-canvas.status-up {
+            border-color: var(--success-color);
+        }
+
+        .device-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        .device-status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-up { background: var(--success-color); }
+        .status-down { background: var(--accent-color); }
+        .status-warning { background: var(--warning-color); }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .device-label {
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: var(--text-dark);
+            font-size: 13px;
+        }
+
+        .device-details {
+            font-size: 10px;
+            color: #666;
+            line-height: 1.3;
+        }
+
+        .device-interfaces {
+            margin-top: 6px;
+            padding: 4px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+            font-size: 9px;
+            text-align: left;
+        }
+
+        .interface-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 1px 0;
+        }
+
+        .interface-status {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-left: 4px;
+        }
+
+        .interface-up { background: var(--success-color); }
+        .interface-down { background: #ccc; }
+        .interface-connected { background: var(--warning-color); }
+
+        /* Enhanced Connections */
+        .connection-line {
+            cursor: pointer;
+            pointer-events: stroke;
+        }
+
+        .connection-line:hover {
+            stroke-width: 6 !important;
+            filter: brightness(1.2);
+        }
+
+        .connection-label {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        /* Interface Selection Modal */
+        .interface-modal {
+            position: absolute;
+            background: white;
+            border: 2px solid var(--secondary-color);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+            z-index: 1000;
+            min-width: 200px;
+        }
+
+        .interface-modal h4 {
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        .interface-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .interface-option {
+            padding: 8px;
+            margin: 4px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .interface-option:hover {
+            background: var(--bg-light);
+            border-color: var(--secondary-color);
+        }
+
+        .interface-option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .interface-option.selected {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        /* Enhanced Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 2% auto;
+            padding: 0;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--bg-light);
+            flex-wrap: wrap;
+        }
+
+        .modal-tab {
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+        }
+
+        .modal-tab.active {
+            border-bottom-color: var(--secondary-color);
+            color: var(--secondary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--bg-light);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        /* Interfaces Management */
+        .interfaces-container {
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .interface-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 2fr 2fr 1fr auto;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: var(--bg-light);
+            border-radius: 4px;
+        }
+
+        .interface-row input,
+        .interface-row select {
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .btn-add-interface {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-remove-interface {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Enhanced Status Bar */
+        .status-bar {
+            background: var(--primary-color);
+            color: var(--text-light);
+            padding: 12px 20px;
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            gap: 20px;
+            align-items: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success-color);
+        }
+
+        /* Label Generator Tab */
+        .label-generator {
+            padding: 20px;
+            background: white;
+            border-radius: var(--border-radius);
+        }
+
+        .label-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .label-section {
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 20px;
+        }
+
+        .label-section h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .label-input-group {
+            margin-bottom: 15px;
+        }
+
+        .label-input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 14px;
+        }
+
+        .label-input-group input {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid var(--bg-light);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .label-result {
+            background: var(--bg-light);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            text-align: center;
+        }
+
+        .label-output {
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-color);
+            padding: 15px;
+            background: white;
+            border: 2px solid var(--secondary-color);
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .label-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn-primary {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-dark);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .btn-secondary:hover {
+            background: #2c3e50;
+        }
+
+        /* Help Modal */
+        .help-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .help-section {
+            margin-bottom: 30px;
+        }
+
+        .help-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .help-section ul {
+            margin-left: 20px;
+        }
+
+        .help-section li {
+            margin-bottom: 8px;
+        }
+
+        .shortcut-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 10px;
+            background: var(--bg-light);
+            padding: 15px;
+            border-radius: var(--border-radius);
+        }
+
+        .shortcut-key {
+            font-family: 'Courier New', monospace;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-weight: bold;
+        }
+
+        /* Notification System */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            padding: 15px 20px;
+            z-index: 3000;
+            min-width: 300px;
+            transform: translateX(350px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success { border-left: 4px solid var(--success-color); }
+        .notification.warning { border-left: 4px solid var(--warning-color); }
+        .notification.error { border-left: 4px solid var(--accent-color); }
+        .notification.info { border-left: 4px solid var(--secondary-color); }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .sidebar { width: 280px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .interface-row { 
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { 
+                width: 240px;
+                position: absolute;
+                z-index: 1000;
+                height: 100%;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .advanced-toolbar { 
+                flex-direction: column; 
+                align-items: stretch;
+            }
+            .toolbar-group { 
+                border-right: none; 
+                border-bottom: 1px solid #555; 
+                padding: 10px 0;
+            }
+            .modal-content {
+                width: 95%;
+                margin: 5% auto;
+            }
+        }
+
+        /* Device Type Specific Colors */
+        .router-icon { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .core-router-icon { background: linear-gradient(135deg, #8e44ad, #732d91); }
+        .edge-router-icon { background: linear-gradient(135deg, #e67e22, #d35400); }
+        .switch-icon { background: linear-gradient(135deg, #27ae60, #229954); }
+        .l3-switch-icon { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .hub-icon { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .firewall-icon { background: linear-gradient(135deg, #e74c3c, #cb4335); }
+        .ips-icon { background: linear-gradient(135deg, #ad1457, #880e4f); }
+        .waf-icon { background: linear-gradient(135deg, #d32f2f, #b71c1c); }
+        .loadbalancer-icon { background: linear-gradient(135deg, #7b1fa2, #4a148c); }
+        .vpn-icon { background: linear-gradient(135deg, #1976d2, #0d47a1); }
+        .modem-icon { background: linear-gradient(135deg, #ff9800, #f57c00); }
+        .ap-icon { background: linear-gradient(135deg, #4caf50, #388e3c); }
+        .controller-icon { background: linear-gradient(135deg, #009688, #00695c); }
+        .pc-icon { background: linear-gradient(135deg, #607d8b, #455a64); }
+        .notebook-icon { background: linear-gradient(135deg, #795548, #5d4037); }
+        .server-icon { background: linear-gradient(135deg, #ff5722, #d84315); }
+        .dns-server-icon { background: linear-gradient(135deg, #3f51b5, #303f9f); }
+        .web-server-icon { background: linear-gradient(135deg, #4caf50, #388e3c); }
+        .db-server-icon { background: linear-gradient(135deg, #9c27b0, #7b1fa2); }
+        .mail-server-icon { background: linear-gradient(135deg, #2196f3, #1976d2); }
+        .printer-icon { background: linear-gradient(135deg, #424242, #212121); }
+        .nas-icon { background: linear-gradient(135deg, #ff9800, #ef6c00); }
+        .san-icon { background: linear-gradient(135deg, #795548, #5d4037); }
+        .iot-device-icon { background: linear-gradient(135deg, #00bcd4, #0097a7); }
+        .sensor-icon { background: linear-gradient(135deg, #4caf50, #2e7d32); }
+        .camera-icon { background: linear-gradient(135deg, #9e9e9e, #616161); }
+        .phone-icon { background: linear-gradient(135deg, #607d8b, #37474f); }
+
+        /* Hide elements */
+        .hidden { display: none !important; }
+
+        /* Mobile menu toggle */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 999;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        /* Connection line styles */
+        .ethernet-line { stroke: #27ae60; stroke-width: 4; }
+        .fiber-line { stroke: #f39c12; stroke-width: 4; }
+        .serial-line { stroke: #9b59b6; stroke-width: 4; }
+        .coaxial-line { stroke: #34495e; stroke-width: 4; }
+        .wireless-line { stroke: #3498db; stroke-width: 4; stroke-dasharray: 5,5; }
+        .phone-line { stroke: #e74c3c; stroke-width: 4; }
+
+    ---------------------
+
+    CODIGO INCOMPLETO 
+    
+
+    int1.connectedTo = `${device2.id}:${interfaceId2}`;
+            int2.connected = true;
+            int2.connectedTo = `${device1.id}:${interfaceId1}`;
+
+            connections.push(connection);
+            renderConnection(connection);
+            updateDeviceDisplay(device1);
+            updateDeviceDisplay(device2);
+            updateStats();
+            autoSave();
+        }
+
+        function getConnectionType(interfaceType) {
+            const typeMapping = {
+                'ethernet': 'ethernet',
+                'fastethernet': 'ethernet',
+                'gigabitethernet': 'ethernet',
+                'fiber': 'fiber',
+                'serial': 'serial',
+                'coaxial': 'coaxial',
+                'phone': 'phone',
+                'wireless': 'wireless'
+            };
+            return typeMapping[interfaceType] || 'ethernet';
+        }
+
+        function renderConnection(connection) {
+            const device1 = devices.find(d => d.id === connection.device1);
+            const device2 = devices.find(d => d.id === connection.device2);
+            
+            if (!device1 || !device2) return;
+
+            const svg = document.getElementById('connection-svg');
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            
+            line.id = connection.id;
+            line.classList.add(`${connection.type}-line`, 'connection-line');
+            
+            const device1Center = getDeviceCenter(device1);
+            const device2Center = getDeviceCenter(device2);
+            
+            line.setAttribute('x1', device1Center.x);
+            line.setAttribute('y1', device1Center.y);
+            line.setAttribute('x2', device2Center.x);
+            line.setAttribute('y2', device2Center.y);
+            
+            line.setAttribute('stroke-width', '4');
+            line.setAttribute('stroke-dasharray', connection.status === 'down' ? '10,5' : 'none');
+            
+            // Add click handler
+            line.addEventListener('click', (e) => handleConnectionClick(e, connection));
+            
+            svg.appendChild(line);
+
+            // Add connection label
+            const int1 = device1.interfaces.find(i => i.id === connection.interface1);
+            const int2 = device2.interfaces.find(i => i.id === connection.interface2);
+            
+            const label = document.createElement('div');
+            label.className = 'connection-label';
+            label.id = `label_${connection.id}`;
+            label.textContent = `${int1.name} ↔ ${int2.name}`;
+            
+            const midX = (device1Center.x + device2Center.x) / 2;
+            const midY = (device1Center.y + device2Center.y) / 2;
+            
+            label.style.left = midX + 'px';
+            label.style.top = midY + 'px';
+            
+            document.getElementById('canvas-container').appendChild(label);
+        }
+
+        function getDeviceCenter(device) {
+            return {
+                x: device.x + 60,
+                y: device.y + 50
+            };
+        }
+
+        function updateConnections() {
+            connections.forEach(connection => {
+                const device1 = devices.find(d => d.id === connection.device1);
+                const device2 = devices.find(d => d.id === connection.device2);
+                
+                if (device1 && device2) {
+                    const line = document.getElementById(connection.id);
+                    const label = document.getElementById(`label_${connection.id}`);
+                    
+                    if (line) {
+                        const device1Center = getDeviceCenter(device1);
+                        const device2Center = getDeviceCenter(device2);
+                        
+                        line.setAttribute('x1', device1Center.x);
+                        line.setAttribute('y1', device1Center.y);
+                        line.setAttribute('x2', device2Center.x);
+                        line.setAttribute('y2', device2Center.y);
+                        
+                        if (label) {
+                            const midX = (device1Center.x + device2Center.x) / 2;
+                            const midY = (device1Center.y + device2Center.y) / 2;
+                            label.style.left = midX + 'px';
+                            label.style.top = midY + 'px';
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateDeviceDisplay(device) {
+            const deviceElement = document.getElementById(device.id);
+            if (deviceElement) {
+                const interfaceSummary = getInterfaceSummary(device);
+                const interfacesDiv = deviceElement.querySelector('.device-interfaces');
+                if (interfacesDiv) {
+                    interfacesDiv.innerHTML = interfaceSummary;
+                }
+            }
+        }
+
+        function handleConnectionClick(e, connection) {
+            e.stopPropagation();
+            if (confirm('¿Eliminar esta conexión?')) {
+                deleteConnection(connection);
+            }
+        }
+
+        function deleteConnection(connection) {
+            saveUndoState();
+            
+            // Update interface status
+            const device1 = devices.find(d => d.id === connection.device1);
+            const device2 = devices.find(d => d.id === connection.device2);
+            
+            if (device1 && device2) {
+                const int1 = device1.interfaces.find(i => i.id === connection.interface1);
+                const int2 = device2.interfaces.find(i => i.id === connection.interface2);
+                
+                if (int1) {
+                    int1.connected = false;
+                    int1.connectedTo = null;
+                }
+                if (int2) {
+                    int2.connected = false;
+                    int2.connectedTo = null;
+                }
+                
+                updateDeviceDisplay(device1);
+                updateDeviceDisplay(device2);
+            }
+            
+            // Remove connection
+            connections = connections.filter(c => c.id !== connection.id);
+            
+            // Remove visual elements
+            const line = document.getElementById(connection.id);
+            const label = document.getElementById(`label_${connection.id}`);
+            if (line) line.remove();
+            if (label) label.remove();
+            
+            updateStats();
+            autoSave();
+            showNotification('Conexión eliminada', 'info');
+        }
+
+        // Sidebar Functions
+        function switchSidebarTab(tabName) {
+            document.querySelectorAll('.sidebar-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            document.querySelectorAll('.sidebar-content .tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+
+        function toggleCategory(header) {
+            header.classList.toggle('collapsed');
+        }
+
+        function filterDevices(searchTerm) {
+            const deviceItems = document.querySelectorAll('.device-item');
+            const term = searchTerm.toLowerCase();
+            
+            deviceItems.forEach(item => {
+                const deviceName = item.querySelector('.device-name').textContent.toLowerCase();
+                const deviceDesc = item.querySelector('.device-description').textContent.toLowerCase();
+                
+                if (deviceName.includes(term) || deviceDesc.includes(term)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('mobile-open');
+        }
+
+        // Layer Management
+        function setCurrentLayer(layer) {
+            currentLayer = layer;
+            document.getElementById('layer-indicator').textContent = `📍 ${layer.charAt(0).toUpperCase() + layer.slice(1)} Layer`;
+        }
+
+        function toggleLayerVisibility(layer, visible) {
+            layerVisibility[layer] = visible;
+            
+            devices.forEach(device => {
+                if (device.layer === layer) {
+                    const element = document.getElementById(device.id);
+                    if (element) {
+                        element.style.display = visible ? 'block' : 'none';
+                    }
+                }
+            });
+
+            updateConnectionsVisibility();
+        }
+
+        function updateConnectionsVisibility() {
+            connections.forEach(connection => {
+                const device1 = devices.find(d => d.id === connection.device1);
+                const device2 = devices.find(d => d.id === connection.device2);
+                
+                if (device1 && device2) {
+                    const visible1 = layerVisibility[device1.layer];
+                    const visible2 = layerVisibility[device2.layer];
+                    const connectionVisible = visible1 && visible2;
+                    
+                    const line = document.getElementById(connection.id);
+                    const label = document.getElementById(`label_${connection.id}`);
+                    
+                    if (line) line.style.display = connectionVisible ? 'block' : 'none';
+                    if (label) label.style.display = connectionVisible ? 'block' : 'none';
+                }
+            });
+        }
+
+        // Toolbar Functions
+        function toggleConnectionMode() {
+            connectionMode = !connectionMode;
+            const btn = document.getElementById('connect-btn');
+            
+            if (connectionMode) {
+                btn.textContent = '❌ Cancelar';
+                btn.classList.add('active');
+                setStatus('Modo conexión activado - Click derecho en dispositivos para seleccionar interfaces');
+            } else {
+                btn.textContent = '🔗 Conectar';
+                btn.classList.remove('active');
+                clearSelection();
+                connectionStart = null;
+                setStatus('Modo conexión desactivado');
+            }
+        }
+
+        function autoArrange() {
+            if (devices.length === 0) {
+                showNotification('No hay dispositivos para organizar', 'warning');
+                return;
+            }
+
+            saveUndoState();
+
+            const layerGroups = {};
+            devices.forEach(device => {
+                if (!layerGroups[device.layer]) {
+                    layerGroups[device.layer] = [];
+                }
+                layerGroups[device.layer].push(device);
+            });
+
+            const layerPositions = {
+                'core': { y: 150, color: '#3498db' },
+                'distribution': { y: 350, color: '#2ecc71' },
+                'access': { y: 550, color: '#f39c12' },
+                'dmz': { y: 750, color: '#e67e22' },
+                'user': { y: 950, color: '#9b59b6' }
+            };
+
+            Object.keys(layerGroups).forEach(layer => {
+                const layerDevices = layerGroups[layer];
+                const layerY = layerPositions[layer]?.y || 300;
+                const spacing = Math.min(200, 2400 / Math.max(layerDevices.length, 1));
+                const startX = (2400 - (layerDevices.length - 1) * spacing) / 2;
+
+                layerDevices.forEach((device, index) => {
+                    device.x = startX + index * spacing;
+                    device.y = layerY;
+                    
+                    const deviceElement = document.getElementById(device.id);
+                    if (deviceElement) {
+                        deviceElement.style.left = device.x + 'px';
+                        deviceElement.style.top = device.y + 'px';
+                    }
+                });
+            });
+
+            updateConnections();
+            setStatus('Dispositivos organizados automáticamente por capas');
+            showNotification('Topología organizada exitosamente', 'success');
+            autoSave();
+        }
+
+        function validateTopology() {
+            const issues = [];
+            
+            // Check for isolated devices
+            const connectedDevices = new Set();
+            connections.forEach(conn => {
+                connectedDevices.add(conn.device1);
+                connectedDevices.add(conn.device2);
+            });
+            
+            const isolatedDevices = devices.filter(device => !connectedDevices.has(device.id));
+            if (isolatedDevices.length > 0) {
+                issues.push(`Dispositivos aislados: ${isolatedDevices.map(d => d.name).join(', ')}`);
+            }
+
+            // Check for devices with all interfaces occupied
+            devices.forEach(device => {
+                const freeInterfaces = device.interfaces.filter(i => i.enabled && !i.connected).length;
+                if (freeInterfaces === 0 && device.interfaces.length > 0) {
+                    issues.push(`${device.name}: Todas las interfaces ocupadas`);
+                }
+            });
+
+            // Check for IP conflicts
+            const ipMap = new Map();
+            devices.forEach(device => {
+                if (device.ip) {
+                    if (ipMap.has(device.ip)) {
+                        issues.push(`Conflicto IP ${device.ip}: ${device.name} y ${ipMap.get(device.ip)}`);
+                    } else {
+                        ipMap.set(device.ip, device.name);
+                    }
+                }
+                
+                device.interfaces.forEach(int => {
+                    if (int.ip) {
+                        if (ipMap.has(int.ip)) {
+                            issues.push(`Conflicto IP ${int.ip}: ${device.name}:${int.name} y ${ipMap.get(int.ip)}`);
+                        } else {
+                            ipMap.set(int.ip, `${device.name}:${int.name}`);
+                        }
+                    }
+                });
+            });
+
+            // Display results
+            if (issues.length === 0) {
+                showNotification('✅ Topología válida - No se encontraron problemas', 'success');
+                setStatus('Validación completada - Topología correcta');
+            } else {
+                const issueList = issues.map(issue => `• ${issue}`).join('\n');
+                alert(`⚠️ Problemas encontrados:\n\n${issueList}`);
+                setStatus(`Validación completada - ${issues.length} problema(s) encontrado(s)`);
+            }
+        }
+
+        // Zoom Functions
+        function zoomIn() {
+            currentZoom = Math.min(currentZoom * 1.25, 3);
+            updateZoom();
+        }
+
+        function zoomOut() {
+            currentZoom = Math.max(currentZoom * 0.8, 0.25);
+            updateZoom();
+        }
+
+        function resetZoom() {
+            currentZoom = 1;
+            updateZoom();
+        }
+
+        function updateZoom() {
+            const container = document.getElementById('canvas-container');
+            container.style.transform = `scale(${currentZoom})`;
+            updateZoomDisplay();
+        }
+
+        function updateZoomDisplay() {
+            const zoomPercent = Math.round(currentZoom * 100);
+            document.getElementById('zoom-level').textContent = `${zoomPercent}%`;
+            document.getElementById('zoom-display').textContent = `${zoomPercent}%`;
+        }
+
+        // Modal Functions
+        function openPropertiesModal(device) {
+            selectedDevice = device;
+            const modal = document.getElementById('properties-modal');
+            const modalTitle = document.getElementById('modal-title');
+            
+            modalTitle.textContent = `Propiedades de ${device.name}`;
+            
+            // Populate form fields
+            document.getElementById('device-name').value = device.name;
+            document.getElementById('device-type-display').value = device.type;
+            document.getElementById('device-model').value = device.model || '';
+            document.getElementById('device-brand').value = device.brand || '';
+            document.getElementById('device-serial').value = device.serial || '';
+            document.getElementById('device-location').value = device.location || '';
+            document.getElementById('device-layer').value = device.layer;
+            document.getElementById('device-status').value = device.status;
+            document.getElementById('device-ip').value = device.ip || '';
+            document.getElementById('device-subnet').value = device.subnet || '';
+            document.getElementById('device-gateway').value = device.gateway || '';
+            document.getElementById('device-dns').value = device.dns || '';
+            document.getElementById('device-vlan').value = device.vlan || '';
+            document.getElementById('device-mac').value = device.mac || '';
+            document.getElementById('device-uptime').value = device.uptime || '';
+            document.getElementById('device-temperature').value = device.temperature || '';
+            document.getElementById('device-notes').value = device.notes || '';
+            
+            // Load interfaces
+            loadInterfaces(device);
+            
+            // Reset tabs
+            switchModalTab('general');
+            
+            modal.style.display = 'block';
+        }
+
+        function loadInterfaces(device) {
+            const container = document.getElementById('interfaces-container');
+            container.innerHTML = '';
+            
+            device.interfaces.forEach(interface => {
+                addInterfaceRow(interface);
+            });
+        }
+
+        function addInterface() {
+            if (!selectedDevice) return;
+            
+            const newInterface = {
+                id: `int_${++interfaceCounter}`,
+                name: `Interface${selectedDevice.interfaces.length}`,
+                type: 'ethernet',
+                enabled: true,
+                connected: false,
+                connectedTo: null,
+                ip: '',
+                subnet: '',
+                gateway: '',
+                vlan: ''
+            };
+            
+            selectedDevice.interfaces.push(newInterface);
+            addInterfaceRow(newInterface);
+        }
+
+        function addInterfaceRow(interface) {
+            const container = document.getElementById('interfaces-container');
+            const row = document.createElement('div');
+            row.className = 'interface-row';
+            row.dataset.interfaceId = interface.id;
+            
+            row.innerHTML = `
+                <input type="text" value="${interface.name}" placeholder="Nombre" onchange="updateInterface('${interface.id}', 'name', this.value)">
+                <select onchange="updateInterface('${interface.id}', 'type', this.value)">
+                    ${Object.entries(interfaceTypes).map(([key, type]) => 
+                        `<option value="${key}" ${interface.type === key ? 'selected' : ''}>${type.name}</option>`
+                    ).join('')}
+                </select>
+                <select onchange="updateInterface('${interface.id}', 'enabled', this.value === 'true')">
+                    <option value="true" ${interface.enabled ? 'selected' : ''}>Habilitada</option>
+                    <option value="false" ${!interface.enabled ? 'selected' : ''}>Deshabilitada</option>
+                </select>
+                <input type="text" value="${interface.ip}" placeholder="IP" onchange="updateInterface('${interface.id}', 'ip', this.value)">
+                <input type="text" value="${interface.vlan}" placeholder="VLAN" onchange="updateInterface('${interface.id}', 'vlan', this.value)">
+                <span style="font-size: 12px; color: ${interface.connected ? '#27ae60' : '#999'};">
+                    ${interface.connected ? '🔗 Conectada' : '⭕ Libre'}
+                </span>
+                <button class="btn-remove-interface" onclick="removeInterface('${interface.id}')" ${interface.connected ? 'disabled' : ''}>×</button>
+            `;
+            
+            container.appendChild(row);
+        }
+
+        function updateInterface(interfaceId, field, value) {
+            if (!selectedDevice) return;
+            
+            const interface = selectedDevice.interfaces.find(i => i.id === interfaceId);
+            if (interface) {
+                interface[field] = value;
+            }
+        }
+
+        function removeInterface(interfaceId) {
+            if (!selectedDevice) return;
+            
+            selectedDevice.interfaces = selectedDevice.interfaces.filter(i => i.id !== interfaceId);
+            const row = document.querySelector(`[data-interface-id="${interfaceId}"]`);
+            if (row) row.remove();
+        }
+
+        function closePropertiesModal() {
+            document.getElementById('properties-modal').style.display = 'none';
+            selectedDevice = null;
+        }
+
+        function switchModalTab(tabName) {
+            document.querySelectorAll('#properties-modal .modal-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('#properties-modal .tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Find and activate the clicked tab
+            const tabs = document.querySelectorAll('#properties-modal .modal-tab');
+            tabs.forEach(tab => {
+                if (tab.textContent.toLowerCase().includes(tabName)) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+
+        function handlePropertiesSubmit(e) {
+            e.preventDefault();
+            if (!selectedDevice) return;
+
+            saveUndoState();
+
+            // Update device properties
+            selectedDevice.name = document.getElementById('device-name').value;
+            selectedDevice.model = document.getElementById('device-model').value;
+            selectedDevice.brand = document.getElementById('device-brand').value;
+            selectedDevice.serial = document.getElementById('device-serial').value;
+            selectedDevice.location = document.getElementById('device-location').value;
+            selectedDevice.layer = document.getElementById('device-layer').value;
+            selectedDevice.status = document.getElementById('device-status').value;
+            selectedDevice.ip = document.getElementById('device-ip').value;
+            selectedDevice.subnet = document.getElementById('device-subnet').value;
+            selectedDevice.gateway = document.getElementById('device-gateway').value;
+            selectedDevice.dns = document.getElementById('device-dns').value;
+            selectedDevice.vlan = document.getElementById('device-vlan').value;
+            selectedDevice.mac = document.getElementById('device-mac').value;
+            selectedDevice.temperature = document.getElementById('device-temperature').value;
+            selectedDevice.notes = document.getElementById('device-notes').value;
+            
+            // Update device visualization
+            const deviceElement = document.getElementById(selectedDevice.id);
+            if (deviceElement) {
+                deviceElement.className = `device-on-canvas status-${selectedDevice.status} layer-${selectedDevice.layer}`;
+                
+                const interfaceSummary = getInterfaceSummary(selectedDevice);
+                
+                deviceElement.innerHTML = `
+                    <div class="device-header">
+                        <div class="device-icon ${selectedDevice.type}-icon">${getDeviceIcon(selectedDevice.type)}</div>
+                        <div class="device-status-indicator status-${selectedDevice.status}"></div>
+                    </div>
+                    <div class="device-label">${selectedDevice.name}</div>
+                    <div class="device-details">
+                        ${selectedDevice.ip || 'Sin IP'}<br>
+                        ${selectedDevice.layer.toUpperCase()}
+                    </div>
+                    <div class="device-interfaces">
+                        ${interfaceSummary}
+                    </div>
+                `;
+            }
+            
+            closePropertiesModal();
+            setStatus(`Propiedades de ${selectedDevice.name} actualizadas`);
+            showNotification('Propiedades actualizadas exitosamente', 'success');
+            autoSave();
+        }
+
+        function deleteSelectedDevice() {
+            if (!selectedDevice) return;
+            
+            if (confirm(`¿Estás seguro de que quieres eliminar ${selectedDevice.name}?`)) {
+                saveUndoState();
+                
+                // Remove connections
+                connections = connections.filter(connection => {
+                    if (connection.device1 === selectedDevice.id || connection.device2 === selectedDevice.id) {
+                        const connectionElement = document.getElementById(connection.id);
+                        const labelElement = document.getElementById(`label_${connection.id}`);
+                        if (connectionElement) connectionElement.remove();
+                        if (labelElement) labelElement.remove();
+                        
+                        // Update connected device interfaces
+                        const otherDeviceId = connection.device1 === selectedDevice.id ? connection.device2 : connection.device1;
+                        const otherDevice = devices.find(d => d.id === otherDeviceId);
+                        if (otherDevice) {
+                            const interfaceId = connection.device1 === selectedDevice.id ? connection.interface2 : connection.interface1;
+                            const interface = otherDevice.interfaces.find(i => i.id === interfaceId);
+                            if (interface) {
+                                interface.connected = false;
+                                interface.connectedTo = null;
+                            }
+                            updateDeviceDisplay(otherDevice);
+                        }
+                        
+                        return false;
+                    }
+                    return true;
+                });
+                
+                // Remove device
+                devices = devices.filter(d => d.id !== selectedDevice.id);
+                const deviceElement = document.getElementById(selectedDevice.id);
+                if (deviceElement) deviceElement.remove();
+                
+                closePropertiesModal();
+                selectedDevice = null;
+                updateStats();
+                setStatus('Dispositivo eliminado exitosamente');
+                showNotification('Dispositivo eliminado', 'info');
+                autoSave();
+            }
+        }
+
+        // File Management
+        function newDiagram() {
+            if (devices.length > 0 || connections.length > 0) {
+                if (confirm('¿Crear nuevo diagrama? Se perderán los cambios no guardados.')) {
+                    clearDiagram();
+                    showNotification('Nuevo diagrama creado', 'info');
+                }
+            }
+        }
+
+        function clearDiagram() {
+            devices.forEach(device => {
+                const element = document.getElementById(device.id);
+                if (element) element.remove();
+            });
+            
+            connections.forEach(connection => {
+                const element = document.getElementById(connection.id);
+                const label = document.getElementById(`label_${connection.id}`);
+                if (element) element.remove();
+                if (label) label.remove();
+            });
+            
+            devices = [];
+            connections = [];
+            selectedDevice = null;
+            connectionStart = null;
+            deviceCounter = 0;
+            connectionCounter = 0;
+            interfaceCounter = 0;
+            undoStack = [];
+            redoStack = [];
+            
+            updateStats();
+            setStatus('Diagrama limpiado');
+        }
+
+        function saveDiagram() {
+            const diagramData = {
+                version: '3.0',
+                metadata: {
+                    createdAt: new Date().toISOString(),
+                    title: 'Network Diagram',
+                    description: 'Created with Network Diagram Creator Pro Enhanced'
+                },
+                settings: {
+                    currentLayer: currentLayer,
+                    layerVisibility: layerVisibility,
+                    zoom: currentZoom
+                },
+                devices: devices,
+                connections: connections,
+                counters: {
+                    device: deviceCounter,
+                    connection: connectionCounter,
+                    interface: interfaceCounter
+                }
+            };
+            
+            const dataStr = JSON.stringify(diagramData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const filename = `network_diagram_${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', filename);
+            linkElement.click();
+            
+            setStatus('Diagrama guardado exitosamente');
+            showNotification('Diagrama guardado como ' + filename, 'success');
+        }
+
+        function loadDiagram(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const diagramData = JSON.parse(e.target.result);
+                    
+                    clearDiagram();
+                    
+                    // Load settings
+                    if (diagramData.settings) {
+                        currentLayer = diagramData.settings.currentLayer || 'core';
+                        layerVisibility = diagramData.settings.layerVisibility || layerVisibility;
+                        currentZoom = diagramData.settings.zoom || 1;
+                        updateZoom();
+                        setCurrentLayer(currentLayer);
+                        
+                        // Update layer checkboxes
+                        Object.entries(layerVisibility).forEach(([layer, visible]) => {
+                            const checkbox = document.querySelector(`[data-layer="${layer}"] input`);
+                            if (checkbox) checkbox.checked = visible;
+                        });
+                    }
+                    
+                    // Load counters
+                    if (diagramData.counters) {
+                        deviceCounter = diagramData.counters.device || 0;
+                        connectionCounter = diagramData.counters.connection || 0;
+                        interfaceCounter = diagramData.counters.interface || 0;
+                    }
+                    
+                    // Load devices
+                    if (diagramData.devices) {
+                        devices = diagramData.devices;
+                        devices.forEach(device => {
+                            renderDevice(device);
+                        });
+                    }
+                    
+                    // Load connections
+                    if (diagramData.connections) {
+                        connections = diagramData.connections;
+                        connections.forEach(connection => {
+                            renderConnection(connection);
+                        });
+                    }
+                    
+                    updateStats();
+                    setStatus('Diagrama cargado exitosamente');
+                    showNotification('Diagrama cargado exitosamente', 'success');
+                    
+                } catch (error) {
+                    showNotification('Error al cargar el diagrama: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+            
+            event.target.value = '';
+        }
+
+        function exportDiagram() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = 3000;
+            canvas.height = 2000;
+            
+            // Background
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Grid
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let x = 0; x <= canvas.width; x += 25) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y <= canvas.height; y += 25) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            // Draw connections
+            connections.forEach(connection => {
+                const device1 = devices.find(d => d.id === connection.device1);
+                const device2 = devices.find(d => d.id === connection.device2);
+                
+                if (device1 && device2) {
+                    const center1 = getDeviceCenter(device1);
+                    const center2 = getDeviceCenter(device2);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(center1.x, center1.y);
+                    ctx.lineTo(center2.x, center2.y);
+                    
+                    const colors = {
+                        'ethernet': '#27ae60',
+                        'fiber': '#f39c12',
+                        'serial': '#9b59b6',
+                        'coaxial': '#34495e',
+                        'wireless': '#3498db',
+                        'phone': '#e74c3c'
+                    };
+                    ctx.strokeStyle = colors[connection.type] || '#000000';
+                    ctx.lineWidth = 4;
+                    if (connection.type === 'wireless') {
+                        ctx.setLineDash([5, 5]);
+                    }
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    
+                    // Draw connection label
+                    const int1 = device1.interfaces.find(i => i.id === connection.interface1);
+                    const int2 = device2.interfaces.find(i => i.id === connection.interface2);
+                    const labelText = `${int1?.name || '?'} ↔ ${int2?.name || '?'}`;
+                    
+                    const midX = (center1.x + center2.x) / 2;
+                    const midY = (center1.y + center2.y) / 2;
+                    
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                    ctx.fillRect(midX - 40, midY - 8, 80, 16);
+                    
+                    ctx.fillStyle = '#333';
+                    ctx.font = '10px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(labelText, midX, midY + 4);
+                }
+            });
+            
+            // Draw devices
+            devices.forEach(device => {
+                if (!layerVisibility[device.layer]) return;
+                
+                const x = device.x;
+                const y = device.y;
+                
+                // Device background
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+                ctx.fillRect(x, y, 120, 100);
+                
+                // Device border
+                const statusColors = {
+                    'up': '#27ae60',
+                    'down': '#e74c3c',
+                    'warning': '#f39c12'
+                };
+                ctx.strokeStyle = statusColors[device.status] || '#3498db';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x, y, 120, 100);
+                
+                // Device icon background
+                const iconColor = getDeviceColor(device.type);
+                ctx.fillStyle = iconColor;
+                ctx.fillRect(x + 44, y + 10, 32, 32);
+                
+                // Device icon text
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(getDeviceIcon(device.type), x + 60, y + 30);
+                
+                // Device name
+                ctx.fillStyle = '#2c3e50';
+                ctx.font = 'bold 11px Arial';
+                ctx.fillText(device.name, x + 60, y + 55);
+                
+                // Device details
+                ctx.fillStyle = '#666';
+                ctx.font = '9px Arial';
+                ctx.fillText(device.ip || 'Sin IP', x + 60, y + 68);
+                ctx.fillText(device.layer.toUpperCase(), x + 60, y + 80);
+                
+                // Interface summary
+                ctx.font = '8px Arial';
+                const freeInterfaces = device.interfaces.filter(i => i.enabled && !i.connected).length;
+                const totalInterfaces = device.interfaces.filter(i => i.enabled).length;
+                ctx.fillText(`Interfaces: ${freeInterfaces}/${totalInterfaces} libres`, x + 60, y + 92);
+            });
+            
+            // Title
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Network Diagram', 20, 40);
+            
+            ctx.font = '14px Arial';
+            ctx.fillText(`Generado: ${new Date().toLocaleString()}`, 20, 65);
+            ctx.fillText(`Dispositivos: ${devices.length} | Conexiones: ${connections.length}`, 20, 85);
+            
+            // Download
+            const link = document.createElement('a');
+            link.download = `network_diagram_${new Date().toISOString().split('T')[0]}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            setStatus('Diagrama exportado como imagen');
+            showNotification('Diagrama exportado exitosamente', 'success');
+        }
+
+        function getDeviceColor(type) {
+            const colors = {
+                'core-router': '#8e44ad', 'edge-router': '#e67e22', 'router': '#e74c3c',
+                'l3-switch': '#2ecc71', 'switch': '#27ae60', 'hub': '#3498db',
+                'firewall': '#e74c3c', 'ips': '#ad1457', 'waf': '#d32f2f',
+                'loadbalancer': '#7b1fa2', 'vpn': '#1976d2', 'modem': '#ff9800',
+                'ap': '#4caf50', 'controller': '#009688', 'server': '#ff5722',
+                'web-server': '#4caf50', 'db-server': '#9c27b0', 'dns-server': '#3f51b5',
+                'mail-server': '#2196f3', 'pc': '#607d8b', 'notebook': '#795548',
+                'printer': '#424242', 'phone': '#607d8b', 'nas': '#ff9800',
+                'san': '#795548', 'iot-device': '#00bcd4', 'sensor': '#4caf50',
+                'camera': '#9e9e9e'
+            };
+            return colors[type] || '#34495e';
+        }
+
+        // Template Loading
+        function loadTemplate(templateName) {
+            if (devices.length > 0 && !confirm('¿Cargar plantilla? Se perderán los cambios actuales.')) {
+                return;
+            }
+            
+            clearDiagram();
+            
+            const templates = {
+                'basic-enterprise': () => {
+                    createDevice('router', 600, 200);
+                    createDevice('switch', 400, 350);
+                    createDevice('switch', 800, 350);
+                    createDevice('pc', 300, 500);
+                    createDevice('pc', 500, 500);
+                    createDevice('pc', 700, 500);
+                    createDevice('pc', 900, 500);
+                    createDevice('server', 600, 500);
+                    
+                    setTimeout(() => {
+                        // Connect router to switches
+                        createConnection(
+                            devices[0], devices[0].interfaces[0].id,
+                            devices[1], devices[1].interfaces[devices[1].interfaces.length-1].id
+                        );
+                        createConnection(
+                            devices[0], devices[0].interfaces[1].id,
+                            devices[2], devices[2].interfaces[devices[2].interfaces.length-1].id
+                        );
+                        
+                        // Connect PCs to switches
+                        createConnection(
+                            devices[1], devices[1].interfaces[0].id,
+                            devices[3], devices[3].interfaces[0].id
+                        );
+                        createConnection(
+                            devices[1], devices[1].interfaces[1].id,
+                            devices[4], devices[4].interfaces[0].id
+                        );
+                        createConnection(
+                            devices[2], devices[2].interfaces[0].id,
+                            devices[5], devices[5].interfaces[0].id
+                        );
+                        createConnection(
+                            devices[2], devices[2].interfaces[1].id,
+                            devices[6], devices[6].interfaces[0].id
+                        );
+                        
+                        // Connect server
+                        createConnection(
+                            devices[1], devices[1].interfaces[2].id,
+                            devices[7], devices[7].interfaces[0].id
+                        );
+                    }, 100);
+                },
+                
+                'dmz-network': () => {
+                    // Core layer
+                    currentLayer = 'core';
+                    createDevice('firewall', 600, 200);
+                    
+                    // Distribution layer
+                    currentLayer = 'distribution';
+                    createDevice('switch', 400, 350);
+                    createDevice('switch', 800, 350);
+                    
+                    // DMZ layer
+                    currentLayer = 'dmz';
+                    createDevice('web-server', 750, 500);
+                    createDevice('mail-server', 850, 500);
+                    
+                    // User layer
+                    currentLayer = 'user';
+                    createDevice('pc', 300, 500);
+                    createDevice('pc', 400, 500);
+                    createDevice('pc', 500, 500);
+                    
+                    currentLayer = 'core';
+                    setCurrentLayer('core');
+                },
+                
+                'campus-network': () => {
+                    // Core layer
+                    currentLayer = 'core';
+                    createDevice('core-router', 550, 100);
+                    createDevice('core-router', 750, 100);
+                    
+                    // Distribution layer
+                    currentLayer = 'distribution';
+                    createDevice('l3-switch', 400, 250);
+                    createDevice('l3-switch', 900, 250);
+                    
+                    // Access layer
+                    currentLayer = 'access';
+                    createDevice('switch', 300, 400);
+                    createDevice('switch', 500, 400);
+                    createDevice('switch', 800, 400);
+                    createDevice('switch', 1000, 400);
+                    
+                    // User layer
+                    currentLayer = 'user';
+                    for (let i = 0; i < 8; i++) {
+                        createDevice('pc', 200 + i * 150, 550);
+                    }
+                    
+                    currentLayer = 'core';
+                    setCurrentLayer('core');
+                },
+                
+                'star-topology': () => {
+                    currentLayer = 'access';
+                    createDevice('switch', 600, 300);
+                    
+                    currentLayer = 'user';
+                    const positions = [
+                        { x: 400, y: 150 },
+                        { x: 800, y: 150 },
+                        { x: 900, y: 300 },
+                        { x: 800, y: 450 },
+                        { x: 400, y: 450 },
+                        { x: 300, y: 300 }
+                    ];
+                    
+                    positions.forEach(pos => {
+                        createDevice('pc', pos.x, pos.y);
+                    });
+                    
+                    currentLayer = 'access';
+                    setCurrentLayer('access');
+                }
+            };
+            
+            if (templates[templateName]) {
+                templates[templateName]();
+                setTimeout(() => {
+                    autoArrange();
+                    setStatus(`Plantilla "${templateName}" cargada exitosamente`);
+                    showNotification(`Plantilla ${templateName} aplicada`, 'success');
+                }, 200);
+            }
+        }
+
+        // Label Generator Functions
+        function toggleLabels() {
+            const modal = document.getElementById('label-modal');
+            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function closeLabelModal() {
+            document.getElementById('label-modal').style.display = 'none';
+        }
+
+        function updateLabelPreview() {
+            const origin = {
+                building: document.getElementById('origin-building').value,
+                room: document.getElementById('origin-room').value,
+                rack: document.getElementById('origin-rack').value,
+                unit: document.getElementById('origin-unit').value,
+                device: document.getElementById('origin-device').value,
+                interface: document.getElementById('origin-interface').value
+            };
+            
+            const dest = {
+                building: document.getElementById('dest-building').value,
+                room: document.getElementById('dest-room').value,
+                rack: document.getElementById('dest-rack').value,
+                unit: document.getElementById('dest-unit').value,
+                device: document.getElementById('dest-device').value,
+                interface: document.getElementById('dest-interface').value
+            };
+            
+            const originLabel = `${origin.building}${origin.room}${origin.rack}${origin.unit}${origin.device}${origin.interface}`;
+            const destLabel = `${dest.building}${dest.room}${dest.rack}${dest.unit}${dest.device}${dest.interface}`;
+            
+            document.getElementById('label-forward').textContent = `${originLabel} → ${destLabel}`;
+            document.getElementById('label-reverse').textContent = `${destLabel} → ${originLabel}`;
+        }
+
+        function generateLabels() {
+            updateLabelPreview();
+            showNotification('Etiquetas generadas', 'success');
+        }
+
+        function copyLabel(direction) {
+            const labelElement = document.getElementById(`label-${direction}`);
+            const labelText = labelElement.textContent;
+            
+            navigator.clipboard.writeText(labelText).then(() => {
+                showNotification(`Etiqueta copiada: ${labelText}`, 'success');
+            }).catch(() => {
+                showNotification('Error al copiar etiqueta', 'error');
+            });
+        }
+
+        function clearLabelForm() {
+            const inputs = document.querySelectorAll('#label-modal input');
+            inputs.forEach(input => input.value = '');
+            updateLabelPreview();
+        }
+
+        // Help Functions
+        function showHelp() {
+            document.getElementById('help-modal').style.display = 'block';
+        }
+
+        function closeHelpModal() {
+            document.getElementById('help-modal').style.display = 'none';
+        }
+
+        // Utility Functions
+        function updateStats() {
+            document.getElementById('device-count').textContent = devices.length;
+            document.getElementById('connection-count').textContent = connections.length;
+        }
+
+        function setStatus(message) {
+            document.getElementById('status-text').textContent = message;
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        function handleKeyboard(e) {
+            // Keyboard shortcuts
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'n':
+                        e.preventDefault();
+                        newDiagram();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        saveDiagram();
+                        break;
+                    case 'o':
+                        e.preventDefault();
+                        document.getElementById('file-input').click();
+                        break;
+                    case 'z':
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            redo();
+                        } else {
+                            undo();
+                        }
+                        break;
+                    case 'y':
+                        e.preventDefault();
+                        redo();
+                        break;
+                    case '=':
+                    case '+':
+                        e.preventDefault();
+                        zoomIn();
+                        break;
+                    case '-':
+                        e.preventDefault();
+                        zoomOut();
+                        break;
+                    case '0':
+                        e.preventDefault();
+                        resetZoom();
+                        break;
+                }
+            }
+            
+            // Other shortcuts
+            if (e.key === 'Escape') {
+                if (connectionMode) {
+                    toggleConnectionMode();
+                }
+                clearSelection();
+                closePropertiesModal();
+                closeLabelModal();
+                closeHelpModal();
+            }
+            
+            if (e.key === 'Delete' && selectedDevice) {
+                deleteSelectedDevice();
+            }
+            
+            if (e.key === 'c' && !e.ctrlKey) {
+                toggleConnectionMode();
+            }
+        }
+
+        function handleWorkspaceClick(e) {
+            if (!connectionMode) {
+                clearSelection();
+            }
+        }
+
+        // Undo/Redo System
+        function saveUndoState() {
+            const state = {
+                devices: JSON.parse(JSON.stringify(devices)),
+                connections: JSON.parse(JSON.stringify(connections)),
+                counters: {
+                    device: deviceCounter,
+                    connection: connectionCounter,
+                    interface: interfaceCounter
+                }
+            };
+            
+            undoStack.push(state);
+            if (undoStack.length > 50) {
+                undoStack.shift();
+            }
+            
+            redoStack = [];
+        }
+
+        function undo() {
+            if (undoStack.length === 0) {
+                showNotification('No hay acciones para deshacer', 'warning');
+                return;
+            }
+            
+            const currentState = {
+                devices: JSON.parse(JSON.stringify(devices)),
+                connections: JSON.parse(JSON.stringify(connections)),
+                counters: {
+                    device: deviceCounter,
+                    connection: connectionCounter,
+                    interface: interfaceCounter
+                }
+            };
+            redoStack.push(currentState);
+            
+            const previousState = undoStack.pop();
+            restoreState(previousState);
+            
+            showNotification('Acción deshecha', 'info');
+        }
+
+        function redo() {
+            if (redoStack.length === 0) {
+                showNotification('No hay acciones para rehacer', 'warning');
+                return;
+            }
+            
+            const currentState = {
+                devices: JSON.parse(JSON.stringify(devices)),
+                connections: JSON.parse(JSON.stringify(connections)),
+                counters: {
+                    device: deviceCounter,
+                    connection: connectionCounter,
+                    interface: interfaceCounter
+                }
+            };
+            undoStack.push(currentState);
+            
+            const nextState = redoStack.pop();
+            restoreState(nextState);
+            
+            showNotification('Acción rehecha', 'info');
+        }
+
+        function restoreState(state) {
+            // Clear current state
+            clearDiagram();
+            
+            // Restore counters
+            deviceCounter = state.counters.device;
+            connectionCounter = state.counters.connection;
+            interfaceCounter = state.counters.interface;
+            
+            // Restore devices
+            devices = state.devices;
+            devices.forEach(device => {
+                renderDevice(device);
+            });
+            
+            // Restore connections
+            connections = state.connections;
+            connections.forEach(connection => {
+                renderConnection(connection);
+            });
+            
+            updateStats();
+        }
+
+        // Auto-save Function
+        function autoSave() {
+            try {
+                const saveData = {
+                    devices: devices,
+                    connections: connections,
+                    settings: { 
+                        currentLayer, 
+                        layerVisibility, 
+                        zoom: currentZoom 
+                    },
+                    counters: {
+                        device: deviceCounter,
+                        connection: connectionCounter,
+                        interface: interfaceCounter
+                    }
+                };
+                localStorage.setItem('networkDiagramAutoSave', JSON.stringify(saveData));
+            } catch (e) {
+                console.log('Auto-save not available');
+            }
+        }
+
+        function loadAutoSave() {
+            try {
+                const savedData = localStorage.getItem('networkDiagramAutoSave');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    
+                    // Ask user if they want to restore
+                    if (confirm('Se encontró un diagrama guardado automáticamente. ¿Desea restaurarlo?')) {
+                        // Restore settings
+                        if (data.settings) {
+                            currentLayer = data.settings.currentLayer || 'core';
+                            layerVisibility = data.settings.layerVisibility || layerVisibility;
+                            currentZoom = data.settings.zoom || 1;
+                            updateZoom();
+                            setCurrentLayer(currentLayer);
+                        }
+                        
+                        // Restore counters
+                        if (data.counters) {
+                            deviceCounter = data.counters.device || 0;
+                            connectionCounter = data.counters.connection || 0;
+                            interfaceCounter = data.counters.interface || 0;
+                        }
+                        
+                        // Restore devices and connections
+                        devices = data.devices || [];
+                        connections = data.connections || [];
+                        
+                        devices.forEach(device => {
+                            renderDevice(device);
+                        });
+                        
+                        connections.forEach(connection => {
+                            renderConnection(connection);
+                        });
+                        
+                        updateStats();
+                        showNotification('Diagrama restaurado desde guardado automático', 'success');
+                    }
+                }
+            } catch (e) {
+                console.log('Could not load auto-save');
+            }
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = ['properties-modal', 'label-modal', 'help-modal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        };
+
+        // Initialize theme
+        document.documentElement.setAttribute('data-theme', 'light');
+    </script>
+</body>
+</html>
+
+        function getConnectionType(interfaceType) {
+            const typeMapping = {
+                'ethernet': 'ethernet',
+                'fastethernet': 'ethernet',
+                'gigabitethernet': 'ethernet',
+                'fiber': 'fiber',
+                'serial': 'serial',
+                'coaxial': 'coaxial',
+                'phone': 'phone',
+                'wireless': 'wireless'
+            };
+            return typeMapping[interfaceType] || 'ethernet';
+        }
+
+        function renderConnection(connection) {
+            const device1 = devices.find(d => d.id === connection.device1);
+            const device2 = devices.find(d => d.id === connection.device2);
+            
+            if (!device1 || !device2) return;
+
+            const svg = document.getElementById('connection-svg');
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            
+            line.id = connection.id;
+            line.classList.add(`${connection.type}-line`, 'connection-line');
+            
+            const device1Center = getDeviceCenter(device1);
+            const device2Center = getDeviceCenter(device2);
+            
+            line.setAttribute('x1', device1Center.x);
+            line.setAttribute('y1', device1Center.y);
+            line.setAttribute('x2', device2Center.x);
+            line.setAttribute('y2', device2Center.y);
+            
+            line.setAttribute('stroke-width', '4');
+            line.setAttribute('stroke-dasharray', connection.status === 'down' ? '10,5' : 'none');
+            
+            // Add click handler
+            line.addEventListener('click', (e) => handleConnectionClick(e, connection));
+            
+            svg.appendChild(line);
+
+            // Add connection label
+            const int1 = device1.interfaces.find(i => i.id === connection.interface1);
+            const int2 = device2.interfaces.find(i => i.id === connection.interface2);
+            
+            const label = document.createElement('div');
+            label.className = 'connection-label';
+            label.id = `label_${connection.id}`;
+            label.textContent = `${int1.name} ↔ ${int2.name}`;
+            
+            const midX = (device1Center.x + device2Center.x) / 2;
+            const midY = (device1Center.y + device2Center.y) / 2;
+            
+            label.style.left = midX + 'px';
+            label.style.top = midY + 'px';
+            
+            document.getElementById('canvas-container').appendChild(label);
+        }
+
+        function getDeviceCenter(device) {
+            return {
+                x: device.x + 60,
+                y: device.y + 50
+            };
+        }
+
+        function updateConnections() {
+            connections.forEach(connection => {
+                const device1 = devices.find(d => d.id === connection.device1);
+                const device2 = devices.find(d => d.id === connection.device2);
+                
+                if (device1 && device2) {
+                    const line = document.getElementById(connection.id);
+                    const label = document.getElementById(`label_${connection.id}`);
+                    
+                    if (line) {
+                        const device1Center = getDeviceCenter(device1);
+                        const device2Center = getDeviceCenter(device2);
+                        
+                        line.setAttribute('x1', device1Center.x);
+                        line.setAttribute('y1', device1Center.y);
+                        line.setAttribute('x2', device2Center.x);
+                        line.setAttribute('y2', device2Center.y);
+                        
+                        if (label) {
+                            const midX = (device1Center.x + device2Center.x) / 2;
+                            const midY = (device1Center.y + device2Center.y) / 2;
+                            label.style.left = midX + 'px';
+                            label.style.top = midY + 'px';
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateDeviceDisplay(device) {
+            const deviceElement = document.getElementById(device.id);
+            if (deviceElement) {
+                const interfaceSummary = getInterfaceSummary(device);
+                const interfacesDiv = deviceElement.querySelector('.device-interfaces');
+                if (interfacesDiv) {
+                    interfacesDiv.innerHTML = interfaceSummary;
+                }
+            }
+        }
+
+        function handleConnectionClick(e, connection) {
+            e.stopPropagation();
+            if (confirm('¿Eliminar esta conexión?')) {
+                deleteConnection(connection);
+            }
+        }
+
+        function deleteConnection(connection) {
+            saveUndoState();
+            
+            // Update interface status
+            const device1 = devices.find(d => d.id === connection.device1);
+            const device2 = devices.find(d => d.id === connection.device2);
+            
+            if (device1 && device2) {
+                const int1 = device1.interfaces.find(i => i.id === connection.interface1);
+                const int2 = device2.interfaces.find(i => i.id === connection.interface2);
+                
+                if (int1) {
+                    int1.connected = false;
+                    int1.connectedTo = null;
+                }
+                if (int2) {
+                    int2.connected = false;
+                    int2.connectedTo = null;
+                }
+                
+                updateDeviceDisplay(device1);
+                updateDeviceDisplay(device2);
+            }
+            
+            // Remove connection
+            connections = connections.filter(c => c.id !== connection.id);
+            
+            // Remove visual elements
+            const line = document.getElementById(connection.id);
+            const label = document.getElementById(`label_${connection.id}`);
+            if (line) line.remove();
+            if (label) label.remove();
+            
+            updateStats();
+            autoSave();
+            showNotification('Conexión eliminada', 'info');
+        }
+
+        // Sidebar Functions
+        function switchSidebarTab(tabName) {
+            document.querySelectorAll('.sidebar-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            document.querySelectorAll('.sidebar-content .tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+
+        function toggleCategory(header) {
+            header.classList.toggle('collapsed');
+        }
+
+        function filterDevices(searchTerm) {
+            const deviceItems = document.querySelectorAll('.device-item');
+            const term = searchTerm.toLowerCase();
+            
+            deviceItems.forEach(item => {
+                const deviceName = item.querySelector('.device-name').textContent.toLowerCase();
+                const deviceDesc = item.querySelector('.device-description').textContent.toLowerCase();
+                
+                if (deviceName.includes(term) || deviceDesc.includes(term)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('mobile-open');
+        }
+
+        // Layer Management
+        function setCurrentLayer(layer) {
+            currentLayer = layer;
+            document.getElementById('layer-indicator').textContent = `📍 ${layer.charAt(0).toUpperCase() + layer.slice(1)} Layer`;
+        }
+
+        function toggleLayerVisibility(layer, visible) {
+            layerVisibility[layer] = visible;
+            
+            devices.forEach(device => {
+                if (device.layer === layer) {
+                    const element = document.getElementById(device.id);
+                    if (element) {
+                        element.style.display = visible ? 'block' : 'none';
+                    }
+                }
+            });
+
+            updateConnectionsVisibility();
+        }
+
+        function updateConnectionsVisibility() {
+            connections.forEach(connection => {
+                const device1 = devices.find(d => d.id === connection.device1);
+                const device2 = devices.find(d => d.id === connection.device2);
+                
+                if (device1 && device2) {
+                    const visible1 = layerVisibility[device1.layer];
+                    const visible2 = layerVisibility[device2.layer];
+                    const connectionVisible = visible1 && visible2;
+                    
+                    const line = document.getElementById(connection.id);
+                    const label = document.getElementById(`label_${connection.id}`);
+                    
+                    if (line) line.style.display = connectionVisible ? 'block' : 'none';
+                    if (label) label.style.display = connectionVisible ? 'block' : 'none';
+                }
+            });
+        }
+
+        // Toolbar Functions
+        function toggleConnectionMode() {
+            connectionMode = !connectionMode;
+            const btn = document.getElementById('connect-btn');
+            
+            if (connectionMode) {
+                btn.textContent = '❌ Cancelar';
+                btn.classList.add('active');
+                setStatus('Modo conexión activado - Click derecho en dispositivos para seleccionar interfaces');
+            } else {
+                btn.textContent = '🔗 Conectar';
+                btn.classList.remove('active');
+                clearSelection();
+                connectionStart = null;
+                setStatus('Modo conexión desactivado');
+            }
+        }
+
+        function autoArrange() {
+            if (devices.length === 0) {
+                showNotification('No hay dispositivos para organizar', 'warning');
+                return;
+            }
+
+            saveUndoState();
+
+            const layerGroups = {};
+            devices.forEach(device => {
+                if (!layerGroups[device.layer]) {
+                    layerGroups[device.layer] = [];
+                }
+                layerGroups[device.layer].push(device);
+            });
+
+            const layerPositions = {
+                'core': { y: 150, color: '#3498db' },
+                'distribution': { y: 350, color: '#2ecc71' },
+                'access': { y: 550, color: '#f39c12' },
+                'dmz': { y: 750, color: '#e67e22' },
+                'user': { y: 950, color: '#9b59b6' }
+            };
+
+            Object.keys(layerGroups).forEach(layer => {
+                const layerDevices = layerGroups[layer];
+                const layerY = layerPositions[layer]?.y || 300;
+                const spacing = Math.min(200, 2400 / Math.max(layerDevices.length, 1));
+                const startX = (2400 - (layerDevices.length - 1) * spacing) / 2;
+
+                layerDevices.forEach((device, index) => {
+                    device.x = startX + index * spacing;
+                    device.y = layerY;
+                    
+                    const deviceElement = document.getElementById(device.id);
+                    if (deviceElement) {
+                        deviceElement.style.left = device.x + 'px';
+                        deviceElement.style.top = device.y + 'px';
+                    }
+                });
+            });
+
+            updateConnections();
+            setStatus('Dispositivos organizados automáticamente por capas');
+            showNotification('Topología organizada exitosamente', 'success');
+            autoSave();
+        }
+
+        function validateTopology() {
+            const issues = [];
+            
+            // Check for isolated devices
+            const connectedDevices = new Set();
+            connections.forEach(conn => {
+                connectedDevices.add(conn.device1);
+                connectedDevices.add(conn.device2);
+            });
+            
+            const isolatedDevices = devices.filter(device => !connectedDevices.has(device.id));
+            if (isolatedDevices.length > 0) {
+                issues.push(`Dispositivos aislados: ${isolatedDevices.map(d => d.name).join(', ')}`);
+            }
+
+            // Check for devices with all interfaces occupied
+            devices.forEach(device => {
+                const freeInterfaces = device.interfaces.filter(i => i.enabled && !i.connected).length;
+                if (freeInterfaces === 0 && device.interfaces.length > 0) {
+                    issues.push(`${device.name}: Todas las interfaces ocupadas`);
+                }
+            });
+
+            // Check for IP conflicts
+            const ipMap = new Map();
+            devices.forEach(device => {
+                if (device.ip) {
+                    if (ipMap.has(device.ip)) {
+                        issues.push(`Conflicto IP ${device.ip}: ${device.name} y ${ipMap.get(device.ip)}`);
+                    } else {
+                        ipMap.set(device.ip, device.name);
+                    }
+                }
+                
+                device.interfaces.forEach(int => {
+                    if (int.ip) {
+                        if (ipMap.has(int.ip)) {
+                            issues.push(`Conflicto IP ${int.ip}: ${device.name}:${int.name} y ${ipMap.get(int.ip)}`);
+                        } else {
+                            ipMap.set(int.ip, `${device.name}:${int.name}`);
+                        }
+                    }
+                });
+            });
+
+            // Display results
+            if (issues.length === 0) {
+                showNotification('✅ Topología válida - No se encontraron problemas', 'success');
+                setStatus('Validación completada - Topología correcta');
+            } else {
+                const issueList = issues.map(issue => `• ${issue}`).join('\n');
+                alert(`⚠️ Problemas encontrados:\n\n${issueList}`);
+                setStatus(`Validación completada - ${issues.length} problema(s) encontrado(s)`);
+            }
+        }
+
+        // Zoom Functions
+        function zoomIn() {
+            currentZoom = Math.min(currentZoom * 1.25, 3);
+            updateZoom();
+        }
+
+        function zoomOut() {
+            currentZoom = Math.max(currentZoom * 0.8, 0.25);
+            updateZoom();
+        }
+
+        function resetZoom() {
+            currentZoom = 1;
+            updateZoom();
+        }
+
+        function updateZoom() {
+            const container = document.getElementById('canvas-container');
+            container.style.transform = `scale(${currentZoom})`;
+            updateZoomDisplay();
+        }
+
+        function updateZoomDisplay() {
+            const zoomPercent = Math.round(currentZoom * 100);
+            document.getElementById('zoom-level').textContent = `${zoomPercent}%`;
+            document.getElementById('zoom-display').textContent = `${zoomPercent}%`;
+        }
+
+        // Modal Functions
+        function openPropertiesModal(device) {
+            selectedDevice = device;
+            const modal = document.getElementById('properties-modal');
+            const modalTitle = document.getElementById('modal-title');
+            
+            modalTitle.textContent = `Propiedades de ${device.name}`;
+            
+            // Populate form fields
+            document.getElementById('device-name').value = device.name;
+            document.getElementById('device-type-display').value = device.type;
+            document.getElementById('device-model').value = device.model || '';
+            document.getElementById('device-brand').value = device.brand || '';
+            document.getElementById('device-serial').value = device.serial || '';
+            document.getElementById('device-location').value = device.location || '';
+            document.getElementById('device-layer').value = device.layer;
+            document.getElementById('device-status').value = device.status;
+            document.getElementById('device-ip').value = device.ip || '';
+            document.getElementById('device-subnet').value = device.subnet || '';
+            document.getElementById('device-gateway').value = device.gateway || '';
+            document.getElementById('device-dns').value = device.dns || '';
+            document.getElementById('device-vlan').value = device.vlan || '';
+            document.getElementById('device-mac').value = device.mac || '';
+            document.getElementById('device-uptime').value = device.uptime || '';
+            document.getElementById('device-temperature').value = device.temperature || '';
+            document.getElementById('device-notes').value = device.notes || '';
+            
+            // Load interfaces
+            loadInterfaces(device);
+            
+            // Reset tabs
+            switchModalTab('general');
+            
+            modal.style.display = 'block';
+        }
+
+        function loadInterfaces(device) {
+            const container = document.getElementById('interfaces-container');
+            container.innerHTML = '';
+            
+            device.interfaces.forEach(interface => {
+                addInterfaceRow(interface);
+            });
+        }
+
+        function addInterface() {
+            if (!selectedDevice) return;
+            
+            const newInterface = {
+                id: `int_${++interfaceCounter}`,
+                name: `Interface${selectedDevice.interfaces.length}`,
+                type: 'ethernet',
+                enabled: true,
+                connected: false,
+                connectedTo: null,
+                ip: '',
+                subnet: '',
+                gateway: '',
+                vlan: ''
+            };
+            
+            selectedDevice.interfaces.push(newInterface);
+            addInterfaceRow(newInterface);
+        }
+
+        function addInterfaceRow(interface) {
+            const container = document.getElementById('interfaces-container');
+            const row = document.createElement('div');
+            row.className = 'interface-row';
+            row.dataset.interfaceId = interface.id;
+            
+            row.innerHTML = `
+                <input type="text" value="${interface.name}" placeholder="Nombre" onchange="updateInterface('${interface.id}', 'name', this.value)">
+                <select onchange="updateInterface('${interface.id}', 'type', this.value)">
+                    ${Object.entries(interfaceTypes).map(([key, type]) => 
+                        `<option value="${key}" ${interface.type === key ? 'selected' : ''}>${type.name}</option>`
+                    ).join('')}
+                </select>
+                <select onchange="updateInterface('${interface.id}', 'enabled', this.value === 'true')">
+                    <option value="true" ${interface.enabled ? 'selected' : ''}>Habilitada</option>
+                    <option value="false" ${!interface.enabled ? 'selected' : ''}>Deshabilitada</option>
+                </select>
+                <input type="text" value="${interface.ip}" placeholder="IP" onchange="updateInterface('${interface.id}', 'ip', this.value)">
+                <input type="text" value="${interface.vlan}" placeholder="VLAN" onchange="updateInterface('${interface.id}', 'vlan', this.value)">
+                <span style="font-size: 12px; color: ${interface.connected ? '#27ae60' : '#999'};">
+                    ${interface.connected ? '🔗 Conectada' : '⭕ Libre'}
+                </span>
+                <button class="btn-remove-interface" onclick="removeInterface('${interface.id}')" ${interface.connected ? 'disabled' : ''}>×</button>
+            `;
+            
+            container.appendChild(row);
+        }
+
+        function updateInterface(interfaceId, field, value) {
+            if (!selectedDevice) return;
+            
+            const interface = selectedDevice.interfaces.find(i => i.id === interfaceId);
+            if (interface) {
+                interface[field] = value;
+            }
+        }
+
+        function removeInterface(interfaceId) {
+            if (!selectedDevice) return;
+            
+            selectedDevice.interfaces = selectedDevice.interfaces.filter(i => i.id !== interfaceId);
+            const row = document.querySelector(`[data-interface-id="${interfaceId}"]`);
+            if (row) row.remove();
+        }
+
+        function closePropertiesModal() {
+            document.getElementById('properties-modal').style.display = 'none';
+            selectedDevice = null;
+        }
+
+        function switchModalTab(tabName) {
+            document.querySelectorAll('#properties-modal .modal-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('#properties-modal .tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Find and activate the clicked tab
+            const tabs = document.querySelectorAll('#properties-modal .modal-tab');
+            tabs.forEach(tab => {
+                if (tab.textContent.toLowerCase().includes(tabName)) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+
+        function handlePropertiesSubmit(e) {
+            e.preventDefault();
+            if (!selectedDevice) return;
+
+            saveUndoState();
+
+            // Update device properties
+            selectedDevice.name = document.getElementById('device-name').value;
+            selectedDevice.model = document.getElementById('device-model').value;
+            selectedDevice.brand = document.getElementById('device-brand').value;
+            selectedDevice.serial = document.getElementById('device-serial').value;
+            selectedDevice.location = document.getElementById('device-location').value;
+            selectedDevice.layer = document.getElementById('device-layer').value;
+            selectedDevice.status = document.getElementById('device-status').value;
+            selectedDevice.ip = document.getElementById('device-ip').value;
+            selectedDevice.subnet = document.getElementById('device-subnet').value;
+            selectedDevice.gateway = document.getElementById('device-gateway').value;
+            selectedDevice.dns = document.getElementById('device-dns').value;
+            selectedDevice.vlan = document.getElementById('device-vlan').value;
+            selectedDevice.mac = document.getElementById('device-mac').value;
+            selectedDevice.temperature = document.getElementById('device-temperature').value;
+            selectedDevice.notes = document.getElementById('device-notes').value;
+            
+            // Update device visualization
+            const deviceElement = document.getElementById(selectedDevice.id);
+            if (deviceElement) {
+                deviceElement.className = `device-on-canvas status-${selectedDevice.status} layer-${selectedDevice.layer}`;
+                
+                const interfaceSummary = getInterfaceSummary(selectedDevice);
+                
+                deviceElement.innerHTML = `
+                    <div class="device-header">
+                        <div class="device-icon ${selectedDevice.type}-icon">${getDeviceIcon(selectedDevice.type)}</div>
+                        <div class="device-status-indicator status-${selectedDevice.status}"></div>
+                    </div>
+                    <div class="device-label">${selectedDevice.name}</div>
+                    <div class="device-details">
+                        ${selectedDevice.ip || 'Sin IP'}<br>
+                        ${selectedDevice.layer.toUpperCase()}
+                    </div>
+                    <div class="device-interfaces">
+                        ${interfaceSummary}
+                    </div>
+                `;
+            }
+            
+            closePropertiesModal();
+            setStatus(`Propiedades de ${selectedDevice.name} actualizadas`);
+            showNotification('Propiedades actualizadas exitosamente', 'success');
+            autoSave();
+        }
+
+        function deleteSelectedDevice() {
+            if (!selectedDevice) return;
+            
+            if (confirm(`¿Estás seguro de que quieres eliminar ${selectedDevice.name}?`)) {
+                saveUndoState();
+                
+                // Remove connections
+                connections = connections.filter(connection => {
+                    if (connection.device1 === selectedDevice.id || connection.device2 === selectedDevice.id) {
+                        const connectionElement = document.getElementById(connection.id);
+                        const labelElement = document.getElementById(`label_${connection.id}`);
+                        if (connectionElement) connectionElement.remove();
+                        if (labelElement) labelElement.remove();
+                        
+                        // Update connected device interfaces
+                        const otherDeviceId = connection.device1 === selectedDevice.id ? connection.device2 : connection.device1;
+                        const otherDevice = devices.find(d => d.id === otherDeviceId);
+                        if (otherDevice) {
+                            const interfaceId = connection.device1 === selectedDevice.id ? connection.interface2 : connection.interface1;
+                            const interface = otherDevice.interfaces.find(i => i.id === interfaceId);
+                            if (interface) {
+                                interface.connected = false;
+                                interface.connectedTo = null;
+                            }
+                            updateDeviceDisplay(otherDevice);
+                        }
+                        
+                        return false;
+                    }
+                    return true;
+                });
+                
+                // Remove device
+                devices = devices.filter(d => d.id !== selectedDevice.id);
+                const deviceElement = document.getElementById(selectedDevice.id);
+                if (deviceElement) deviceElement.remove();
+                
+                closePropertiesModal();
+                selectedDevice = null;
+                updateStats();
+                setStatus('Dispositivo eliminado exitosamente');
+                showNotification('Dispositivo eliminado', 'info');
+                autoSave();
+            }
+        }
+
+        // File Management
+        function newDiagram() {
+            if (devices.length > 0 || connections.length > 0) {
+                if (confirm('¿Crear nuevo diagrama? Se perderán los cambios no guardados.')) {
+                    clearDiagram();
+                    showNotification('Nuevo diagrama creado', 'info');
+                }
+            }
+        }
+
+        function clearDiagram() {
+            devices.forEach(device => {
+                const element = document.getElementById(device.id);
+                if (element) element.remove();
+            });
+            
+            connections.forEach(connection => {
+                const element = document.getElementById(connection.id);
+                const label = document.getElementById(`label_${connection.id}`);
+                if (element) element.remove();
+                if (label) label.remove();
+            });
+            
+            devices = [];
+            connections = [];
+            selectedDevice = null;
+            connectionStart = null;
+            deviceCounter = 0;
+            connectionCounter = 0;
+            interfaceCounter = 0;
+            undoStack = [];
+            redoStack = [];
+            
+            updateStats();
+            setStatus('Diagrama limpiado');
+        }
+
+        function saveDiagram() {
+            const diagramData = {
+                version: '3.0',
+                metadata: {
+                    createdAt: new Date().toISOString(),
+                    title: 'Network Diagram',
+                    description: 'Created with Network Diagram Creator Pro Enhanced'
+                },
+                settings: {
+                    currentLayer: currentLayer,
+                    layerVisibility: layerVisibility,
+                    zoom: currentZoom
+                },
+                devices: devices,
+                connections: connections,
+                counters: {
+                    device: deviceCounter,
+                    connection: connectionCounter,
+                    interface: interfaceCounter
+                }
+            };
+            
+            const dataStr = JSON.stringify(diagramData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const filename = `network_diagram_${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', filename);
+            linkElement.click();
+            
+            setStatus('Diagrama guardado exitosamente');
+            showNotification('Diagrama guardado como ' + filename, 'success');
+        }
+
+        function loadDiagram(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const diagramData = JSON.parse(e.target.result);
+                    
+                    clearDiagram();
+                    
+                    // Load settings
+                    if (diagramData.settings) {
+                        currentLayer = diagramData.settings.currentLayer || 'core';
+                        layerVisibility = diagramData.settings.layerVisibility || layerVisibility;
+                        currentZoom = diagramData.settings.zoom || 1;
+                        updateZoom();
+                        setCurrentLayer(currentLayer);
+                        
+                        // Update layer checkboxes
+                        Object.entries(layerVisibility).forEach(([layer, visible]) => {
+                            const checkbox = document.querySelector(`[data-layer="${layer}"] input`);
+                            if (checkbox) checkbox.checked = visible;
+                        });
+                    }
+                    
+                    // Load counters
+                    if (diagramData.counters) {
+                        deviceCounter = diagramData.counters.device || 0;
+                        connectionCounter = diagramData.counters.connection || 0;
+                        interfaceCounter = diagramData.counters.interface || 0;
+                    }
+                    
+                    // Load devices
+                    if (diagramData.devices) {
+                        devices = diagramData.devices;
+                        devices.forEach(device => {
+                            renderDevice(device);
+                        });
+                    }
+                    
+                    // Load connections
+                    if (diagramData.connections) {
+                        connections = diagramData.connections;
+                        connections.forEach(connection => {
+                            renderConnection(connection);
+                        });
+                    }
+                    
+                    updateStats();
+                    setStatus('Diagrama cargado exitosamente');
+                    showNotification('Diagrama cargado exitosamente', 'success');
+                    
+                } catch (error) {
+                    showNotification('Error al cargar el diagrama: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+            
+            event.target.value = '';
+        }
+
+        function exportDiagram() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = 3000;
+            canvas.height = 2000;
+            
+            // Background
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Grid
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let x = 0; x <= canvas.width; x += 25) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y <= canvas.height; y += 25) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            // Draw connections
+            connections.forEach(connection => {
+                const device1 = devices.find(d => d.id === connection.device1);
+                const device2 = devices.find(d => d.id === connection.device2);
+                
+                if (device1 && device2) {
+                    const center1 = getDeviceCenter(device1);
+                    const center2 = getDeviceCenter(device2);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(center1.x, center1.y);
+                    ctx.lineTo(center2.x, center2.y);
+                    
