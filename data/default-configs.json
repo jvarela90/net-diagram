@@ -1,0 +1,1019 @@
+{
+  "version": "1.0.0",
+  "appSettings": {
+    "autoSave": true,
+    "autoSaveInterval": 30000,
+    "maxZoom": 3,
+    "minZoom": 0.25,
+    "defaultZoom": 1,
+    "gridSize": 20,
+    "snapToGrid": true,
+    "showGrid": true,
+    "maxDevices": 1000,
+    "canvasSize": {
+      "width": 2000,
+      "height": 1500
+    }
+  },
+  "deviceTypes": {
+    "router": {
+      "name": "Router",
+      "icon": "RT",
+      "category": "network",
+      "color": "#FF6B6B",
+      "defaultPorts": ["22", "80", "443", "161"],
+      "defaultProtocols": ["SSH", "HTTP", "HTTPS", "SNMP"],
+      "properties": {
+        "ip": "",
+        "mask": "255.255.255.0",
+        "gateway": "",
+        "mac": "",
+        "model": "",
+        "manufacturer": "",
+        "location": "",
+        "vlan": "",
+        "description": "",
+        "status": "active"
+      },
+      "specifications": {
+        "ports": 24,
+        "speed": "1000 Mbps",
+        "powerConsumption": "50W",
+        "dimensions": "440x350x44 mm"
+      }
+    },
+    "switch": {
+      "name": "Switch",
+      "icon": "SW",
+      "category": "network",
+      "color": "#4ECDC4",
+      "defaultPorts": ["22", "80", "443", "161"],
+      "defaultProtocols": ["SSH", "HTTP", "HTTPS", "SNMP"],
+      "properties": {
+        "ip": "",
+        "mask": "255.255.255.0",
+        "gateway": "",
+        "mac": "",
+        "model": "",
+        "manufacturer": "",
+        "location": "",
+        "vlan": "",
+        "description": "",
+        "status": "active"
+      },
+      "specifications": {
+        "ports": 48,
+        "speed": "1000 Mbps",
+        "powerConsumption": "30W",
+        "dimensions": "440x220x44 mm"
+      }
+    },
+    "firewall": {
+      "name": "Firewall",
+      "icon": "FW",
+      "category": "security",
+      "color": "#FF9FF3",
+      "defaultPorts": ["22", "80", "443", "161", "8080"],
+      "defaultProtocols": ["SSH", "HTTP", "HTTPS", "SNMP", "Management"],
+      "properties": {
+        "ip": "",
+        "mask": "255.255.255.0",
+        "gateway": "",
+        "mac": "",
+        "model": "",
+        "manufacturer": "",
+        "location": "",
+        "vlan": "",
+        "description": "",
+        "status": "active",
+        "securityLevel": "high"
+      },
+      "specifications": {
+        "throughput": "1 Gbps",
+        "maxConnections": 100000,
+        "powerConsumption": "75W",
+        "dimensions": "440x350x88 mm"
+      }
+    },
+    "server": {
+      "name": "Servidor",
+      "icon": "SV",
+      "category": "compute",
+      "color": "#45B7D1",
+      "defaultPorts": ["22", "80", "443", "3389", "3306", "5432"],
+      "defaultProtocols": ["SSH", "HTTP", "HTTPS", "RDP", "MySQL", "PostgreSQL"],
+      "properties": {
+        "ip": "",
+        "mask": "255.255.255.0",
+        "gateway": "",
+        "mac": "",
+        "model": "",
+        "manufacturer": "",
+        "location": "",
+        "vlan": "",
+        "description": "",
+        "status": "active",
+        "os": "",
+        "role": ""
+      },
+      "specifications": {
+        "cpu": "Intel Xeon",
+        "ram": "32 GB",
+        "storage": "1 TB SSD",
+        "powerConsumption": "200W",
+        "dimensions": "440x700x88 mm"
+      }
+    },
+    "workstation": {
+      "name": "Estación de Trabajo",
+      "icon": "WS",
+      "category": "endpoint",
+      "color": "#54A0FF",
+      "defaultPorts": ["22", "3389"],
+      "defaultProtocols": ["SSH", "RDP"],
+      "properties": {
+        "ip": "",
+        "mask": "255.255.255.0",
+        "gateway": "",
+        "mac": "",
+        "model": "",
+        "manufacturer": "",
+        "location": "",
+        "vlan": "",
+        "description": "",
+        "status": "active",
+        "os": "",
+        "user": ""
+      },
+      "specifications": {
+        "cpu": "Intel Core i7",
+        "ram": "16 GB",
+        "storage": "512 GB SSD",
+        "powerConsumption": "150W",
+        "dimensions": "Desktop/Tower"
+      }
+    },
+    "laptop": {
+      "name": "Laptop",
+      "icon": "LP",
+      "category": "endpoint",
+      "color": "#FECA57",
+      "defaultPorts": ["22", "3389"],
+      "defaultProtocols": ["SSH", "RDP", "WiFi"],
+      "properties": {
+        "ip": "",
+        "mask": "255.255.255.0",
+        "gateway": "",
+        "mac": "",
+        "wifiMac": "",
+        "model": "",
+        "manufacturer": "",
+        "location": "",
+        "vlan": "",
+        "description": "",
+        "status": "active",
+        "os": "",
+        "user": ""
+      },
+      "specifications": {
+        "cpu": "Intel Core i5",
+        "ram": "8 GB",
+        "storage": "256 GB SSD",
+        "battery": "6 horas",
+        "screen": "14 pulgadas"
+      }
+    },
+    "accessPoint": {
+      "name": "Punto de Acceso",
+      "icon": "AP",
+      "category": "wireless",
+      "color": "#96CEB4",
+      "defaultPorts": ["22", "80", "443"],
+      "defaultProtocols": ["SSH", "HTTP", "HTTPS", "WiFi"],
+      "properties": {
+        "ip": "",
+        "mask": "255.255.255.0",
+        "gateway": "",
+        "mac": "",
+        "model": "",
+        "manufacturer": "",
+        "location": "",
+        "vlan": "",
+        "description": "",
+        "status": "active",
+        "ssid": "",
+        "channel": "",
+        "security": "WPA2"
+      },
+      "specifications": {
+        "standards": "802.11ac",
+        "frequency": "2.4/5 GHz",
+        "range": "100 metros",
+        "powerConsumption": "12W"
+      }
+    },
+    "printer": {
+      "name": "Impresora",
+      "icon": "PR",
+      "category": "peripheral",
+      "color": "#A55EEA",
+      "defaultPorts": ["80", "443", "9100", "631"],
+      "defaultProtocols": ["HTTP", "HTTPS", "IPP", "LPR"],
+      "properties": {
+        "ip": "",
+        "mask": "255.255.255.0",
+        "gateway": "",
+        "mac": "",
+        "model": "",
+        "manufacturer": "",
+        "location": "",
+        "vlan": "",
+        "description": "",
+        "status": "active",
+        "type": "laser"
+      },
+      "specifications": {
+        "speed": "30 ppm",
+        "resolution": "1200 dpi",
+        "paperSize": "A4",
+        "powerConsumption": "400W"
+      }
+    },
+    "camera": {
+      "name": "Cámara IP",
+      "icon": "CM",
+      "category": "iot",
+      "color": "#5F27CD",
+      "defaultPorts": ["80", "443", "554", "8080"],
+      "defaultProtocols": ["HTTP", "HTTPS", "RTSP", "ONVIF"],
+      "properties": {
+        "ip": "",
+        "mask": "255.255.255.0",
+        "gateway": "",
+        "mac": "",
+        "model": "",
+        "manufacturer": "",
+        "location": "",
+        "vlan": "",
+        "description": "",
+        "status": "active",
+        "resolution": "1080p",
+        "ptz": false
+      },
+      "specifications": {
+        "resolution": "1920x1080",
+        "fps": "30",
+        "nightVision": true,
+        "powerConsumption": "8W"
+      }
+    },
+    "sensor": {
+      "name": "Sensor IoT",
+      "icon": "SR",
+      "category": "iot",
+      "color": "#26DE81",
+      "defaultPorts": ["80", "443", "1883", "8883"],
+      "defaultProtocols": ["HTTP", "HTTPS", "MQTT", "CoAP"],
+      "properties": {
+        "ip": "",
+        "mask": "255.255.255.0",
+        "gateway": "",
+        "mac": "",
+        "model": "",
+        "manufacturer": "",
+        "location": "",
+        "vlan": "",
+        "description": "",
+        "status": "active",
+        "sensorType": "temperature",
+        "protocol": "MQTT"
+      },
+      "specifications": {
+        "protocol": "WiFi/Bluetooth",
+        "battery": "2 años",
+        "range": "50 metros",
+        "accuracy": "±0.5°C"
+      }
+    }
+  },
+  "connectionTypes": {
+    "ethernet": {
+      "name": "Ethernet (UTP)",
+      "color": "#2D3748",
+      "style": "solid",
+      "width": 2,
+      "properties": {
+        "bandwidth": "1000 Mbps",
+        "maxDistance": "100 metros",
+        "cable": "Cat6",
+        "duplex": "full"
+      }
+    },
+    "fiber": {
+      "name": "Fibra Óptica",
+      "color": "#FF6B6B",
+      "style": "solid",
+      "width": 3,
+      "properties": {
+        "bandwidth": "10 Gbps",
+        "maxDistance": "2 km",
+        "type": "monomodo",
+        "connector": "SC/LC"
+      }
+    },
+    "serial": {
+      "name": "Serial",
+      "color": "#4ECDC4",
+      "style": "dashed",
+      "width": 2,
+      "properties": {
+        "bandwidth": "115200 bps",
+        "maxDistance": "15 metros",
+        "cable": "RS-232",
+        "connector": "DB9"
+      }
+    },
+    "coaxial": {
+      "name": "Coaxial",
+      "color": "#FECA57",
+      "style": "solid",
+      "width": 2,
+      "properties": {
+        "bandwidth": "10 Mbps",
+        "maxDistance": "500 metros",
+        "cable": "RG-58",
+        "connector": "BNC"
+      }
+    },
+    "wireless": {
+      "name": "Inalámbrico",
+      "color": "#9B59B6",
+      "style": "dotted",
+      "width": 2,
+      "properties": {
+        "bandwidth": "300 Mbps",
+        "maxDistance": "100 metros",
+        "frequency": "2.4/5 GHz",
+        "security": "WPA2"
+      }
+    }
+  },
+  "networkTemplates": {
+    "basicOffice": {
+      "name": "Red Empresarial Básica",
+      "description": "Topología estándar para oficinas pequeñas",
+      "devices": [
+        {
+          "type": "router",
+          "name": "Router-Principal",
+          "position": { "x": 400, "y": 200 },
+          "layer": "Core",
+          "properties": {
+            "ip": "192.168.1.1",
+            "description": "Router principal de la red"
+          }
+        },
+        {
+          "type": "switch",
+          "name": "Switch-Acceso-01",
+          "position": { "x": 200, "y": 350 },
+          "layer": "Access",
+          "properties": {
+            "ip": "192.168.1.10",
+            "description": "Switch de acceso - Área administrativa"
+          }
+        },
+        {
+          "type": "switch",
+          "name": "Switch-Acceso-02",
+          "position": { "x": 600, "y": 350 },
+          "layer": "Access",
+          "properties": {
+            "ip": "192.168.1.11",
+            "description": "Switch de acceso - Área técnica"
+          }
+        },
+        {
+          "type": "server",
+          "name": "Servidor-Principal",
+          "position": { "x": 400, "y": 500 },
+          "layer": "Core",
+          "properties": {
+            "ip": "192.168.1.100",
+            "description": "Servidor de archivos y aplicaciones"
+          }
+        }
+      ],
+      "connections": [
+        {
+          "from": "Router-Principal",
+          "to": "Switch-Acceso-01",
+          "type": "ethernet"
+        },
+        {
+          "from": "Router-Principal",
+          "to": "Switch-Acceso-02",
+          "type": "ethernet"
+        },
+        {
+          "from": "Switch-Acceso-01",
+          "to": "Servidor-Principal",
+          "type": "ethernet"
+        }
+      ]
+    },
+    "dmzNetwork": {
+      "name": "Red con DMZ",
+      "description": "Configuración de seguridad empresarial con zona desmilitarizada",
+      "devices": [
+        {
+          "type": "router",
+          "name": "Router-Perimetral",
+          "position": { "x": 400, "y": 100 },
+          "layer": "WAN",
+          "properties": {
+            "ip": "203.0.113.1",
+            "description": "Router de conexión a Internet"
+          }
+        },
+        {
+          "type": "firewall",
+          "name": "Firewall-Principal",
+          "position": { "x": 400, "y": 250 },
+          "layer": "Core",
+          "properties": {
+            "ip": "192.168.1.1",
+            "description": "Firewall principal de seguridad"
+          }
+        },
+        {
+          "type": "switch",
+          "name": "Switch-DMZ",
+          "position": { "x": 200, "y": 400 },
+          "layer": "DMZ",
+          "properties": {
+            "ip": "10.0.1.10",
+            "description": "Switch para servicios públicos"
+          }
+        },
+        {
+          "type": "switch",
+          "name": "Switch-LAN",
+          "position": { "x": 600, "y": 400 },
+          "layer": "Access",
+          "properties": {
+            "ip": "192.168.1.10",
+            "description": "Switch de red interna"
+          }
+        },
+        {
+          "type": "server",
+          "name": "Servidor-Web",
+          "position": { "x": 200, "y": 550 },
+          "layer": "DMZ",
+          "properties": {
+            "ip": "10.0.1.100",
+            "description": "Servidor web público"
+          }
+        },
+        {
+          "type": "server",
+          "name": "Servidor-BD",
+          "position": { "x": 600, "y": 550 },
+          "layer": "Access",
+          "properties": {
+            "ip": "192.168.1.100",
+            "description": "Servidor de base de datos interno"
+          }
+        }
+      ],
+      "connections": [
+        {
+          "from": "Router-Perimetral",
+          "to": "Firewall-Principal",
+          "type": "ethernet"
+        },
+        {
+          "from": "Firewall-Principal",
+          "to": "Switch-DMZ",
+          "type": "ethernet"
+        },
+        {
+          "from": "Firewall-Principal",
+          "to": "Switch-LAN",
+          "type": "ethernet"
+        },
+        {
+          "from": "Switch-DMZ",
+          "to": "Servidor-Web",
+          "type": "ethernet"
+        },
+        {
+          "from": "Switch-LAN",
+          "to": "Servidor-BD",
+          "type": "ethernet"
+        }
+      ]
+    },
+    "campusNetwork": {
+      "name": "Red de Campus",
+      "description": "Arquitectura jerárquica para organizaciones grandes",
+      "devices": [
+        {
+          "type": "router",
+          "name": "Router-Core-01",
+          "position": { "x": 350, "y": 150 },
+          "layer": "Core",
+          "properties": {
+            "ip": "10.0.0.1",
+            "description": "Router core principal"
+          }
+        },
+        {
+          "type": "router",
+          "name": "Router-Core-02",
+          "position": { "x": 450, "y": 150 },
+          "layer": "Core",
+          "properties": {
+            "ip": "10.0.0.2",
+            "description": "Router core secundario"
+          }
+        },
+        {
+          "type": "switch",
+          "name": "Switch-Dist-Edificio-A",
+          "position": { "x": 200, "y": 300 },
+          "layer": "Distribution",
+          "properties": {
+            "ip": "10.1.0.1",
+            "description": "Switch distribución Edificio A"
+          }
+        },
+        {
+          "type": "switch",
+          "name": "Switch-Dist-Edificio-B",
+          "position": { "x": 400, "y": 300 },
+          "layer": "Distribution",
+          "properties": {
+            "ip": "10.2.0.1",
+            "description": "Switch distribución Edificio B"
+          }
+        },
+        {
+          "type": "switch",
+          "name": "Switch-Dist-Edificio-C",
+          "position": { "x": 600, "y": 300 },
+          "layer": "Distribution",
+          "properties": {
+            "ip": "10.3.0.1",
+            "description": "Switch distribución Edificio C"
+          }
+        }
+      ],
+      "connections": [
+        {
+          "from": "Router-Core-01",
+          "to": "Router-Core-02",
+          "type": "fiber"
+        },
+        {
+          "from": "Router-Core-01",
+          "to": "Switch-Dist-Edificio-A",
+          "type": "fiber"
+        },
+        {
+          "from": "Router-Core-01",
+          "to": "Switch-Dist-Edificio-B",
+          "type": "fiber"
+        },
+        {
+          "from": "Router-Core-02",
+          "to": "Switch-Dist-Edificio-B",
+          "type": "fiber"
+        },
+        {
+          "from": "Router-Core-02",
+          "to": "Switch-Dist-Edificio-C",
+          "type": "fiber"
+        }
+      ]
+    },
+    "dataCenter": {
+      "name": "Data Center",
+      "description": "Infraestructura de centro de datos",
+      "devices": [
+        {
+          "type": "switch",
+          "name": "Switch-Core-DC",
+          "position": { "x": 400, "y": 150 },
+          "layer": "Core",
+          "properties": {
+            "ip": "10.0.0.1",
+            "description": "Switch core del data center"
+          }
+        },
+        {
+          "type": "switch",
+          "name": "Switch-ToR-Rack-1",
+          "position": { "x": 200, "y": 300 },
+          "layer": "Access",
+          "properties": {
+            "ip": "10.1.1.1",
+            "description": "Switch Top of Rack 1"
+          }
+        },
+        {
+          "type": "switch",
+          "name": "Switch-ToR-Rack-2",
+          "position": { "x": 400, "y": 300 },
+          "layer": "Access",
+          "properties": {
+            "ip": "10.1.2.1",
+            "description": "Switch Top of Rack 2"
+          }
+        },
+        {
+          "type": "switch",
+          "name": "Switch-ToR-Rack-3",
+          "position": { "x": 600, "y": 300 },
+          "layer": "Access",
+          "properties": {
+            "ip": "10.1.3.1",
+            "description": "Switch Top of Rack 3"
+          }
+        },
+        {
+          "type": "server",
+          "name": "Servidor-Web-01",
+          "position": { "x": 150, "y": 450 },
+          "layer": "Access",
+          "properties": {
+            "ip": "10.1.1.10",
+            "description": "Servidor web cluster"
+          }
+        },
+        {
+          "type": "server",
+          "name": "Servidor-Web-02",
+          "position": { "x": 250, "y": 450 },
+          "layer": "Access",
+          "properties": {
+            "ip": "10.1.1.11",
+            "description": "Servidor web cluster"
+          }
+        },
+        {
+          "type": "server",
+          "name": "Servidor-BD-01",
+          "position": { "x": 350, "y": 450 },
+          "layer": "Access",
+          "properties": {
+            "ip": "10.1.2.10",
+            "description": "Servidor base de datos principal"
+          }
+        },
+        {
+          "type": "server",
+          "name": "Servidor-BD-02",
+          "position": { "x": 450, "y": 450 },
+          "layer": "Access",
+          "properties": {
+            "ip": "10.1.2.11",
+            "description": "Servidor base de datos replica"
+          }
+        }
+      ],
+      "connections": [
+        {
+          "from": "Switch-Core-DC",
+          "to": "Switch-ToR-Rack-1",
+          "type": "fiber"
+        },
+        {
+          "from": "Switch-Core-DC",
+          "to": "Switch-ToR-Rack-2",
+          "type": "fiber"
+        },
+        {
+          "from": "Switch-Core-DC",
+          "to": "Switch-ToR-Rack-3",
+          "type": "fiber"
+        },
+        {
+          "from": "Switch-ToR-Rack-1",
+          "to": "Servidor-Web-01",
+          "type": "ethernet"
+        },
+        {
+          "from": "Switch-ToR-Rack-1",
+          "to": "Servidor-Web-02",
+          "type": "ethernet"
+        },
+        {
+          "from": "Switch-ToR-Rack-2",
+          "to": "Servidor-BD-01",
+          "type": "ethernet"
+        },
+        {
+          "from": "Switch-ToR-Rack-2",
+          "to": "Servidor-BD-02",
+          "type": "ethernet"
+        }
+      ]
+    },
+    "iotNetwork": {
+      "name": "Red IoT",
+      "description": "Red especializada para dispositivos Internet de las Cosas",
+      "devices": [
+        {
+          "type": "router",
+          "name": "Gateway-IoT",
+          "position": { "x": 400, "y": 150 },
+          "layer": "Core",
+          "properties": {
+            "ip": "192.168.100.1",
+            "description": "Gateway principal IoT"
+          }
+        },
+        {
+          "type": "switch",
+          "name": "Switch-IoT-VLAN",
+          "position": { "x": 400, "y": 250 },
+          "layer": "Access",
+          "properties": {
+            "ip": "192.168.100.10",
+            "vlan": "100",
+            "description": "Switch para segmentación IoT"
+          }
+        },
+        {
+          "type": "accessPoint",
+          "name": "AP-IoT-01",
+          "position": { "x": 200, "y": 350 },
+          "layer": "IoT",
+          "properties": {
+            "ip": "192.168.100.20",
+            "ssid": "IoT-Network",
+            "description": "Access Point para dispositivos IoT"
+          }
+        },
+        {
+          "type": "accessPoint",
+          "name": "AP-IoT-02",
+          "position": { "x": 600, "y": 350 },
+          "layer": "IoT",
+          "properties": {
+            "ip": "192.168.100.21",
+            "ssid": "IoT-Network",
+            "description": "Access Point para dispositivos IoT"
+          }
+        },
+        {
+          "type": "camera",
+          "name": "Camara-01",
+          "position": { "x": 100, "y": 450 },
+          "layer": "IoT",
+          "properties": {
+            "ip": "192.168.100.101",
+            "description": "Cámara de seguridad entrada"
+          }
+        },
+        {
+          "type": "camera",
+          "name": "Camara-02",
+          "position": { "x": 300, "y": 450 },
+          "layer": "IoT",
+          "properties": {
+            "ip": "192.168.100.102",
+            "description": "Cámara de seguridad parking"
+          }
+        },
+        {
+          "type": "sensor",
+          "name": "Sensor-Temp-01",
+          "position": { "x": 500, "y": 450 },
+          "layer": "IoT",
+          "properties": {
+            "ip": "192.168.100.201",
+            "sensorType": "temperature",
+            "description": "Sensor temperatura sala servidores"
+          }
+        },
+        {
+          "type": "sensor",
+          "name": "Sensor-Acceso-01",
+          "position": { "x": 700, "y": 450 },
+          "layer": "IoT",
+          "properties": {
+            "ip": "192.168.100.202",
+            "sensorType": "motion",
+            "description": "Sensor movimiento entrada"
+          }
+        }
+      ],
+      "connections": [
+        {
+          "from": "Gateway-IoT",
+          "to": "Switch-IoT-VLAN",
+          "type": "ethernet"
+        },
+        {
+          "from": "Switch-IoT-VLAN",
+          "to": "AP-IoT-01",
+          "type": "ethernet"
+        },
+        {
+          "from": "Switch-IoT-VLAN",
+          "to": "AP-IoT-02",
+          "type": "ethernet"
+        },
+        {
+          "from": "AP-IoT-01",
+          "to": "Camara-01",
+          "type": "wireless"
+        },
+        {
+          "from": "AP-IoT-01",
+          "to": "Camara-02",
+          "type": "wireless"
+        },
+        {
+          "from": "AP-IoT-02",
+          "to": "Sensor-Temp-01",
+          "type": "wireless"
+        },
+        {
+          "from": "AP-IoT-02",
+          "to": "Sensor-Acceso-01",
+          "type": "wireless"
+        }
+      ]
+    }
+  },
+  "layers": {
+    "ISP": {
+      "name": "ISP",
+      "description": "Proveedor de Servicios de Internet",
+      "color": "#FF6B6B",
+      "order": 0,
+      "yPosition": 50
+    },
+    "WAN": {
+      "name": "WAN",
+      "description": "Red de Área Amplia",
+      "color": "#4ECDC4",
+      "order": 1,
+      "yPosition": 150
+    },
+    "Core": {
+      "name": "Core",
+      "description": "Núcleo de la red - equipos principales",
+      "color": "#45B7D1",
+      "order": 2,
+      "yPosition": 250
+    },
+    "Distribution": {
+      "name": "Distribution",
+      "description": "Capa de distribución - agregación",
+      "color": "#96CEB4",
+      "order": 3,
+      "yPosition": 350
+    },
+    "Access": {
+      "name": "Access",
+      "description": "Capa de acceso - conexión de usuarios",
+      "color": "#FECA57",
+      "order": 4,
+      "yPosition": 450
+    },
+    "DMZ": {
+      "name": "DMZ",
+      "description": "Zona desmilitarizada - servicios públicos",
+      "color": "#FF9FF3",
+      "order": 5,
+      "yPosition": 550
+    },
+    "User": {
+      "name": "User",
+      "description": "Dispositivos de usuario final",
+      "color": "#54A0FF",
+      "order": 6,
+      "yPosition": 650
+    },
+    "IoT": {
+      "name": "IoT",
+      "description": "Dispositivos Internet de las Cosas",
+      "color": "#5F27CD",
+      "order": 7,
+      "yPosition": 750
+    }
+  },
+  "validationRules": {
+    "topology": [
+      {
+        "rule": "core_layer_required",
+        "description": "La capa Core debe tener al menos un dispositivo",
+        "severity": "error"
+      },
+      {
+        "rule": "access_layer_connection",
+        "description": "Dispositivos en capa Access deben conectarse a Distribution o Core",
+        "severity": "warning"
+      },
+      {
+        "rule": "dmz_isolation",
+        "description": "Dispositivos DMZ deben estar aislados de la red interna",
+        "severity": "error"
+      },
+      {
+        "rule": "redundancy_check",
+        "description": "Equipos críticos deben tener redundancia",
+        "severity": "warning"
+      }
+    ],
+    "addressing": [
+      {
+        "rule": "ip_conflict",
+        "description": "No debe haber conflictos de direcciones IP",
+        "severity": "error"
+      },
+      {
+        "rule": "subnet_consistency",
+        "description": "Dispositivos en la misma VLAN deben estar en la misma subred",
+        "severity": "warning"
+      }
+    ]
+  },
+  "exportFormats": {
+    "png": {
+      "name": "PNG Image",
+      "extension": "png",
+      "mimeType": "image/png",
+      "quality": 1.0,
+      "backgroundColor": "#ffffff"
+    },
+    "svg": {
+      "name": "SVG Vector",
+      "extension": "svg",
+      "mimeType": "image/svg+xml",
+      "includeMetadata": true
+    },
+    "pdf": {
+      "name": "PDF Document",
+      "extension": "pdf",
+      "mimeType": "application/pdf",
+      "pageSize": "A4",
+      "orientation": "landscape"
+    },
+    "json": {
+      "name": "JSON Project",
+      "extension": "json",
+      "mimeType": "application/json",
+      "includeHistory": false
+    }
+  },
+  "themes": {
+    "light": {
+      "name": "Tema Claro",
+      "backgroundColor": "#ffffff",
+      "gridColor": "#e2e8f0",
+      "textColor": "#2d3748",
+      "borderColor": "#cbd5e0",
+      "selectedColor": "#4299e1"
+    },
+    "dark": {
+      "name": "Tema Oscuro",
+      "backgroundColor": "#1a202c",
+      "gridColor": "#2d3748",
+      "textColor": "#e2e8f0",
+      "borderColor": "#4a5568",
+      "selectedColor": "#63b3ed"
+    }
+  },
+  "shortcuts": {
+    "general": {
+      "save": "Ctrl+S",
+      "open": "Ctrl+O",
+      "export": "Ctrl+E",
+      "undo": "Ctrl+Z",
+      "redo": "Ctrl+Y",
+      "selectAll": "Ctrl+A",
+      "delete": "Delete",
+      "copy": "Ctrl+C",
+      "paste": "Ctrl+V"
+    },
+    "canvas": {
+      "zoomIn": "Ctrl++",
+      "zoomOut": "Ctrl+-",
+      "zoomFit": "Ctrl+0",
+      "toggleGrid": "Ctrl+G",
+      "toggleSnap": "Ctrl+Shift+G"
+    },
+    "tools": {
+      "selectTool": "V",
+      "connectionTool": "C",
+      "textTool": "T",
+      "organizeLayers": "Ctrl+L"
+    }
+  }
+}

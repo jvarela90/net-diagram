@@ -1,0 +1,928 @@
+/**
+ * responsive.css - Estilos responsivos para Network Diagram Creator
+ * Adaptación para diferentes tamaños de pantalla y dispositivos
+ */
+
+/* ==========================================================================
+   BREAKPOINTS Y VARIABLES RESPONSIVAS
+   ========================================================================== */
+
+:root {
+  /* Breakpoints */
+  --breakpoint-xs: 480px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+  /* Espaciado responsivo */
+  --sidebar-width-mobile: 280px;
+  --sidebar-width-tablet: 300px;
+  --sidebar-width-desktop: 320px;
+
+  /* Altura de header responsiva */
+  --header-height-mobile: 56px;
+  --header-height-desktop: 60px;
+
+  /* Toolbar responsivo */
+  --toolbar-height-mobile: 48px;
+  --toolbar-height-desktop: 50px;
+}
+
+/* ==========================================================================
+   LAYOUT BASE RESPONSIVO
+   ========================================================================== */
+
+/* Contenedor principal adaptativo */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header responsivo */
+.header {
+  height: var(--header-height-mobile);
+  padding: 0 var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.header-logo {
+  font-size: var(--font-size-md);
+}
+
+.header-logo img {
+  width: 28px;
+  height: 28px;
+}
+
+.header-nav {
+  gap: var(--spacing-xs);
+}
+
+/* Toolbar responsivo */
+.toolbar {
+  top: var(--header-height-mobile);
+  height: var(--toolbar-height-mobile);
+  padding: 0 var(--spacing-md);
+  gap: var(--spacing-sm);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.toolbar::-webkit-scrollbar {
+  display: none;
+}
+
+.toolbar-group {
+  padding: 0 var(--spacing-sm);
+  gap: var(--spacing-xs);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Sidebar responsivo */
+.sidebar {
+  top: calc(var(--header-height-mobile) + var(--toolbar-height-mobile));
+  width: var(--sidebar-width-mobile);
+  height: calc(100vh - var(--header-height-mobile) - var(--toolbar-height-mobile));
+  transform: translateX(-100%);
+  transition: transform var(--transition-normal);
+  z-index: var(--z-modal);
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
+.sidebar-toggle {
+  top: calc(var(--header-height-mobile) + var(--toolbar-height-mobile) + var(--spacing-md));
+  left: var(--spacing-md);
+  z-index: calc(var(--z-modal) + 1);
+}
+
+.sidebar.open + .sidebar-toggle {
+  left: calc(var(--sidebar-width-mobile) + var(--spacing-md));
+}
+
+/* Overlay para sidebar en móvil */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-overlay);
+  z-index: calc(var(--z-modal) - 1);
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--transition-normal);
+}
+
+.sidebar.open ~ .sidebar-overlay {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Contenido principal adaptativo */
+.main-content {
+  margin-left: 0;
+  margin-top: calc(var(--header-height-mobile) + var(--toolbar-height-mobile));
+  height: calc(100vh - var(--header-height-mobile) - var(--toolbar-height-mobile));
+}
+
+/* ==========================================================================
+   COMPONENTES RESPONSIVOS
+   ========================================================================== */
+
+/* Biblioteca de dispositivos responsive */
+.device-library {
+  padding: var(--spacing-sm);
+}
+
+.device-grid {
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  gap: var(--spacing-xs);
+}
+
+.device-item {
+  padding: var(--spacing-xs);
+}
+
+.device-icon {
+  width: 32px;
+  height: 32px;
+  font-size: 10px;
+}
+
+.device-name {
+  font-size: 10px;
+}
+
+/* Gestor de capas responsive */
+.layer-panel {
+  padding: var(--spacing-sm);
+}
+
+.layer-control {
+  padding: var(--spacing-xs);
+}
+
+.layer-header {
+  gap: var(--spacing-xs);
+}
+
+.layer-color {
+  width: 14px;
+  height: 14px;
+}
+
+.layer-name {
+  font-size: var(--font-size-xs);
+}
+
+/* Canvas responsivo */
+.canvas-container {
+  background-size: 15px 15px;
+}
+
+.network-device {
+  width: 70px;
+  height: 50px;
+}
+
+.device-icon-canvas {
+  width: 28px;
+  height: 20px;
+  font-size: 10px;
+}
+
+.device-label {
+  font-size: 9px;
+  max-width: 68px;
+}
+
+.device-status {
+  width: 10px;
+  height: 10px;
+  top: -3px;
+  right: -3px;
+}
+
+/* Modales responsivos */
+.modal {
+  width: 95%;
+  max-width: none;
+  margin: var(--spacing-md);
+  max-height: calc(100vh - var(--spacing-xl));
+}
+
+.modal-header,
+.modal-body,
+.modal-footer {
+  padding: var(--spacing-md);
+}
+
+.modal-title {
+  font-size: var(--font-size-md);
+}
+
+.form-row {
+  grid-template-columns: 1fr;
+  gap: var(--spacing-sm);
+}
+
+/* Controles de zoom responsivos */
+.zoom-controls {
+  bottom: var(--spacing-md);
+  right: var(--spacing-md);
+  gap: var(--spacing-xs);
+}
+
+.zoom-btn {
+  width: 36px;
+  height: 36px;
+  font-size: var(--font-size-sm);
+}
+
+.zoom-level {
+  padding: var(--spacing-xs);
+  font-size: 10px;
+  min-width: 40px;
+}
+
+/* Minimap responsivo */
+.minimap {
+  bottom: var(--spacing-md);
+  left: var(--spacing-md);
+  width: 150px;
+  height: 100px;
+}
+
+/* Notificaciones responsivas */
+.notifications-container {
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  left: var(--spacing-sm);
+}
+
+.notification {
+  max-width: none;
+  padding: var(--spacing-sm);
+}
+
+.notification-title {
+  font-size: var(--font-size-xs);
+}
+
+.notification-message {
+  font-size: var(--font-size-xs);
+}
+
+/* Tooltips responsivos */
+.tooltip {
+  font-size: 10px;
+  padding: var(--spacing-xs);
+  max-width: 150px;
+}
+
+/* ==========================================================================
+   INTERACCIONES TÁCTILES
+   ========================================================================== */
+
+/* Mejoras para dispositivos táctiles */
+@media (hover: none) and (pointer: coarse) {
+  .device-item,
+  .btn,
+  .network-device,
+  .layer-control {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .btn-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .zoom-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .device-item:hover,
+  .network-device:hover,
+  .layer-control:hover {
+    transform: none;
+  }
+
+  .device-item:active,
+  .network-device:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+
+  /* Eliminar efectos hover en touch */
+  .btn:hover,
+  .input:hover,
+  .tab-button:hover {
+    background-color: initial;
+    border-color: initial;
+    color: initial;
+  }
+}
+
+/* ==========================================================================
+   TABLETS (768px y superior)
+   ========================================================================== */
+
+@media (min-width: 768px) {
+  /* Header */
+  .header {
+    height: var(--header-height-desktop);
+    padding: 0 var(--spacing-lg);
+  }
+
+  .header-logo {
+    font-size: var(--font-size-lg);
+  }
+
+  .header-logo img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .header-nav {
+    gap: var(--spacing-sm);
+  }
+
+  /* Toolbar */
+  .toolbar {
+    top: var(--header-height-desktop);
+    height: var(--toolbar-height-desktop);
+    padding: 0 var(--spacing-lg);
+    gap: var(--spacing-md);
+    overflow-x: visible;
+  }
+
+  .toolbar-group {
+    padding: 0 var(--spacing-md);
+    gap: var(--spacing-sm);
+  }
+
+  /* Sidebar */
+  .sidebar {
+    top: calc(var(--header-height-desktop) + var(--toolbar-height-desktop));
+    width: var(--sidebar-width-tablet);
+    height: calc(100vh - var(--header-height-desktop) - var(--toolbar-height-desktop));
+    transform: translateX(0);
+    position: relative;
+    z-index: var(--z-sticky);
+  }
+
+  .sidebar-toggle {
+    top: calc(var(--header-height-desktop) + var(--toolbar-height-desktop) + var(--spacing-lg));
+    left: calc(var(--sidebar-width-tablet) + var(--spacing-sm));
+  }
+
+  .sidebar.collapsed {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.collapsed + .sidebar-toggle {
+    left: var(--spacing-sm);
+  }
+
+  .sidebar-overlay {
+    display: none;
+  }
+
+  /* Contenido principal */
+  .main-content {
+    margin-left: var(--sidebar-width-tablet);
+    margin-top: calc(var(--header-height-desktop) + var(--toolbar-height-desktop));
+    height: calc(100vh - var(--header-height-desktop) - var(--toolbar-height-desktop));
+  }
+
+  .main-content.sidebar-collapsed {
+    margin-left: 0;
+  }
+
+  /* Componentes */
+  .device-library {
+    padding: var(--spacing-md);
+  }
+
+  .device-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: var(--spacing-sm);
+  }
+
+  .device-item {
+    padding: var(--spacing-sm);
+  }
+
+  .device-icon {
+    width: 40px;
+    height: 40px;
+    font-size: var(--font-size-xs);
+  }
+
+  .device-name {
+    font-size: var(--font-size-xs);
+  }
+
+  .layer-panel {
+    padding: var(--spacing-md);
+  }
+
+  .layer-control {
+    padding: var(--spacing-sm);
+  }
+
+  .layer-header {
+    gap: var(--spacing-sm);
+  }
+
+  .layer-color {
+    width: 16px;
+    height: 16px;
+  }
+
+  .layer-name {
+    font-size: var(--font-size-sm);
+  }
+
+  /* Canvas */
+  .canvas-container {
+    background-size: 20px 20px;
+  }
+
+  .network-device {
+    width: 80px;
+    height: 60px;
+  }
+
+  .device-icon-canvas {
+    width: 32px;
+    height: 24px;
+    font-size: var(--font-size-xs);
+  }
+
+  .device-label {
+    font-size: 10px;
+    max-width: 76px;
+  }
+
+  .device-status {
+    width: 12px;
+    height: 12px;
+    top: -4px;
+    right: -4px;
+  }
+
+  /* Modales */
+  .modal {
+    width: 90%;
+    max-width: 600px;
+    margin: 0;
+  }
+
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: var(--spacing-lg);
+  }
+
+  .modal-title {
+    font-size: var(--font-size-lg);
+  }
+
+  .form-row {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+  }
+
+  /* Controles */
+  .zoom-controls {
+    bottom: var(--spacing-lg);
+    right: var(--spacing-lg);
+  }
+
+  .zoom-btn {
+    width: 40px;
+    height: 40px;
+    font-size: var(--font-size-md);
+  }
+
+  .zoom-level {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-xs);
+    min-width: 50px;
+  }
+
+  .minimap {
+    bottom: var(--spacing-lg);
+    left: var(--spacing-lg);
+    width: 200px;
+    height: 150px;
+  }
+
+  /* Notificaciones */
+  .notifications-container {
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+    left: auto;
+  }
+
+  .notification {
+    max-width: 350px;
+    padding: var(--spacing-md);
+  }
+
+  .notification-title {
+    font-size: var(--font-size-sm);
+  }
+
+  .notification-message {
+    font-size: var(--font-size-sm);
+  }
+
+  .tooltip {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    max-width: 200px;
+  }
+}
+
+/* ==========================================================================
+   DESKTOP (1024px y superior)
+   ========================================================================== */
+
+@media (min-width: 1024px) {
+  .sidebar {
+    width: var(--sidebar-width-desktop);
+  }
+
+  .sidebar-toggle {
+    left: calc(var(--sidebar-width-desktop) + var(--spacing-sm));
+  }
+
+  .main-content {
+    margin-left: var(--sidebar-width-desktop);
+  }
+
+  /* Mejoras de layout para pantallas grandes */
+  .device-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  }
+
+  .form-row.three-columns {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  /* Tooltips mejorados */
+  .tooltip {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    max-width: 250px;
+  }
+}
+
+/* ==========================================================================
+   PANTALLAS EXTRA GRANDES (1280px y superior)
+   ========================================================================== */
+
+@media (min-width: 1280px) {
+  .sidebar {
+    width: 350px;
+  }
+
+  .sidebar-toggle {
+    left: calc(350px + var(--spacing-sm));
+  }
+
+  .main-content {
+    margin-left: 350px;
+  }
+
+  .device-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+
+  .network-device {
+    width: 90px;
+    height: 70px;
+  }
+
+  .device-icon-canvas {
+    width: 36px;
+    height: 28px;
+  }
+
+  .device-label {
+    font-size: 11px;
+    max-width: 86px;
+  }
+}
+
+/* ==========================================================================
+   MODO LANDSCAPE EN MÓVILES
+   ========================================================================== */
+
+@media (max-width: 767px) and (orientation: landscape) {
+  .header {
+    height: 48px;
+  }
+
+  .toolbar {
+    top: 48px;
+    height: 40px;
+  }
+
+  .sidebar {
+    top: 88px;
+    height: calc(100vh - 88px);
+    width: 250px;
+  }
+
+  .sidebar-toggle {
+    top: calc(88px + var(--spacing-sm));
+  }
+
+  .main-content {
+    margin-top: 88px;
+    height: calc(100vh - 88px);
+  }
+
+  .zoom-controls {
+    bottom: var(--spacing-sm);
+    right: var(--spacing-sm);
+  }
+
+  .minimap {
+    bottom: var(--spacing-sm);
+    left: var(--spacing-sm);
+    width: 120px;
+    height: 80px;
+  }
+
+  .modal {
+    max-height: calc(100vh - var(--spacing-md));
+  }
+}
+
+/* ==========================================================================
+   MODO PANTALLA COMPLETA
+   ========================================================================== */
+
+.fullscreen-mode {
+  .header,
+  .toolbar,
+  .sidebar {
+    display: none;
+  }
+
+  .main-content {
+    margin: 0;
+    margin-top: 0;
+    height: 100vh;
+  }
+
+  .zoom-controls {
+    bottom: var(--spacing-md);
+    right: var(--spacing-md);
+  }
+
+  .minimap {
+    bottom: var(--spacing-md);
+    left: var(--spacing-md);
+  }
+}
+
+/* ==========================================================================
+   MODO PRESENTACIÓN
+   ========================================================================== */
+
+.presentation-mode {
+  .header,
+  .toolbar,
+  .sidebar,
+  .zoom-controls,
+  .minimap {
+    display: none;
+  }
+
+  .main-content {
+    margin: 0;
+    height: 100vh;
+  }
+
+  .canvas-container {
+    background-image: none;
+  }
+
+  .network-device {
+    pointer-events: none;
+    cursor: default;
+  }
+
+  .connection-line {
+    pointer-events: none;
+  }
+}
+
+/* ==========================================================================
+   MODO IMPRESIÓN
+   ========================================================================== */
+
+@media print {
+  .header,
+  .toolbar,
+  .sidebar,
+  .zoom-controls,
+  .minimap,
+  .notifications-container,
+  .modal-backdrop,
+  .tooltip {
+    display: none !important;
+  }
+
+  .main-content {
+    margin: 0;
+    height: auto;
+    overflow: visible;
+  }
+
+  .canvas-container {
+    background: white;
+    box-shadow: none;
+  }
+
+  .network-device {
+    break-inside: avoid;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+}
+
+/* ==========================================================================
+   MODO ALTO CONTRASTE
+   ========================================================================== */
+
+@media (prefers-contrast: high) {
+  :root {
+    --border-color: #000000;
+    --border-color-dark: #333333;
+    --text-muted: #333333;
+    --bg-tertiary: #f0f0f0;
+  }
+
+  .network-device {
+    border-width: 3px;
+  }
+
+  .connection-line {
+    stroke-width: 3;
+  }
+
+  .device-status {
+    border-width: 3px;
+  }
+}
+
+/* ==========================================================================
+   MODO REDUCCIÓN DE MOVIMIENTO
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .loading-spinner {
+    animation: none;
+  }
+
+  .skeleton {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   MODO OSCURO RESPONSIVO
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #1a202c;
+    --bg-secondary: #2d3748;
+    --bg-tertiary: #4a5568;
+    --bg-dark: #0f1419;
+    
+    --text-primary: #e2e8f0;
+    --text-secondary: #cbd5e0;
+    --text-muted: #a0aec0;
+    --text-light: #718096;
+    
+    --border-color: #4a5568;
+    --border-color-dark: #2d3748;
+  }
+
+  .canvas-container {
+    background-color: var(--bg-primary);
+    background-image: 
+      linear-gradient(var(--border-color) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+  }
+
+  .network-device {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+  }
+
+  .device-label {
+    color: var(--text-primary);
+  }
+}
+
+/* ==========================================================================
+   UTILIDADES RESPONSIVAS
+   ========================================================================== */
+
+/* Visibilidad responsiva */
+.hidden-mobile {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .hidden-mobile {
+    display: initial;
+  }
+  
+  .hidden-tablet {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hidden-tablet {
+    display: initial;
+  }
+  
+  .hidden-desktop {
+    display: none;
+  }
+}
+
+.visible-mobile-only {
+  display: initial;
+}
+
+@media (min-width: 768px) {
+  .visible-mobile-only {
+    display: none;
+  }
+}
+
+/* Texto responsivo */
+.text-responsive {
+  font-size: var(--font-size-xs);
+}
+
+@media (min-width: 768px) {
+  .text-responsive {
+    font-size: var(--font-size-sm);
+  }
+}
+
+@media (min-width: 1024px) {
+  .text-responsive {
+    font-size: var(--font-size-md);
+  }
+}
+
+/* Márgenes y padding responsivos */
+.p-responsive {
+  padding: var(--spacing-sm);
+}
+
+@media (min-width: 768px) {
+  .p-responsive {
+    padding: var(--spacing-md);
+  }
+}
+
+@media (min-width: 1024px) {
+  .p-responsive {
+    padding: var(--spacing-lg);
+  }
+}

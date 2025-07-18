@@ -1,376 +1,532 @@
 /**
- * Layer Manager - Gestión del sistema de capas de red
+ * LayerManager - Gestor de capas para diagramas de red
+ * Maneja la organización jerárquica de dispositivos en capas lógicas
+ * Capas soportadas: ISP, WAN, Core, Distribution, Access, DMZ, User, IoT
  */
 
-const LayerManager = {
-    app: null,
-    layers: [
-        { id: 'isp', name: 'ISP Layer', icon: '🌍', description: 'Proveedor de servicios de Internet', color: '#8e44ad' },
-        { id: 'wan', name: 'WAN Layer', icon: '🌐', description: 'Red de área amplia', color: '#e74c3c' },
-        { id: 'core', name: 'Core Layer', icon: '⚡', description: 'Núcleo de la red', color: '#3498db' },
-        { id: 'distribution', name: 'Distribution Layer', icon: '📊', description: 'Capa de distribución', color: '#2ecc71' },
-        { id: 'access', name: 'Access Layer', icon: '🔌', description: 'Capa de acceso', color: '#f39c12' },
-        { id: 'dmz', name: 'DMZ Layer', icon: '🛡️', description: 'Zona desmilitarizada', color: '#e67e22' },
-        { id: 'user', name: 'User Layer', icon: '👥', description: 'Dispositivos de usuario', color: '#9b59b6' },
-        { id: 'iot', name: 'IoT Layer', icon: '🌐', description: 'Internet de las cosas', color: '#1abc9c' }
-    ],
+class LayerManager {
+    constructor() {
+        this.layers = new Map();
+        this.layerOrder = ['ISP', 'WAN', 'Core', 'Distribution', 'Access', 'DMZ', 'User', 'IoT'];
+        this.layerColors = {
+            'ISP': '#FF6B6B',
+            'WAN': '#4ECDC4', 
+            'Core': '#45B7D1',
+            'Distribution': '#96CEB4',
+            'Access': '#FECA57',
+            'DMZ': '#FF9FF3',
+            'User': '#54A0FF',
+            'IoT': '#5F27CD'
+        };
+        this.layerVisibility = new Map();
+        this.deviceLayers = new Map(); // Mapea device ID a layer
+        this.init();
+    }
 
     /**
      * Inicializa el gestor de capas
      */
-    init(app) {
-        this.app = app;
-        this.setupLayerBackgrounds();
-        console.log('✓ LayerManager inicializado');
-    },
+    init() {
+        // Inicializar todas las capas
+        this.layerOrder.forEach(layerName => {
+            this.layers.set(layerName, {
+                name: layerName,
+                devices: new Set(),
+                visible: true,
+                color: this.layerColors[layerName],
+                description: this.getLayerDescription(layerName),
+                yPosition: this.getLayerYPosition(layerName)
+            });
+            this.layerVisibility.set(layerName, true);
+        });
+
+        this.createLayerControls();
+        this.attachEventListeners();
+    }
 
     /**
-     * Configura los fondos de las capas
+     * Obtiene la descripción de una capa
      */
-    setupLayerBackgrounds() {
-        const style = document.createElement('style');
-        style.textContent = this.layers.map(layer => `
-            .layer-${layer.id} {
-                background-color: ${this.hexToRgba(layer.color, 0.1)};
-            }
-        `).join('\n');
-        document.head.appendChild(style);
-    },
+    getLayerDescription(layerName) {
+        const descriptions = {
+            'ISP': 'Proveedor de Servicios de Internet',
+            'WAN': 'Red de Área Amplia',
+            'Core': 'Núcleo de la red - equipos principales',
+            'Distribution': 'Capa de distribución - agregación',
+            'Access': 'Capa de acceso - conexión de usuarios',
+            'DMZ': 'Zona desmilitarizada - servicios públicos',
+            'User': 'Dispositivos de usuario final',
+            'IoT': 'Dispositivos Internet de las Cosas'
+        };
+        return descriptions[layerName] || '';
+    }
 
     /**
-     * Convierte hex a rgba
+     * Calcula la posición Y sugerida para una capa
      */
-    hexToRgba(hex, alpha) {
-        const r = parseInt(hex.slice(1, 3), 16);
-        const g = parseInt(hex.slice(3, 5), 16);
-        const b = parseInt(hex.slice(5, 7), 16);
-        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-    },
+    getLayerYPosition(layerName) {
+        const index = this.layerOrder.indexOf(layerName);
+        return 100 + (index * 120); // Espaciado de 120px entre capas
+    }
 
     /**
-     * Establece la capa actual
+     * Asigna un dispositivo a una capa
      */
-    setCurrentLayer(layerId) {
-        if (!this.isValidLayer(layerId)) {
-            console.warn(`Capa inválida: ${layerId}`);
-            return;
+    assignDeviceToLayer(deviceId, layerName) {
+        if (!this.layers.has(layerName)) {
+            console.warn(`Capa ${layerName} no existe`);
+            return false;
         }
 
-        this.app.setState({ currentLayer: layerId });
-        this.updateLayerIndicator(layerId);
-        this.updateLayerSelector(layerId);
-        
-        const layer = this.getLayer(layerId);
-        this.app.setStatus(`Capa actual: ${layer.name}`);
-        
-        // Notificar cambio de capa
-        this.dispatchLayerChange(layerId);
-    },
+        // Remover de capa anterior si existe
+        this.removeDeviceFromLayer(deviceId);
+
+        // Asignar a nueva capa
+        this.layers.get(layerName).devices.add(deviceId);
+        this.deviceLayers.set(deviceId, layerName);
+
+        // Disparar evento
+        this.dispatchEvent('deviceAssigned', {
+            deviceId,
+            layerName,
+            layer: this.layers.get(layerName)
+        });
+
+        this.updateLayerVisuals();
+        return true;
+    }
 
     /**
-     * Obtiene información de una capa
+     * Remueve un dispositivo de su capa actual
      */
-    getLayer(layerId) {
-        return this.layers.find(layer => layer.id === layerId);
-    },
+    removeDeviceFromLayer(deviceId) {
+        const currentLayer = this.deviceLayers.get(deviceId);
+        if (currentLayer && this.layers.has(currentLayer)) {
+            this.layers.get(currentLayer).devices.delete(deviceId);
+            this.deviceLayers.delete(deviceId);
+            
+            this.dispatchEvent('deviceRemoved', {
+                deviceId,
+                layerName: currentLayer
+            });
+        }
+    }
 
     /**
-     * Verifica si una capa es válida
+     * Obtiene la capa de un dispositivo
      */
-    isValidLayer(layerId) {
-        return this.layers.some(layer => layer.id === layerId);
-    },
+    getDeviceLayer(deviceId) {
+        return this.deviceLayers.get(deviceId) || null;
+    }
+
+    /**
+     * Obtiene todos los dispositivos de una capa
+     */
+    getLayerDevices(layerName) {
+        const layer = this.layers.get(layerName);
+        return layer ? Array.from(layer.devices) : [];
+    }
 
     /**
      * Alterna la visibilidad de una capa
      */
-    toggleVisibility(layerId, visible) {
-        if (!this.isValidLayer(layerId)) return;
+    toggleLayerVisibility(layerName) {
+        if (!this.layers.has(layerName)) return false;
 
-        this.app.state.layerVisibility[layerId] = visible;
+        const layer = this.layers.get(layerName);
+        layer.visible = !layer.visible;
+        this.layerVisibility.set(layerName, layer.visible);
+
+        this.updateDeviceVisibility(layerName);
+        this.updateLayerControls();
         
-        // Actualizar visibilidad de dispositivos
-        this.updateDeviceVisibility(layerId, visible);
+        this.dispatchEvent('layerVisibilityChanged', {
+            layerName,
+            visible: layer.visible
+        });
+
+        return layer.visible;
+    }
+
+    /**
+     * Establece la visibilidad de una capa
+     */
+    setLayerVisibility(layerName, visible) {
+        if (!this.layers.has(layerName)) return false;
+
+        const layer = this.layers.get(layerName);
+        layer.visible = visible;
+        this.layerVisibility.set(layerName, visible);
+
+        this.updateDeviceVisibility(layerName);
+        this.updateLayerControls();
         
-        // Actualizar visibilidad de conexiones
-        ConnectionManager.updateVisibility();
-        
-        const layer = this.getLayer(layerId);
-        const status = visible ? 'visible' : 'oculta';
-        Notifications.info(`Capa ${layer.name} ${status}`);
-    },
+        this.dispatchEvent('layerVisibilityChanged', {
+            layerName,
+            visible
+        });
+
+        return true;
+    }
 
     /**
      * Actualiza la visibilidad de dispositivos en una capa
      */
-    updateDeviceVisibility(layerId, visible) {
-        this.app.state.devices.forEach(device => {
-            if (device.layer === layerId) {
-                const element = document.getElementById(device.id);
-                if (element) {
-                    element.style.display = visible ? 'block' : 'none';
+    updateDeviceVisibility(layerName) {
+        const layer = this.layers.get(layerName);
+        if (!layer) return;
+
+        layer.devices.forEach(deviceId => {
+            const deviceElement = document.querySelector(`[data-device-id="${deviceId}"]`);
+            if (deviceElement) {
+                deviceElement.style.display = layer.visible ? 'block' : 'none';
+                deviceElement.classList.toggle('layer-hidden', !layer.visible);
+            }
+        });
+    }
+
+    /**
+     * Organiza automáticamente los dispositivos por capas
+     */
+    autoOrganizeByLayers() {
+        this.layerOrder.forEach((layerName, index) => {
+            const layer = this.layers.get(layerName);
+            const yPosition = layer.yPosition;
+            
+            let xOffset = 100;
+            const deviceSpacing = 150;
+
+            layer.devices.forEach(deviceId => {
+                const deviceElement = document.querySelector(`[data-device-id="${deviceId}"]`);
+                if (deviceElement && layer.visible) {
+                    // Animar posición
+                    this.animateDevicePosition(deviceElement, xOffset, yPosition);
+                    xOffset += deviceSpacing;
+                }
+            });
+        });
+
+        this.dispatchEvent('layersOrganized');
+    }
+
+    /**
+     * Anima la posición de un dispositivo
+     */
+    animateDevicePosition(element, x, y) {
+        element.style.transition = 'all 0.3s ease-in-out';
+        element.style.left = x + 'px';
+        element.style.top = y + 'px';
+    }
+
+    /**
+     * Crea los controles de capas en la UI
+     */
+    createLayerControls() {
+        const sidebar = document.querySelector('.sidebar') || document.body;
+        
+        const layerPanel = document.createElement('div');
+        layerPanel.className = 'layer-panel';
+        layerPanel.innerHTML = `
+            <div class="layer-panel-header">
+                <h3>Capas de Red</h3>
+                <button class="btn-organize" title="Organizar por capas">
+                    <i class="icon-organize"></i>
+                </button>
+            </div>
+            <div class="layer-controls"></div>
+        `;
+
+        const controlsContainer = layerPanel.querySelector('.layer-controls');
+        
+        this.layerOrder.forEach(layerName => {
+            const layer = this.layers.get(layerName);
+            const layerControl = this.createLayerControl(layer);
+            controlsContainer.appendChild(layerControl);
+        });
+
+        sidebar.appendChild(layerPanel);
+    }
+
+    /**
+     * Crea un control individual para una capa
+     */
+    createLayerControl(layer) {
+        const control = document.createElement('div');
+        control.className = 'layer-control';
+        control.dataset.layer = layer.name;
+        
+        control.innerHTML = `
+            <div class="layer-header">
+                <div class="layer-color" style="background-color: ${layer.color}"></div>
+                <span class="layer-name">${layer.name}</span>
+                <div class="layer-actions">
+                    <button class="btn-layer-visibility" data-visible="${layer.visible}">
+                        <i class="icon-${layer.visible ? 'eye' : 'eye-off'}"></i>
+                    </button>
+                    <span class="device-count">${layer.devices.size}</span>
+                </div>
+            </div>
+            <div class="layer-description">${layer.description}</div>
+        `;
+
+        return control;
+    }
+
+    /**
+     * Actualiza los controles de capas
+     */
+    updateLayerControls() {
+        this.layerOrder.forEach(layerName => {
+            const layer = this.layers.get(layerName);
+            const control = document.querySelector(`[data-layer="${layerName}"]`);
+            
+            if (control) {
+                const visibilityBtn = control.querySelector('.btn-layer-visibility');
+                const deviceCount = control.querySelector('.device-count');
+                const icon = visibilityBtn.querySelector('i');
+                
+                visibilityBtn.dataset.visible = layer.visible;
+                icon.className = `icon-${layer.visible ? 'eye' : 'eye-off'}`;
+                deviceCount.textContent = layer.devices.size;
+                
+                control.classList.toggle('layer-hidden', !layer.visible);
+            }
+        });
+    }
+
+    /**
+     * Actualiza visuales de las capas en el canvas
+     */
+    updateLayerVisuals() {
+        // Actualizar indicadores visuales en el canvas
+        this.layerOrder.forEach(layerName => {
+            const layer = this.layers.get(layerName);
+            this.drawLayerBackground(layer);
+        });
+    }
+
+    /**
+     * Dibuja el fondo de una capa en el canvas
+     */
+    drawLayerBackground(layer) {
+        const canvas = document.querySelector('#main-canvas');
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        const canvasWidth = canvas.width;
+        const layerHeight = 100;
+        
+        if (layer.visible && layer.devices.size > 0) {
+            ctx.save();
+            ctx.globalAlpha = 0.1;
+            ctx.fillStyle = layer.color;
+            ctx.fillRect(0, layer.yPosition - 50, canvasWidth, layerHeight);
+            
+            // Etiqueta de la capa
+            ctx.globalAlpha = 0.8;
+            ctx.fillStyle = layer.color;
+            ctx.font = 'bold 12px Arial';
+            ctx.fillText(layer.name, 10, layer.yPosition - 30);
+            ctx.restore();
+        }
+    }
+
+    /**
+     * Adjunta event listeners
+     */
+    attachEventListeners() {
+        // Event listener para controles de visibilidad
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.btn-layer-visibility')) {
+                const layerControl = e.target.closest('.layer-control');
+                const layerName = layerControl.dataset.layer;
+                this.toggleLayerVisibility(layerName);
+            }
+            
+            if (e.target.closest('.btn-organize')) {
+                this.autoOrganizeByLayers();
+            }
+        });
+
+        // Event listener para drag and drop entre capas
+        document.addEventListener('dragover', (e) => {
+            const layerControl = e.target.closest('.layer-control');
+            if (layerControl) {
+                e.preventDefault();
+                layerControl.classList.add('drag-over');
+            }
+        });
+
+        document.addEventListener('dragleave', (e) => {
+            const layerControl = e.target.closest('.layer-control');
+            if (layerControl) {
+                layerControl.classList.remove('drag-over');
+            }
+        });
+
+        document.addEventListener('drop', (e) => {
+            const layerControl = e.target.closest('.layer-control');
+            if (layerControl) {
+                e.preventDefault();
+                layerControl.classList.remove('drag-over');
+                
+                const layerName = layerControl.dataset.layer;
+                const deviceId = e.dataTransfer.getData('text/device-id');
+                
+                if (deviceId) {
+                    this.assignDeviceToLayer(deviceId, layerName);
                 }
             }
         });
-    },
+    }
 
     /**
-     * Actualiza el indicador de capa actual
-     */
-    updateLayerIndicator(layerId) {
-        const indicator = document.getElementById('layer-indicator');
-        if (indicator) {
-            const layer = this.getLayer(layerId);
-            indicator.textContent = `${layer.icon} ${layer.name}`;
-        }
-    },
-
-    /**
-     * Actualiza el selector de capa
-     */
-    updateLayerSelector(layerId) {
-        const selector = document.getElementById('current-layer');
-        if (selector) {
-            selector.value = layerId;
-        }
-    },
-
-    /**
-     * Obtiene estadísticas por capa
+     * Obtiene estadísticas de las capas
      */
     getLayerStats() {
         const stats = {};
-        
-        this.layers.forEach(layer => {
-            const deviceCount = this.app.state.devices.filter(d => d.layer === layer.id).length;
-            const connectionCount = this.getLayerConnections(layer.id).length;
-            
-            stats[layer.id] = {
-                name: layer.name,
-                devices: deviceCount,
-                connections: connectionCount,
-                visible: this.app.state.layerVisibility[layer.id]
+        this.layerOrder.forEach(layerName => {
+            const layer = this.layers.get(layerName);
+            stats[layerName] = {
+                deviceCount: layer.devices.size,
+                visible: layer.visible,
+                color: layer.color
             };
         });
-        
         return stats;
-    },
+    }
 
     /**
-     * Obtiene conexiones que involucran una capa específica
+     * Exporta configuración de capas
      */
-    getLayerConnections(layerId) {
-        return this.app.state.connections.filter(connection => {
-            const device1 = this.app.getDevice(connection.device1);
-            const device2 = this.app.getDevice(connection.device2);
-            return (device1 && device1.layer === layerId) || 
-                   (device2 && device2.layer === layerId);
-        });
-    },
-
-    /**
-     * Mueve un dispositivo a otra capa
-     */
-    moveDeviceToLayer(deviceId, targetLayerId) {
-        if (!this.isValidLayer(targetLayerId)) return false;
-
-        const device = this.app.getDevice(deviceId);
-        if (!device) return false;
-
-        const oldLayer = device.layer;
-        device.layer = targetLayerId;
-
-        // Actualizar visualización
-        DeviceManager.updateRender(device);
-
-        // Actualizar visibilidad si la nueva capa está oculta
-        if (!this.app.state.layerVisibility[targetLayerId]) {
-            const element = document.getElementById(deviceId);
-            if (element) element.style.display = 'none';
-        }
-
-        const targetLayer = this.getLayer(targetLayerId);
-        Notifications.success(`${device.name} movido a ${targetLayer.name}`);
-        
-        return true;
-    },
-
-    /**
-     * Organiza dispositivos por capas automáticamente
-     */
-    autoOrganizeByLayers() {
-        const layerPositions = this.getLayerPositions();
-        const layerGroups = this.groupDevicesByLayer();
-
-        Object.keys(layerGroups).forEach(layerId => {
-            const devices = layerGroups[layerId];
-            const position = layerPositions[layerId];
-            
-            if (devices.length > 0 && position) {
-                this.arrangeDevicesInLayer(devices, position);
-            }
-        });
-
-        ConnectionManager.updateAll();
-        Notifications.success('Dispositivos organizados por capas');
-    },
-
-    /**
-     * Obtiene las posiciones Y de cada capa
-     */
-    getLayerPositions() {
-        return {
-            'isp': { y: 50, spacing: 200 },
-            'wan': { y: 200, spacing: 200 },
-            'core': { y: 350, spacing: 200 },
-            'distribution': { y: 500, spacing: 200 },
-            'access': { y: 650, spacing: 200 },
-            'dmz': { y: 800, spacing: 200 },
-            'user': { y: 950, spacing: 200 },
-            'iot': { y: 1100, spacing: 200 }
+    exportLayerConfig() {
+        const config = {
+            layers: {},
+            deviceAssignments: {}
         };
-    },
 
-    /**
-     * Agrupa dispositivos por capa
-     */
-    groupDevicesByLayer() {
-        const groups = {};
-        
-        this.app.state.devices.forEach(device => {
-            if (!groups[device.layer]) {
-                groups[device.layer] = [];
-            }
-            groups[device.layer].push(device);
+        this.layers.forEach((layer, name) => {
+            config.layers[name] = {
+                visible: layer.visible,
+                color: layer.color,
+                description: layer.description,
+                yPosition: layer.yPosition
+            };
         });
-        
-        return groups;
-    },
 
-    /**
-     * Organiza dispositivos dentro de una capa
-     */
-    arrangeDevicesInLayer(devices, position) {
-        const spacing = Math.min(position.spacing, 2400 / Math.max(devices.length, 1));
-        const startX = (2400 - (devices.length - 1) * spacing) / 2;
-
-        devices.forEach((device, index) => {
-            device.x = Math.max(50, startX + index * spacing);
-            device.y = position.y;
-            
-            const deviceElement = document.getElementById(device.id);
-            if (deviceElement) {
-                deviceElement.style.left = device.x + 'px';
-                deviceElement.style.top = device.y + 'px';
-            }
+        this.deviceLayers.forEach((layer, deviceId) => {
+            config.deviceAssignments[deviceId] = layer;
         });
-    },
+
+        return config;
+    }
 
     /**
-     * Valida la jerarquía de capas
+     * Importa configuración de capas
      */
-    validateLayerHierarchy() {
+    importLayerConfig(config) {
+        if (config.layers) {
+            Object.entries(config.layers).forEach(([name, layerConfig]) => {
+                const layer = this.layers.get(name);
+                if (layer) {
+                    layer.visible = layerConfig.visible;
+                    layer.color = layerConfig.color || layer.color;
+                    layer.description = layerConfig.description || layer.description;
+                    layer.yPosition = layerConfig.yPosition || layer.yPosition;
+                }
+            });
+        }
+
+        if (config.deviceAssignments) {
+            Object.entries(config.deviceAssignments).forEach(([deviceId, layerName]) => {
+                this.assignDeviceToLayer(deviceId, layerName);
+            });
+        }
+
+        this.updateLayerControls();
+        this.updateLayerVisuals();
+    }
+
+    /**
+     * Limpia todas las asignaciones de dispositivos
+     */
+    clearAllAssignments() {
+        this.deviceLayers.clear();
+        this.layers.forEach(layer => {
+            layer.devices.clear();
+        });
+        this.updateLayerControls();
+        this.dispatchEvent('layersCleared');
+    }
+
+    /**
+     * Valida la topología de capas
+     */
+    validateLayerTopology() {
         const issues = [];
-        const stats = this.getLayerStats();
-
-        // Verificar que las capas críticas tengan dispositivos
-        const criticalLayers = ['core', 'distribution', 'access'];
-        criticalLayers.forEach(layerId => {
-            if (stats[layerId].devices === 0 && this.app.state.devices.length > 5) {
-                const layer = this.getLayer(layerId);
-                issues.push(`Capa ${layer.name} está vacía en una red compleja`);
+        
+        // Verificar dispositivos sin capa asignada
+        const allDevices = document.querySelectorAll('[data-device-id]');
+        allDevices.forEach(device => {
+            const deviceId = device.dataset.deviceId;
+            if (!this.deviceLayers.has(deviceId)) {
+                issues.push({
+                    type: 'unassigned_device',
+                    deviceId,
+                    message: `Dispositivo ${deviceId} no tiene capa asignada`
+                });
             }
         });
 
-        // Verificar redundancia en core
-        if (stats.core.devices === 1) {
-            issues.push('Capa Core tiene un solo dispositivo (falta redundancia)');
-        }
-
-        // Verificar conexiones entre capas
-        const interLayerConnections = this.getInterLayerConnections();
-        if (interLayerConnections.length === 0 && this.app.state.devices.length > 2) {
-            issues.push('No hay conexiones entre diferentes capas');
-        }
+        // Verificar capas vacías que deberían tener dispositivos
+        const criticalLayers = ['Core', 'Distribution', 'Access'];
+        criticalLayers.forEach(layerName => {
+            const layer = this.layers.get(layerName);
+            if (layer.devices.size === 0) {
+                issues.push({
+                    type: 'empty_critical_layer',
+                    layerName,
+                    message: `Capa crítica ${layerName} está vacía`
+                });
+            }
+        });
 
         return issues;
-    },
+    }
 
     /**
-     * Obtiene conexiones entre diferentes capas
+     * Dispatcher de eventos personalizado
      */
-    getInterLayerConnections() {
-        return this.app.state.connections.filter(connection => {
-            const device1 = this.app.getDevice(connection.device1);
-            const device2 = this.app.getDevice(connection.device2);
-            return device1 && device2 && device1.layer !== device2.layer;
+    dispatchEvent(eventName, data = {}) {
+        const event = new CustomEvent(`layerManager:${eventName}`, {
+            detail: data
         });
-    },
+        document.dispatchEvent(event);
+    }
 
     /**
-     * Muestra/oculta todas las capas
+     * Destructor - limpia recursos
      */
-    toggleAllLayers(visible) {
-        this.layers.forEach(layer => {
-            this.toggleVisibility(layer.id, visible);
-        });
+    destroy() {
+        const layerPanel = document.querySelector('.layer-panel');
+        if (layerPanel) {
+            layerPanel.remove();
+        }
         
-        const action = visible ? 'mostradas' : 'ocultadas';
-        Notifications.info(`Todas las capas ${action}`);
-    },
+        this.layers.clear();
+        this.deviceLayers.clear();
+        this.layerVisibility.clear();
+    }
+}
 
-    /**
-     * Muestra solo una capa específica
-     */
-    showOnlyLayer(layerId) {
-        this.layers.forEach(layer => {
-            this.toggleVisibility(layer.id, layer.id === layerId);
-        });
-        
-        const layer = this.getLayer(layerId);
-        Notifications.info(`Mostrando solo la capa ${layer.name}`);
-    },
+// Exportar para uso global
+window.LayerManager = LayerManager;
 
-    /**
-     * Obtiene dispositivos de una capa específica
-     */
-    getDevicesInLayer(layerId) {
-        return this.app.state.devices.filter(device => device.layer === layerId);
-    },
-
-    /**
-     * Calcula métricas de una capa
-     */
-    getLayerMetrics(layerId) {
-        const devices = this.getDevicesInLayer(layerId);
-        const connections = this.getLayerConnections(layerId);
-        
-        const deviceTypes = {};
-        devices.forEach(device => {
-            deviceTypes[device.type] = (deviceTypes[device.type] || 0) + 1;
-        });
-
-        const statusCounts = {
-            up: devices.filter(d => d.status === 'up').length,
-            down: devices.filter(d => d.status === 'down').length,
-            warning: devices.filter(d => d.status === 'warning').length
-        };
-
-        return {
-            deviceCount: devices.length,
-            connectionCount: connections.length,
-            deviceTypes,
-            statusCounts,
-            coverage: this.calculateLayerCoverage(layerId)
-        };
-    },
-
-    /**
-     * Calcula la cobertura de una capa
-     */
-    calculateLayerCoverage(layerId) {
-        const devices = this.getDevicesInLayer(layerId);
-        if (devices.length === 0) return 0;
-
-        // Calcular área ocupada por dispositivos
-        let minX = Infinity, minY = Infinity;
+// Auto-inicialización si DOM está listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        window.layerManager = new LayerManager();
+    });
+} else {
+    window.layerManager = new LayerManager();
+}
