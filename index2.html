@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Diagram Creator Pro v2.0</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="./data/default-configs.json" as="fetch" type="application/json" crossorigin>
+    
+    <!-- Meta tags for SEO and PWA -->
+    <meta name="description" content="Aplicación web avanzada para crear, editar y gestionar diagramas de redes de manera profesional">
+    <meta name="keywords" content="diagrama de red, network diagram, topología, red, infraestructura">
+    <meta name="author" content="Network Diagram Creator Pro">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="./assets/images/favicon.ico" type="image/x-icon">
+    
+    <!-- CSS - Orden de carga optimizado -->
+    <link rel="stylesheet" href="./assets/css/components.css">
+    <link rel="stylesheet" href="./assets/css/responsive.css">
+    
+    <!-- Inline CSS crítico para evitar FOUC -->
+    <style>
+        /* CSS crítico inline para carga inicial */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #ffffff;
+            overflow: hidden;
+        }
+        
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: white;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loading-logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .loading-text {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #dc3545;
+            color: white;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9998;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .error-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .error-message {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+        }
+        
+        .error-details {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            max-width: 800px;
+            word-break: break-all;
+            margin-bottom: 2rem;
+        }
+        
+        .retry-button {
+            background-color: white;
+            color: #dc3545;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .retry-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Pantalla de carga -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-logo">🌐 Network Diagram Creator Pro</div>
+        <div class="loading-text">Cargando aplicación...</div>
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <!-- Pantalla de error -->
+    <div id="error-screen" class="error-screen">
+        <div class="error-title">⚠️ Error de Inicialización</div>
+        <div class="error-message">
+            Ha ocurrido un error al cargar la aplicación. 
+            Por favor, verifica la consola del navegador para más detalles.
+        </div>
+        <div id="error-details" class="error-details" style="display: none;"></div>
+        <button class="retry-button" onclick="location.reload()">
+            🔄 Reintentar
+        </button>
+    </div>
+
+    <!-- Header Principal -->
+    <header class="header" id="main-header" style="display: none;">
+        <div class="header-logo">
+            <img src="./assets/images/logo.png" alt="Logo" onerror="this.style.display='none'">
+            <span>Network Diagram Creator Pro</span>
+            <span class="version">v2.0</span>
+        </div>
+        
+        <nav class="header-nav">
+            <button class="btn btn-secondary" data-action="nuevo" title="Nuevo proyecto (Ctrl+N)">
+                📄 Nuevo
+            </button>
+            <button class="btn btn-secondary" data-action="guardar" title="Guardar proyecto (Ctrl+S)">
+                💾 Guardar
+            </button>
+            <button class="btn btn-secondary" data-action="cargar" title="Cargar proyecto (Ctrl+O)">
+                📁 Cargar
+            </button>
+            <button class="btn btn-secondary" data-action="exportar" title="Exportar diagrama (Ctrl+E)">
+                📤 Exportar
+            </button>
+        </nav>
+    </header>
+
+    <!-- Toolbar de Herramientas -->
+    <div class="toolbar" id="main-toolbar" style="display: none;">
+        <div class="toolbar-group">
+            <button class="btn btn-icon active" data-tool="select" title="Seleccionar (V)">
+                🔍
+            </button>
+            <button class="btn btn-icon" data-tool="connect" title="Conectar dispositivos (C)">
+                🔗 Conectar
+            </button>
+            <button class="btn btn-icon" data-tool="pan" title="Mover vista">
+                ✋
+            </button>
+        </div>
+        
+        <div class="toolbar-group">
+            <label for="connection-type">Tipo de conexión:</label>
+            <select id="connection-type" class="input" style="width: auto; display: inline-block;">
+                <option value="ethernet">UTP (Verde)</option>
+                <option value="fiber">Fibra Óptica</option>
+                <option value="wireless">Inalámbrico</option>
+                <option value="serial">Serial</option>
+                <option value="coaxial">Coaxial</option>
+            </select>
+        </div>
+        
+        <div class="toolbar-group">
+            <button class="btn btn-secondary" data-action="auto-organizar" title="Organizar automáticamente">
+                🎯 Auto-organizar
+            </button>
+            <button class="btn btn-secondary" data-action="validar" title="Validar topología">
+                ✅ Validar
+            </button>
+        </div>
+        
+        <div class="toolbar-group">
+            <button class="btn btn-secondary" data-action="limpiar" title="Limpiar canvas">
+                🗑️ Limpiar
+            </button>
+        </div>
+        
+        <div class="toolbar-group">
+            <span id="status-text">Listo</span>
+        </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="main-content" id="main-content" style="display: none;">
+        <!-- Área del Canvas -->
+        <div class="canvas-container" id="canvas-container">
+            <canvas id="main-canvas"></canvas>
+            
+            <!-- Overlay para elementos UI sobre el canvas -->
+            <div class="canvas-overlay" id="canvas-overlay"></div>
+        </div>
+        
+        <!-- Controles de Zoom -->
+        <div class="zoom-controls" id="zoom-controls">
+            <button class="zoom-btn" id="zoom-in" title="Acercar (Ctrl++)">+</button>
+            <div class="zoom-level" id="zoom-level">100%</div>
+            <button class="zoom-btn" id="zoom-out" title="Alejar (Ctrl+-)">-</button>
+            <button class="zoom-btn" id="zoom-fit" title="Ajustar (Ctrl+0)">⌂</button>
+        </div>
+        
+        <!-- Minimap -->
+        <div class="minimap" id="minimap" style="display: none;">
+            <canvas class="minimap-canvas" id="minimap-canvas"></canvas>
+            <div class="minimap-viewport" id="minimap-viewport"></div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="main-sidebar" style="display: none;">
+        <!-- Tabs del Sidebar -->
+        <div class="sidebar-tabs">
+            <button class="sidebar-tab active" data-tab="devices">
+                🖥️ Dispositivos
+            </button>
+            <button class="sidebar-tab" data-tab="layers">
+                📚 Capas
+            </button>
+            <button class="sidebar-tab" data-tab="properties">
+                ⚙️ Propiedades
+            </button>
+        </div>
+        
+        <!-- Contenido de Dispositivos -->
+        <div class="sidebar-content active" data-tab-content="devices">
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <span>Biblioteca de Dispositivos</span>
+                    <button class="btn btn-sm" id="refresh-devices" title="Actualizar biblioteca">
+                        🔄
+                    </button>
+                </div>
+                
+                <div class="search-box">
+                    <input type="text" class="input" id="device-search" placeholder="Buscar dispositivos...">
+                </div>
+                
+                <div class="device-library" id="device-library">
+                    <!-- Los dispositivos se cargarán dinámicamente -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contenido de Capas -->
+        <div class="sidebar-content" data-tab-content="layers">
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <span>Gestión de Capas</span>
+                    <button class="btn btn-sm" id="organize-layers" title="Organizar por capas">
+                        🎯
+                    </button>
+                </div>
+                
+                <div class="layer-panel" id="layer-panel">
+                    <!-- Las capas se cargarán dinámicamente -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contenido de Propiedades -->
+        <div class="sidebar-content" data-tab-content="properties">
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <span>Propiedades del Dispositivo</span>
+                </div>
+                
+                <div id="properties-panel">
+                    <div class="no-selection">
+                        <p>Selecciona un dispositivo para ver sus propiedades</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toggle del Sidebar -->
+    <button class="sidebar-toggle" id="sidebar-toggle" style="display: none;">
+        ◀
+    </button>
+
+    <!-- Contenedor de Notificaciones -->
+    <div class="notifications-container" id="notifications-container"></div>
+
+    <!-- Scripts -->
+    <script>
+        // Variables globales de configuración
+        window.APP_CONFIG = {
+            version: '2.0.0',
+            debug: true,
+            maxLoadTime: 10000, // 10 segundos máximo para cargar
+            autoSave: true,
+            autoSaveInterval: 30000
+        };
+        
+        // Manejo de errores global
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.error('Error global:', {message, source, lineno, colno, error});
+            showError('Error JavaScript: ' + message, error);
+            return true;
+        };
+        
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('Promise rechazada:', event.reason);
+            showError('Error de promesa: ' + event.reason, event.reason);
+        });
+        
+        // Función para mostrar errores
+        function showError(message, details) {
+            const loadingScreen = document.getElementById('loading-screen');
+            const errorScreen = document.getElementById('error-screen');
+            const errorDetails = document.getElementById('error-details');
+            
+            loadingScreen.style.display = 'none';
+            errorScreen.style.display = 'flex';
+            
+            if (details) {
+                errorDetails.textContent = details.toString();
+                errorDetails.style.display = 'block';
+            }
+        }
+        
+        // Función para ocultar la pantalla de carga
+        function hideLoadingScreen() {
+            const loadingScreen = document.getElementById('loading-screen');
+            const mainElements = [
+                'main-header', 'main-toolbar', 'main-content', 
+                'main-sidebar', 'sidebar-toggle', 'zoom-controls'
+            ];
+            
+            loadingScreen.classList.add('hidden');
+            
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                mainElements.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) element.style.display = '';
+                });
+            }, 500);
+        }
+        
+        // Timeout de seguridad para la carga
+        setTimeout(() => {
+            if (!window.NetworkDiagram || !window.NetworkDiagram.initialized) {
+                showError(
+                    'La aplicación tardó demasiado en cargar. Esto puede deberse a problemas de conectividad o archivos faltantes.',
+                    'Timeout de inicialización después de ' + (window.APP_CONFIG.maxLoadTime / 1000) + ' segundos'
+                );
+            }
+        }, window.APP_CONFIG.maxLoadTime);
+    </script>
+    
+    <!-- Cargar configuración por defecto primero -->
+    <script>
+        // Función para cargar configuración
+        async function loadDefaultConfig() {
+            try {
+                const response = await fetch('./data/default-configs.json');
+                if (response.ok) {
+                    window.defaultConfigs = await response.json();
+                    console.log('✅ Configuración cargada desde archivo');
+                } else {
+                    console.warn('⚠️ No se pudo cargar configuración externa');
+                }
+            } catch (error) {
+                console.warn('⚠️ Error cargando configuración:', error);
+            }
+        }
+        
+        // Cargar configuración inmediatamente
+        loadDefaultConfig();
+    </script>
+    
+    <!-- Cargar CSS del LayerManager si existe -->
+    <script src="./assets/js/core/layer-manager.js" onerror="console.warn('LayerManager no disponible')"></script>
+    
+    <!-- Cargar script principal de integración -->
+    <script src="./assets/js/main.js"></script>
+    
+    <!-- Scripts adicionales y event listeners -->
+    <script>
+        // Event listeners para la interfaz
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tabs del sidebar
+            const tabs = document.querySelectorAll('.sidebar-tab');
+            const contents = document.querySelectorAll('.sidebar-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetTab = tab.dataset.tab;
+                    
+                    // Remover clases activas
+                    tabs.forEach(t => t.classList.remove('active'));
+                    contents.forEach(c => c.classList.remove('active'));
+                    
+                    // Activar tab y contenido correspondiente
+                    tab.classList.add('active');
+                    const targetContent = document.querySelector(`[data-tab-content="${targetTab}"]`);
+                    if (targetContent) {
+                        targetContent.classList.add('active');
+                    }
+                });
+            });
+            
+            // Toggle del sidebar
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const sidebar = document.getElementById('main-sidebar');
+            const mainContent = document.getElementById('main-content');
+            
+            if (sidebarToggle && sidebar) {
+                sidebarToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('collapsed');
+                    mainContent.classList.toggle('sidebar-collapsed');
+                    sidebarToggle.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
+                });
+            }
+            
+            // Búsqueda de dispositivos
+            const deviceSearch = document.getElementById('device-search');
+            if (deviceSearch) {
+                deviceSearch.addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const deviceItems = document.querySelectorAll('.device-item');
+                    
+                    deviceItems.forEach(item => {
+                        const deviceName = item.querySelector('.device-name').textContent.toLowerCase();
+                        const visible = deviceName.includes(searchTerm);
+                        item.style.display = visible ? 'flex' : 'none';
+                    });
+                });
+            }
+            
+            // Atajos de teclado
+            document.addEventListener('keydown', (e) => {
+                if (!window.networkDiagramApp) return;
+                
+                // Solo procesar si no estamos en un input
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                
+                const app = window.networkDiagramApp;
+                
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key.toLowerCase()) {
+                        case 'n':
+                            e.preventDefault();
+                            app.newProject();
+                            break;
+                        case 's':
+                            e.preventDefault();
+                            app.saveProject();
+                            break;
+                        case 'o':
+                            e.preventDefault();
+                            app.loadProject();
+                            break;
+                        case 'e':
+                            e.preventDefault();
+                            app.exportProject();
+                            break;
+                        case '=':
+                        case '+':
+                            e.preventDefault();
+                            app.setZoom(app.zoom * 1.2);
+                            break;
+                        case '-':
+                            e.preventDefault();
+                            app.setZoom(app.zoom / 1.2);
+                            break;
+                        case '0':
+                            e.preventDefault();
+                            app.fitToCanvas();
+                            break;
+                        case 'z':
+                            e.preventDefault();
+                            if (e.shiftKey) {
+                                // Redo (Ctrl+Shift+Z)
+                                console.log('Redo - no implementado aún');
+                            } else {
+                                // Undo (Ctrl+Z)
+                                console.log('Undo - no implementado aún');
+                            }
+                            break;
+                    }
+                } else {
+                    // Atajos sin Ctrl
+                    switch(e.key.toLowerCase()) {
+                        case 'v':
+                            app.setTool('select');
+                            break;
+                        case 'c':
+                            app.setTool('connect');
+                            break;
+                        case 'h':
+                            app.setTool('pan');
+                            break;
+                        case 'delete':
+                        case 'backspace':
+                            if (app.selectedDevice) {
+                                if (confirm('¿Eliminar el dispositivo seleccionado?')) {
+                                    app.managers.deviceManager.removeDevice(app.selectedDevice.id);
+                                    app.selectedDevice = null;
+                                }
+                            }
+                            break;
+                        case 'escape':
+                            app.selectedDevice = null;
+                            app.connectionMode = false;
+                            app.setTool('select');
+                            app.redrawCanvas();
+                            break;
+                    }
+                }
+            });
+            
+            // Actualizar status text
+            function updateStatus(text) {
+                const statusElement = document.getElementById('status-text');
+                if (statusElement) {
+                    statusElement.textContent = text;
+                }
+            }
+            
+            // Escuchar eventos de la aplicación
+            document.addEventListener('layerManager:deviceAssigned', (e) => {
+                updateStatus(`Dispositivo asignado a capa ${e.detail.layerName}`);
+            });
+            
+            document.addEventListener('layerManager:layerVisibilityChanged', (e) => {
+                updateStatus(`Capa ${e.detail.layerName} ${e.detail.visible ? 'mostrada' : 'oculta'}`);
+            });
+            
+            // Listener para cuando la aplicación termine de cargar
+            document.addEventListener('networkDiagramLoaded', () => {
+                hideLoadingScreen();
+                updateStatus('Aplicación cargada correctamente');
+                
+                // Mostrar estadísticas en consola si está en modo debug
+                if (window.APP_CONFIG.debug && window.networkDiagramApp) {
+                    console.log('📊 Estado de la aplicación:', window.networkDiagramApp.getDebugInfo());
+                }
+            });
+        });
+        
+        // Función para verificar dependencias críticas
+        function checkDependencies() {
+            const requiredFeatures = [
+                'fetch',
+                'Promise',
+                'Map',
+                'Set',
+                'addEventListener',
+                'querySelector'
+            ];
+            
+            const missing = requiredFeatures.filter(feature => {
+                if (feature === 'fetch') return !window.fetch;
+                if (feature === 'Promise') return !window.Promise;
+                if (feature === 'Map') return !window.Map;
+                if (feature === 'Set') return !window.Set;
+                if (feature === 'addEventListener') return !document.addEventListener;
+                if (feature === 'querySelector') return !document.querySelector;
+                return false;
+            });
+            
+            if (missing.length > 0) {
+                showError(
+                    'Tu navegador no soporta algunas características requeridas. Por favor, actualiza tu navegador.',
+                    'Características faltantes: ' + missing.join(', ')
+                );
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Verificar compatibilidad del navegador
+        if (!checkDependencies()) {
+            console.error('❌ Navegador incompatible');
+        }
+        
+        // Función de limpieza al cerrar la página
+        window.addEventListener('beforeunload', (e) => {
+            if (window.networkDiagramApp && window.networkDiagramApp.devices.size > 0) {
+                e.preventDefault();
+                e.returnValue = '¿Estás seguro de que quieres salir? Los cambios no guardados se perderán.';
+                return e.returnValue;
+            }
+        });
+        
+        // Auto-guardado si está habilitado
+        if (window.APP_CONFIG.autoSave) {
+            setInterval(() => {
+                if (window.networkDiagramApp && window.networkDiagramApp.devices.size > 0) {
+                    try {
+                        const project = {
+                            devices: Array.from(window.networkDiagramApp.devices.values()),
+                            connections: window.networkDiagramApp.connections,
+                            timestamp: new Date().toISOString()
+                        };
+                        
+                        localStorage.setItem('networkDiagram_autoSave', JSON.stringify(project));
+                        console.log('💾 Auto-guardado realizado');
+                        
+                    } catch (error) {
+                        console.warn('⚠️ Error en auto-guardado:', error);
+                    }
+                }
+            }, window.APP_CONFIG.autoSaveInterval);
+        }
+        
+        // Función para recuperar auto-guardado
+        function recoverAutoSave() {
+            try {
+                const saved = localStorage.getItem('networkDiagram_autoSave');
+                if (saved && window.networkDiagramApp) {
+                    const project = JSON.parse(saved);
+                    const savedDate = new Date(project.timestamp);
+                    const hoursSince = (Date.now() - savedDate.getTime()) / (1000 * 60 * 60);
+                    
+                    if (hoursSince < 24) { // Solo si es menor a 24 horas
+                        if (confirm(`Se encontró un auto-guardado de ${savedDate.toLocaleString()}. ¿Quieres recuperarlo?`)) {
+                            window.networkDiagramApp.loadProjectData(project);
+                            window.networkDiagramApp.showNotification('Proyecto recuperado del auto-guardado', 'success');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.warn('⚠️ Error recuperando auto-guardado:', error);
+            }
+        }
+        
+        // Listener para recuperar auto-guardado cuando la app esté lista
+        document.addEventListener('networkDiagramLoaded', () => {
+            setTimeout(recoverAutoSave, 1000); // Esperar 1 segundo después de cargar
+        });
+        
+        // Información de versión en consola
+        console.log(`
+🌐 Network Diagram Creator Pro v${window.APP_CONFIG.version}
+📅 Cargado: ${new Date().toLocaleString()}
+🌍 URL: ${window.location.href}
+🖥️ User Agent: ${navigator.userAgent}
+📱 Pantalla: ${screen.width}x${screen.height}
+💾 LocalStorage disponible: ${typeof(Storage) !== "undefined"}
+        `);
+    </script>
+    
+    <!-- Service Worker para PWA (opcional) -->
+    <script>
+        if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+            navigator.serviceWorker.register('./sw.js')
+                .then(registration => {
+                    console.log('✅ Service Worker registrado:', registration);
+                })
+                .catch(error => {
+                    console.log('⚠️ Error registrando Service Worker:', error);
+                });
+        }
+    </script>
+</body>
+</html>
