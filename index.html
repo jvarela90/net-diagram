@@ -5,171 +5,744 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Network Diagram Creator Pro</title>
     
-    <!-- CSS Files -->
-    <link rel="stylesheet" href="assets/css/themes.css">
+    <!-- Meta información -->
+    <meta name="description" content="Herramienta profesional para crear diagramas de red">
+    <meta name="author" content="Network Diagram Creator">
+    <meta name="keywords" content="red, diagrama, network, topology, cisco, switch, router">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="assets/css/main.css" as="style">
+    <link rel="preload" href="assets/js/app.js" as="script">
+    
+    <!-- CSS crítico en línea para evitar FOUC -->
+    <style>
+        /* CSS crítico para pantalla de carga */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            overflow: hidden;
+        }
+        
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .loading-content {
+            text-align: center;
+            max-width: 400px;
+            padding: 2rem;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-progress {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: white;
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+        
+        .loading-details {
+            margin-top: 1rem;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .error-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f8d7da;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: #721c24;
+        }
+        
+        .error-content {
+            text-align: center;
+            max-width: 500px;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border-left: 5px solid #dc3545;
+        }
+        
+        .error-content h2 {
+            margin-bottom: 1rem;
+            color: #dc3545;
+        }
+        
+        .error-actions {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        /* Esconder contenido principal inicialmente */
+        .main-content,
+        .header {
+            display: none;
+        }
+    </style>
+    
+    <!-- CSS principal -->
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/components.css">
-    <link rel="stylesheet" href="assets/css/responsive.css">
+    <link rel="stylesheet" href="assets/css/layers.css">
+    <link rel="stylesheet" href="assets/css/canvas.css">
+    <link rel="stylesheet" href="assets/css/modals.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
+    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Header -->
-        <div class="app-header">
-            <div class="app-title">
-                <span>🌐</span>
-                <span>Network Diagram Creator Pro</span>
-                <span style="font-size: 0.6em; opacity: 0.8;">v2.0</span>
+    <!-- Pantalla de carga -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h2>Network Diagram Creator</h2>
+            <p>Inicializando aplicación profesional de diagramas de red...</p>
+            <div class="loading-progress">
+                <div class="progress-bar" id="progress-bar"></div>
             </div>
-            <div class="theme-controls">
-                <button class="theme-toggle" onclick="UI.toggleTheme()">🌙 Tema</button>
-                <button class="theme-toggle" onclick="Monitoring.toggle()">📊 Monitor</button>
-                <button class="theme-toggle" onclick="UI.showHelp()">❓ Ayuda</button>
-            </div>
-        </div>
-
-        <!-- Main Layout -->
-        <div class="main-layout">
-            <!-- Sidebar -->
-            <div class="sidebar">
-                <div class="sidebar-tabs">
-                    <button class="sidebar-tab active" onclick="Sidebar.switchTab('devices')">📱 Dispositivos</button>
-                    <button class="sidebar-tab" onclick="Sidebar.switchTab('templates')">📋 Plantillas</button>
-                    <button class="sidebar-tab" onclick="Sidebar.switchTab('layers')">🏗️ Capas</button>
-                </div>
-
-                <div class="sidebar-content">
-                    <!-- Devices Tab -->
-                    <div id="devices-tab" class="tab-content active">
-                        <input type="text" class="search-box" placeholder="🔍 Buscar dispositivos..." onkeyup="Sidebar.filterDevices(this.value)">
-                        <div id="device-categories"></div>
-                    </div>
-
-                    <!-- Templates Tab -->
-                    <div id="templates-tab" class="tab-content">
-                        <h3 style="color: white; margin-bottom: 20px;">🏗️ Plantillas de Red</h3>
-                        <div class="templates-grid" id="templates-grid"></div>
-                    </div>
-
-                    <!-- Layers Tab -->
-                    <div id="layers-tab" class="tab-content">
-                        <h3 style="color: white; margin-bottom: 20px;">🏗️ Gestión de Capas</h3>
-                        <div class="layer-controls" id="layer-controls"></div>
-                        
-                        <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px;">
-                            <h4 style="color: white; margin-bottom: 10px;">Capa Actual:</h4>
-                            <select id="current-layer" onchange="LayerManager.setCurrentLayer(this.value)" style="width: 100%; padding: 8px; border-radius: 4px;">
-                                <option value="core">Core Layer</option>
-                                <option value="distribution">Distribution Layer</option>
-                                <option value="access">Access Layer</option>
-                                <option value="dmz">DMZ Layer</option>
-                                <option value="user">User Layer</option>
-                                <option value="iot">IoT Layer</option>
-                                <option value="isp">ISP Layer</option>
-                                <option value="wan">WAN Layer</option>
-                            </select>
-                            <p style="color: #ccc; font-size: 12px; margin-top: 8px;">Los nuevos dispositivos se añadirán a esta capa</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Workspace Container -->
-            <div class="workspace-container">
-                <!-- Toolbar -->
-                <div class="advanced-toolbar" id="advanced-toolbar"></div>
-
-                <!-- Canvas Area -->
-                <div class="canvas-area">
-                    <div class="canvas-viewport" id="canvas-viewport">
-                        <div class="canvas-container" id="canvas-container">
-                            <svg id="connection-svg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
-                            </svg>
-                        </div>
-                    </div>
-                    
-                    <!-- Layer Indicator -->
-                    <div class="layer-indicator" id="layer-indicator">
-                        📍 Core Layer
-                    </div>
-                    
-                    <!-- Mini Map -->
-                    <div class="minimap" id="minimap">
-                        <div class="minimap-viewport" id="minimap-viewport"></div>
-                    </div>
-                </div>
-
-                <!-- Monitoring Panel -->
-                <div class="monitoring-panel hidden" id="monitoring-panel">
-                    <div class="monitoring-header">
-                        <h4>📊 Monitor de Red</h4>
-                        <button onclick="Monitoring.toggle()" style="background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
-                    </div>
-                    <div id="monitoring-content"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Status Bar -->
-        <div class="status-bar">
-            <div class="status-item">
-                <div class="status-indicator"></div>
-                <span id="status-text">Sistema listo - Selecciona dispositivos para comenzar</span>
-            </div>
-            <div class="status-item">
-                <span>Dispositivos: <strong id="device-count">0</strong></span>
-            </div>
-            <div class="status-item">
-                <span>Conexiones: <strong id="connection-count">0</strong></span>
-            </div>
-            <div class="status-item">
-                <span>Zoom: <strong id="zoom-display">100%</strong></span>
+            <div class="loading-details">
+                <p id="loading-status">Preparando entorno...</p>
+                <p id="loading-step">Paso 1 de 6</p>
             </div>
         </div>
     </div>
 
-    <!-- Properties Modal -->
-    <div id="properties-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modal-title">Propiedades del Dispositivo</h3>
-                <span class="close" onclick="Modal.closeProperties()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="modal-tabs">
-                    <button class="modal-tab active" onclick="Modal.switchTab('general')">📋 General</button>
-                    <button class="modal-tab" onclick="Modal.switchTab('network')">🌐 Red</button>
-                    <button class="modal-tab" onclick="Modal.switchTab('monitoring')">📊 Monitoreo</button>
-                    <button class="modal-tab" onclick="Modal.switchTab('advanced')">⚙️ Avanzado</button>
-                </div>
-                <form id="properties-form"></form>
+    <!-- Pantalla de error -->
+    <div id="error-screen" class="error-screen">
+        <div class="error-content">
+            <h2>🚨 Error de Inicialización</h2>
+            <p id="error-message">Ha ocurrido un error al cargar la aplicación.</p>
+            <details id="error-details" style="margin-top: 1rem; text-align: left;">
+                <summary>Detalles técnicos</summary>
+                <pre id="error-stack" style="font-size: 12px; background: #f8f9fa; padding: 1rem; border-radius: 4px; margin-top: 0.5rem;"></pre>
+            </details>
+            <div class="error-actions">
+                <button class="btn btn-primary" onclick="location.reload()">
+                    🔄 Recargar Página
+                </button>
+                <button class="btn btn-secondary" onclick="resetApplication()">
+                    🔧 Reiniciar Aplicación
+                </button>
+                <a href="mailto:support@example.com" class="btn btn-secondary">
+                    📧 Reportar Error
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Hidden file input -->
-    <input type="file" id="file-input" style="display: none;" accept=".json" onchange="FileManager.loadDiagram(event)">
+    <!-- Header Principal -->
+    <header class="header" id="main-header">
+        <div class="header-container">
+            <!-- Logo y título -->
+            <div class="header-brand">
+                <img src="assets/icons/logo.svg" alt="Logo" class="brand-logo" onerror="this.style.display='none'">
+                <h1 class="brand-title">Network Diagram Creator</h1>
+                <span class="brand-version">Pro v2.0</span>
+            </div>
+            
+            <!-- Toolbar principal -->
+            <div class="toolbar" id="main-toolbar">
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" id="new-btn" title="Nuevo proyecto (Ctrl+N)">
+                        <span class="icon">📄</span>
+                        <span class="label">Nuevo</span>
+                    </button>
+                    <button class="toolbar-btn" id="open-btn" title="Abrir proyecto (Ctrl+O)">
+                        <span class="icon">📂</span>
+                        <span class="label">Abrir</span>
+                    </button>
+                    <button class="toolbar-btn" id="save-btn" title="Guardar proyecto (Ctrl+S)">
+                        <span class="icon">💾</span>
+                        <span class="label">Guardar</span>
+                    </button>
+                </div>
+                
+                <div class="toolbar-separator"></div>
+                
+                <div class="toolbar-group">
+                    <button class="toolbar-btn active" id="select-tool" title="Seleccionar (V)">
+                        <span class="icon">🔍</span>
+                    </button>
+                    <button class="toolbar-btn" id="device-tool" title="Agregar dispositivo (D)">
+                        <span class="icon">🖥️</span>
+                    </button>
+                    <button class="toolbar-btn" id="connection-tool" title="Conectar dispositivos (C)">
+                        <span class="icon">🔗</span>
+                    </button>
+                    <button class="toolbar-btn" id="text-tool" title="Agregar texto (T)">
+                        <span class="icon">📝</span>
+                    </button>
+                </div>
+                
+                <div class="toolbar-separator"></div>
+                
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" id="zoom-in" title="Acercar (+)">
+                        <span class="icon">🔍+</span>
+                    </button>
+                    <button class="toolbar-btn" id="zoom-out" title="Alejar (-)">
+                        <span class="icon">🔍-</span>
+                    </button>
+                    <button class="toolbar-btn" id="zoom-fit" title="Ajustar vista (0)">
+                        <span class="icon">⚏</span>
+                    </button>
+                </div>
+                
+                <div class="toolbar-spacer"></div>
+                
+                <!-- Status y configuración -->
+                <div class="toolbar-group">
+                    <div class="status-indicator" id="connection-status" title="Estado de conexión">
+                        <span class="status-dot online"></span>
+                        <span class="status-text">En línea</span>
+                    </div>
+                    <button class="toolbar-btn" id="settings-btn" title="Configuración">
+                        <span class="icon">⚙️</span>
+                    </button>
+                    <button class="toolbar-btn" id="help-btn" title="Ayuda (F1)">
+                        <span class="icon">❓</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
 
-    <!-- Notification Container -->
-    <div id="notification" class="notification"></div>
+    <!-- Contenido Principal -->
+    <div class="main-content" id="main-content">
+        <!-- Sidebar izquierdo -->
+        <aside class="sidebar" id="main-sidebar">
+            <!-- Sección de capas se insertará aquí por LayerManager -->
+            
+            <!-- Sección de dispositivos -->
+            <div class="sidebar-section" id="devices-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <span class="section-icon">🖥️</span>
+                        Dispositivos
+                    </h3>
+                    <button class="collapse-btn" title="Colapsar sección">
+                        <span>−</span>
+                    </button>
+                </div>
+                <div class="section-content">
+                    <div class="search-box">
+                        <input type="text" id="device-search" placeholder="Buscar dispositivos...">
+                        <span class="search-icon">🔍</span>
+                    </div>
+                    
+                    <div class="device-categories" id="device-categories">
+                        <!-- Categorías de dispositivos se cargarán aquí -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sección de plantillas -->
+            <div class="sidebar-section" id="templates-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <span class="section-icon">📋</span>
+                        Plantillas
+                    </h3>
+                    <button class="collapse-btn" title="Colapsar sección">
+                        <span>−</span>
+                    </button>
+                </div>
+                <div class="section-content">
+                    <div class="template-grid" id="template-grid">
+                        <!-- Plantillas se cargarán aquí -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sección de propiedades -->
+            <div class="sidebar-section" id="properties-section" style="display: none;">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <span class="section-icon">⚙️</span>
+                        Propiedades
+                    </h3>
+                    <button class="collapse-btn" title="Colapsar sección">
+                        <span>−</span>
+                    </button>
+                </div>
+                <div class="section-content" id="properties-content">
+                    <!-- Propiedades del elemento seleccionado -->
+                </div>
+            </div>
+        </aside>
 
-    <!-- JavaScript Files -->
-    <script src="assets/js/utils/helpers.js"></script>
-    <script src="assets/js/utils/validators.js"></script>
-    <script src="assets/js/utils/file-manager.js"></script>
-    <script src="assets/js/utils/cable-label-generator.js"></script>
-    <script src="assets/js/ui/notifications.js"></script>
-    <script src="assets/js/ui/modal.js"></script>
-    <script src="assets/js/ui/sidebar.js"></script>
-    <script src="assets/js/ui/toolbar.js"></script>
-    <script src="assets/js/core/canvas-manager.js"></script>
+        <!-- Área de canvas principal -->
+        <main class="canvas-area" id="canvas-area">
+            <!-- Barra de estado del canvas -->
+            <div class="canvas-status-bar">
+                <div class="canvas-info">
+                    <span id="canvas-coordinates">X: 0, Y: 0</span>
+                    <span class="separator">|</span>
+                    <span id="canvas-zoom">Zoom: 100%</span>
+                    <span class="separator">|</span>
+                    <span id="canvas-selection">0 seleccionados</span>
+                </div>
+                <div class="canvas-controls">
+                    <button class="canvas-btn" id="grid-toggle" title="Mostrar/Ocultar grilla">
+                        <span class="icon">⚏</span>
+                    </button>
+                    <button class="canvas-btn" id="snap-toggle" title="Ajustar a grilla">
+                        <span class="icon">⚡</span>
+                    </button>
+                    <button class="canvas-btn" id="rulers-toggle" title="Mostrar/Ocultar reglas">
+                        <span class="icon">📏</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Contenedor del canvas -->
+            <div class="canvas-container" id="canvas-container">
+                <!-- Canvas principal se creará aquí dinámicamente -->
+                <div class="canvas-placeholder" id="canvas-placeholder">
+                    <div class="placeholder-content">
+                        <div class="placeholder-icon">🖼️</div>
+                        <h3>Área de Trabajo</h3>
+                        <p>Arrastra dispositivos aquí para comenzar a crear tu diagrama</p>
+                        <div class="placeholder-actions">
+                            <button class="btn btn-primary" id="start-tutorial">
+                                📚 Iniciar Tutorial
+                            </button>
+                            <button class="btn btn-secondary" id="load-template">
+                                📋 Cargar Plantilla
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Panel de propiedades flotante (opcional) -->
+        <div class="floating-panel" id="floating-properties" style="display: none;">
+            <div class="panel-header">
+                <h4>Propiedades</h4>
+                <button class="panel-close">×</button>
+            </div>
+            <div class="panel-content" id="floating-properties-content">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor de notificaciones -->
+    <div class="notifications-container" id="notifications-container">
+        <!-- Las notificaciones se crearán dinámicamente aquí -->
+    </div>
+
+    <!-- Contenedor de modales -->
+    <div class="modal-container" id="modal-container">
+        <!-- Los modales se crearán dinámicamente aquí -->
+    </div>
+
+    <!-- Scripts críticos del core -->
+    <script>
+        // Variables globales para debugging
+        window.DEBUG_MODE = localStorage.getItem('debug-mode') === 'true' || 
+                           window.location.search.includes('debug=true');
+        
+        // Configuración global de la aplicación
+        window.APP_CONFIG = {
+            version: '2.0.0',
+            apiUrl: 'https://api.networkdiagram.com',
+            maxDevices: 1000,
+            maxConnections: 2000,
+            autoSaveInterval: 30000,
+            debugMode: window.DEBUG_MODE
+        };
+
+        // Funciones de utilidad para manejo de errores
+        function resetApplication() {
+            if (confirm('¿Estás seguro de que quieres reiniciar la aplicación? Se perderán los datos no guardados.')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                location.reload();
+            }
+        }
+
+        function showErrorDetails(error) {
+            const errorDetails = document.getElementById('error-details');
+            const errorStack = document.getElementById('error-stack');
+            
+            if (errorDetails && errorStack) {
+                errorStack.textContent = error.stack || error.message || 'No hay detalles disponibles';
+                errorDetails.style.display = 'block';
+            }
+        }
+
+        // Función para actualizar el progreso de carga
+        function updateLoadingProgress(percent, status, step) {
+            const progressBar = document.getElementById('progress-bar');
+            const statusElement = document.getElementById('loading-status');
+            const stepElement = document.getElementById('loading-step');
+            
+            if (progressBar) {
+                progressBar.style.width = Math.min(100, Math.max(0, percent)) + '%';
+            }
+            
+            if (statusElement && status) {
+                statusElement.textContent = status;
+            }
+            
+            if (stepElement && step) {
+                stepElement.textContent = step;
+            }
+            
+            if (window.DEBUG_MODE) {
+                console.log(`📊 Progreso: ${percent}% - ${status}`);
+            }
+        }
+
+        // Función para mostrar error en pantalla
+        function showErrorScreen(error) {
+            const loadingScreen = document.getElementById('loading-screen');
+            const errorScreen = document.getElementById('error-screen');
+            const errorMessage = document.getElementById('error-message');
+            
+            if (loadingScreen) loadingScreen.style.display = 'none';
+            if (errorScreen) errorScreen.style.display = 'flex';
+            
+            if (errorMessage) {
+                errorMessage.textContent = error.message || 'Error desconocido en la inicialización';
+            }
+            
+            showErrorDetails(error);
+            
+            console.error('🔴 Error mostrado en pantalla:', error);
+        }
+
+        // Función para ocultar pantalla de carga y mostrar aplicación
+        function showApplication() {
+            const loadingScreen = document.getElementById('loading-screen');
+            const mainHeader = document.getElementById('main-header');
+            const mainContent = document.getElementById('main-content');
+            
+            if (loadingScreen) {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 300);
+            }
+            
+            if (mainHeader) {
+                mainHeader.style.display = 'block';
+                setTimeout(() => {
+                    mainHeader.style.opacity = '1';
+                }, 100);
+            }
+            
+            if (mainContent) {
+                mainContent.style.display = 'flex';
+                setTimeout(() => {
+                    mainContent.style.opacity = '1';
+                }, 200);
+            }
+            
+            console.log('✅ Aplicación mostrada');
+        }
+
+        // Detectar capacidades del navegador
+        function detectBrowserCapabilities() {
+            const capabilities = {
+                canvas: !!document.createElement('canvas').getContext,
+                webgl: !!document.createElement('canvas').getContext('webgl'),
+                localStorage: !!window.localStorage,
+                workers: !!window.Worker,
+                offscreenCanvas: !!window.OffscreenCanvas,
+                performance: !!window.performance
+            };
+            
+            console.log('🔍 Capacidades del navegador:', capabilities);
+            return capabilities;
+        }
+
+        // Inicializar detección temprana
+        detectBrowserCapabilities();
+    </script>
+
+    <!-- Scripts del sistema de manejo de errores -->
+    <script src="assets/js/utils/error-handler.js"></script>
+    <script src="assets/js/utils/logger.js"></script>
+    <script src="assets/js/utils/performance-monitor.js"></script>
+
+    <!-- Sistema de estado y inicialización -->
+    <script src="state-manager.js"></script>
+    <script src="app-initialization.js"></script>
+    
+    <!-- Managers principales (en orden de dependencias) -->
     <script src="assets/js/core/layer-manager.js"></script>
-    <script src="assets/js/core/interface-manager.js"></script>
     <script src="assets/js/core/device-manager.js"></script>
     <script src="assets/js/core/connection-manager.js"></script>
-    <script src="assets/js/core/smart-connection-manager.js"></script>
-    <script src="assets/js/templates/network-templates.js"></script>
-    <script src="assets/js/integrations/monitoring.js"></script>
-    <script src="assets/js/integrations/nmap-integration.js"></script>
-    <script src="assets/js/app.js"></script>
+    <script src="assets/js/core/canvas-manager.js"></script>
+    <script src="assets/js/core/selection-manager.js"></script>
+    
+    <!-- UI Managers -->
+    <script src="assets/js/ui/ui-manager.js"></script>
+    <script src="assets/js/ui/toolbar-manager.js"></script>
+    <script src="assets/js/ui/sidebar-manager.js"></script>
+    <script src="assets/js/ui/notification-manager.js"></script>
+    <script src="assets/js/ui/modal-manager.js"></script>
+    
+    <!-- Utilidades y helpers -->
+    <script src="assets/js/utils/file-manager.js"></script>
+    <script src="assets/js/utils/export-manager.js"></script>
+    <script src="assets/js/utils/template-manager.js"></script>
+    <script src="assets/js/utils/validation-manager.js"></script>
+    
+    <!-- Aplicación principal -->
+    <script src="main.js"></script>
+
+    <!-- Script de inicialización principal -->
+    <script>
+        // Inicialización cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                console.log('🚀 Iniciando Network Diagram Creator v2.0...');
+                
+                // Crear instancia del inicializador
+                const initializer = new AppInitializer();
+                
+                // Configurar listeners de progreso
+                updateLoadingProgress(5, 'Validando entorno del navegador...', 'Paso 1 de 6');
+                
+                // Pequeña pausa para mostrar la pantalla de carga
+                await new Promise(resolve => setTimeout(resolve, 200));
+                
+                // Inicializar aplicación
+                await initializer.initialize();
+                
+                // Progreso final
+                updateLoadingProgress(100, '¡Aplicación lista!', 'Completado');
+                
+                // Pequeña pausa antes de mostrar la aplicación
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Mostrar aplicación
+                showApplication();
+                
+                // Configurar manejadores adicionales
+                setupApplicationHandlers();
+                
+                console.log('✅ Network Diagram Creator iniciado correctamente');
+                
+            } catch (error) {
+                console.error('❌ Error fatal en inicialización:', error);
+                showErrorScreen(error);
+                
+                // Reportar error si hay sistema de analytics
+                if (window.analytics) {
+                    window.analytics.track('initialization_error', {
+                        error: error.message,
+                        stack: error.stack,
+                        userAgent: navigator.userAgent
+                    });
+                }
+            }
+        });
+
+        // Configurar manejadores adicionales de la aplicación
+        function setupApplicationHandlers() {
+            // Manejador de redimensionado de ventana
+            let resizeTimeout;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    if (window.CanvasManager) {
+                        window.CanvasManager.handleResize();
+                    }
+                }, 150);
+            });
+            
+            // Manejador de visibilidad de página
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    // Pausar animaciones cuando la página no es visible
+                    if (window.CanvasManager) {
+                        window.CanvasManager.pauseAnimations();
+                    }
+                } else {
+                    // Reanudar animaciones
+                    if (window.CanvasManager) {
+                        window.CanvasManager.resumeAnimations();
+                    }
+                }
+            });
+            
+            // Manejador de beforeunload para advertir sobre cambios no guardados
+            window.addEventListener('beforeunload', (e) => {
+                if (window.StateManager?.getState().project?.hasUnsavedChanges) {
+                    e.preventDefault();
+                    e.returnValue = '¿Estás seguro de que quieres salir? Hay cambios sin guardar.';
+                }
+            });
+            
+            // Configurar shortcuts globales
+            document.addEventListener('keydown', (e) => {
+                // Ctrl+S: Guardar
+                if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    if (window.ProjectManager) {
+                        window.ProjectManager.saveProject();
+                    }
+                }
+                
+                // Ctrl+Z: Deshacer
+                if (e.ctrlKey && e.key === 'z') {
+                    e.preventDefault();
+                    if (window.StateManager) {
+                        window.StateManager.undo();
+                    }
+                }
+                
+                // Ctrl+Y: Rehacer
+                if (e.ctrlKey && e.key === 'y') {
+                    e.preventDefault();
+                    if (window.StateManager) {
+                        window.StateManager.redo();
+                    }
+                }
+                
+                // Delete: Eliminar seleccionado
+                if (e.key === 'Delete') {
+                    if (window.SelectionManager) {
+                        window.SelectionManager.deleteSelected();
+                    }
+                }
+                
+                // F1: Ayuda
+                if (e.key === 'F1') {
+                    e.preventDefault();
+                    if (window.HelpManager) {
+                        window.HelpManager.show();
+                    }
+                }
+                
+                // Escape: Cancelar operación actual
+                if (e.key === 'Escape') {
+                    if (window.ToolManager) {
+                        window.ToolManager.cancelCurrentOperation();
+                    }
+                }
+            });
+            
+            console.log('⚙️ Manejadores de aplicación configurados');
+        }
+
+        // Funciones para debugging (solo en modo debug)
+        if (window.DEBUG_MODE) {
+            window.debugApp = {
+                getState: () => window.StateManager?.getState(),
+                getLayers: () => window.LayerManager?.getAllLayers(),
+                getDevices: () => Array.from(window.StateManager?.getState().devices.values() || []),
+                resetApp: resetApplication,
+                showError: (msg) => showErrorScreen(new Error(msg)),
+                version: window.APP_CONFIG.version
+            };
+            
+            console.log('🐛 Modo debug activado. Usa window.debugApp para debugging.');
+        }
+    </script>
+
+    <!-- Analytics y tracking (opcional) -->
+    <script>
+        // Configurar analytics básico (reemplazar con tu proveedor)
+        if (!window.DEBUG_MODE && 'localhost' !== location.hostname) {
+            (function() {
+                // Aquí iría el código de analytics (Google Analytics, etc.)
+                console.log('📊 Analytics configurado');
+            })();
+        }
+    </script>
 </body>
 </html>

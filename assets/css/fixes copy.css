@@ -1,0 +1,1116 @@
+/**
+ * fixes.css - Correcciones específicas para problemas identificados
+ * Este archivo soluciona los problemas de diseño y funcionalidad observados
+ */
+
+/* ==========================================================================
+   CORRECCIONES DE LAYOUT PRINCIPAL
+   ========================================================================== */
+
+/* Asegurar que el body ocupe toda la pantalla */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Corregir posicionamiento del header */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background-color: #4299e1;
+    color: white;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header-logo {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+}
+
+.header-logo img {
+    width: 28px;
+    height: 28px;
+    margin-right: 8px;
+}
+
+.version {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-left: 8px;
+}
+
+.header-nav {
+    display: flex;
+    gap: 8px;
+}
+
+.header-nav .btn {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 6px 12px;
+    font-size: 14px;
+}
+
+.header-nav .btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Corregir toolbar */
+.toolbar {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    height: 50px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 16px;
+    overflow-x: auto;
+}
+
+.toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    border-right: 1px solid #dee2e6;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.toolbar-group:last-child {
+    border-right: none;
+    margin-left: auto;
+}
+
+.toolbar-group label {
+    font-size: 14px;
+    color: #495057;
+    margin-right: 4px;
+}
+
+.toolbar .btn {
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+}
+
+.toolbar .btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+/* Corregir sidebar */
+.sidebar {
+    position: fixed;
+    top: 110px;
+    left: 0;
+    width: 300px;
+    height: calc(100vh - 110px);
+    background-color: white;
+    border-right: 1px solid #dee2e6;
+    z-index: 998;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-tabs {
+    display: flex;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.sidebar-tab {
+    flex: 1;
+    padding: 12px 8px;
+    background: none;
+    border: none;
+    font-size: 12px;
+    color: #6c757d;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.sidebar-tab.active {
+    color: #007bff;
+    border-bottom-color: #007bff;
+    background-color: white;
+}
+
+.sidebar-tab:hover:not(.active) {
+    background-color: #e9ecef;
+}
+
+.sidebar-content {
+    display: none;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.sidebar-content.active {
+    display: block;
+}
+
+.sidebar-section {
+    padding: 16px;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.sidebar-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+}
+
+/* Corregir biblioteca de dispositivos */
+.search-box {
+    margin-bottom: 16px;
+}
+
+.search-box .input {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+
+.device-library {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+}
+
+.device-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    cursor: grab;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.device-item:hover {
+    background-color: #e9ecef;
+    border-color: #007bff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.device-item:active {
+    cursor: grabbing;
+    transform: scale(0.95);
+}
+
+.device-icon {
+    width: 36px;
+    height: 28px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 4px;
+}
+
+.device-name {
+    font-size: 10px;
+    color: #495057;
+    line-height: 1.2;
+    max-width: 76px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Corregir main content */
+.main-content {
+    position: fixed;
+    top: 110px;
+    left: 300px;
+    right: 0;
+    bottom: 0;
+    background-color: white;
+    overflow: hidden;
+}
+
+.main-content.sidebar-collapsed {
+    left: 0;
+}
+
+/* Corregir canvas container */
+.canvas-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background-color: white;
+    background-image: 
+        linear-gradient(#e9ecef 1px, transparent 1px),
+        linear-gradient(90deg, #e9ecef 1px, transparent 1px);
+    background-size: 20px 20px;
+    overflow: hidden;
+}
+
+#main-canvas {
+    display: block;
+    cursor: default;
+    width: 100%;
+    height: 100%;
+}
+
+/* Corregir controles de zoom */
+.zoom-controls {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 900;
+}
+
+.zoom-btn {
+    width: 36px;
+    height: 36px;
+    background-color: white;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 16px;
+    color: #495057;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.zoom-btn:hover {
+    background-color: #f8f9fa;
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.zoom-level {
+    background-color: white;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: #495057;
+    text-align: center;
+    min-width: 40px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Corregir sidebar toggle */
+.sidebar-toggle {
+    position: fixed;
+    top: 130px;
+    left: 310px;
+    width: 24px;
+    height: 36px;
+    background-color: white;
+    border: 1px solid #ced4da;
+    border-left: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #6c757d;
+    z-index: 997;
+    transition: all 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+    background-color: #f8f9fa;
+    color: #495057;
+}
+
+.sidebar.collapsed + .sidebar-toggle {
+    left: 10px;
+}
+
+/* ==========================================================================
+   CORRECCIONES DE CAPAS (LAYER MANAGER)
+   ========================================================================== */
+
+.layer-panel {
+    padding: 0;
+}
+
+.layer-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 0 16px;
+}
+
+.layer-panel-header h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+    margin: 0;
+}
+
+.btn-organize {
+    padding: 4px 8px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.2s ease;
+}
+
+.btn-organize:hover {
+    background-color: #0056b3;
+}
+
+.layer-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 16px;
+}
+
+.layer-control {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.layer-control:hover {
+    border-color: #007bff;
+    background-color: #e7f3ff;
+}
+
+.layer-control.drag-over {
+    border-color: #28a745;
+    background-color: #d4edda;
+}
+
+.layer-control.layer-hidden {
+    opacity: 0.5;
+}
+
+.layer-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.layer-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.layer-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #495057;
+    flex-grow: 1;
+}
+
+.layer-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-layer-visibility {
+    padding: 2px 4px;
+    background: none;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    border-radius: 2px;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.btn-layer-visibility:hover {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.device-count {
+    font-size: 10px;
+    color: #6c757d;
+    background-color: #e9ecef;
+    padding: 1px 4px;
+    border-radius: 8px;
+    min-width: 16px;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.layer-description {
+    font-size: 11px;
+    color: #6c757d;
+    margin-top: 4px;
+    line-height: 1.3;
+}
+
+/* ==========================================================================
+   CORRECCIONES DE DISPOSITIVOS EN CANVAS
+   ========================================================================== */
+
+.network-device {
+    position: absolute;
+    background-color: white;
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    cursor: move;
+    transition: all 0.2s ease;
+    user-select: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.network-device:hover {
+    border-color: #007bff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-1px);
+}
+
+.network-device.selected {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.network-device.connecting {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.25);
+}
+
+/* ==========================================================================
+   CORRECCIONES DE NOTIFICACIONES
+   ========================================================================== */
+
+.notifications-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.notification {
+    background-color: white;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 12px 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    max-width: 320px;
+    pointer-events: auto;
+    animation: slideInRight 0.3s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notification.success {
+    border-left: 4px solid #28a745;
+}
+
+.notification.warning {
+    border-left: 4px solid #ffc107;
+}
+
+.notification.error {
+    border-left: 4px solid #dc3545;
+}
+
+.notification.info {
+    border-left: 4px solid #17a2b8;
+}
+
+.notification-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.notification-message {
+    font-size: 14px;
+    color: #495057;
+    line-height: 1.4;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0;
+    font-size: 16px;
+    line-height: 1;
+    margin-left: 8px;
+}
+
+.notification-close:hover {
+    color: #495057;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ==========================================================================
+   CORRECCIONES DE PROPIEDADES
+   ========================================================================== */
+
+.no-selection {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 20px;
+}
+
+.no-selection p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* ==========================================================================
+   CORRECCIONES RESPONSIVAS
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 280px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        left: 0;
+    }
+    
+    .sidebar-toggle {
+        left: 10px;
+    }
+    
+    .toolbar {
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    
+    .toolbar::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .toolbar-group {
+        flex-shrink: 0;
+    }
+    
+    .header-nav {
+        gap: 4px;
+    }
+    
+    .header-nav .btn {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+}
+
+/* ==========================================================================
+   CORRECCIONES DE ESTADO DE CARGA
+   ========================================================================== */
+
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    color: white;
+    transition: opacity 0.5s ease;
+}
+
+.loading-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   UTILIDADES DE ACCESIBILIDAD
+   ========================================================================== */
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Focus visible para navegación por teclado */
+.btn:focus-visible,
+.sidebar-tab:focus-visible,
+.device-item:focus-visible {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* Alto contraste para mejor accesibilidad */
+@media (prefers-contrast: high) {
+    .device-item,
+    .layer-control,
+    .notification {
+        border-width: 2px;
+    }
+    
+    .layer-color {
+        border-width: 2px;
+    }
+}
+
+/* Reducir movimiento para usuarios sensibles */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ==========================================================================
+   CORRECCIONES ESPECÍFICAS PARA PROBLEMAS IDENTIFICADOS
+   ========================================================================== */
+
+/* Asegurar que el canvas tenga el tamaño correcto */
+#main-canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+}
+
+/* Corregir el posicionamiento absoluto de elementos */
+.canvas-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Asegurar que los botones de la toolbar funcionen */
+.toolbar .btn[data-action],
+.toolbar .btn[data-tool] {
+    cursor: pointer;
+    user-select: none;
+}
+
+.toolbar .btn[data-action]:active,
+.toolbar .btn[data-tool]:active {
+    transform: translateY(1px);
+}
+
+/* Estilos específicos para elementos draggable */
+.device-item[draggable="true"] {
+    cursor: grab;
+}
+
+.device-item[draggable="true"]:active {
+    cursor: grabbing;
+}
+
+/* Corregir dropdown de tipo de conexión */
+#connection-type {
+    min-width: 140px;
+    background-color: white;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 14px;
+}
+
+/* Estilos para el estado activo del botón conectar */
+.toolbar .btn[data-tool="connect"].active,
+.toolbar .btn[data-action="connect"].active {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+/* Corregir el indicador de capa en el sidebar */
+.layer-control[data-layer] {
+    position: relative;
+}
+
+.layer-control[data-layer]::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: var(--layer-color, #dee2e6);
+    border-radius: 0 2px 2px 0;
+}
+
+/* Asegurar que los inputs tengan el estilo correcto */
+.input, 
+input[type="text"], 
+input[type="search"], 
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: none;
+    box-sizing: border-box;
+}
+
+select {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%23666' d='m2 0-2 2h4zm0 5 2-2h-4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 12px;
+    padding-right: 28px;
+}
+
+/* Corregir el estilo del status text */
+#status-text {
+    font-size: 14px;
+    color: #6c757d;
+    font-style: italic;
+    min-width: 100px;
+}
+
+/* Asegurar que las notificaciones estén por encima de todo */
+.notifications-container {
+    z-index: 10000 !important;
+}
+
+/* Corregir el cursor en modo conexión */
+.canvas-container.connection-mode {
+    cursor: crosshair !important;
+}
+
+.canvas-container.connection-mode #main-canvas {
+    cursor: crosshair !important;
+}
+
+/* Estilos para dispositivos seleccionados en modo conexión */
+.network-device.connection-source {
+    border-color: #ffc107 !important;
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.25) !important;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Corregir el estilo de los iconos en los botones */
+.btn[data-action]::before,
+.btn[data-tool]::before {
+    margin-right: 4px;
+}
+
+/* Asegurar que el grid del canvas sea visible */
+.canvas-container.show-grid {
+    background-image: 
+        linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.canvas-container.hide-grid {
+    background-image: none;
+}
+
+/* Corregir el estilo de la versión en el header */
+.header-logo .version {
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+}
+
+/* Asegurar que los elementos interactivos tengan el cursor correcto */
+.btn,
+.sidebar-tab,
+.device-item,
+.layer-control,
+.zoom-btn,
+.sidebar-toggle {
+    cursor: pointer !important;
+}
+
+/* Corregir el estilo de los inputs deshabilitados */
+.input:disabled,
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed !important;
+    background-color: #f8f9fa;
+}
+
+/* Asegurar que el contenedor del minimap esté correctamente posicionado */
+.minimap {
+    position: absolute;
+    bottom: 80px;
+    left: 20px;
+    width: 160px;
+    height: 120px;
+    background-color: white;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    overflow: hidden;
+    z-index: 900;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.minimap-canvas {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+/* Corregir problemas de z-index */
+.header { z-index: 1000; }
+.toolbar { z-index: 999; }
+.sidebar { z-index: 998; }
+.sidebar-toggle { z-index: 997; }
+.zoom-controls { z-index: 900; }
+.minimap { z-index: 900; }
+.canvas-overlay { z-index: 10; }
+.notifications-container { z-index: 10000; }
+.loading-screen { z-index: 9999; }
+.error-screen { z-index: 9998; }
+
+/* Asegurar que el scroll del sidebar funcione correctamente */
+.sidebar-content {
+    overflow-y: auto;
+    max-height: calc(100vh - 110px - 40px); /* Altura total menos header, toolbar y tabs */
+}
+
+/* Corregir la visibilidad de elementos ocultos por defecto */
+[style*="display: none"] {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+[style*="display: none"].show,
+[style*="display: block"],
+[style*="display: flex"] {
+    opacity: 1;
+}
+
+/* Asegurar que los elementos de drag and drop funcionen */
+.device-item[draggable="true"] {
+    touch-action: none;
+}
+
+.layer-control.drag-over {
+    transform: scale(1.02);
+}
+
+/* Corregir problemas con overflow en elementos pequeños */
+.device-name,
+.layer-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Asegurar que los tooltips no interfieran con la interacción */
+[title] {
+    position: relative;
+}
+
+/* Corregir el estilo de los elementos activos */
+.active,
+.selected,
+.current {
+    position: relative;
+}
+
+.active::after,
+.selected::after,
+.current::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: 2px solid #007bff;
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+/* Asegurar que el layout sea estable durante la carga */
+.main-content,
+.sidebar,
+.header,
+.toolbar {
+    will-change: auto;
+    transform: translateZ(0);
+}
+
+/* Corregir problemas de rendering en algunos navegadores */
+.canvas-container,
+#main-canvas {
+    backface-visibility: hidden;
+    transform: translateZ(0);
+}
+
+/* Asegurar que los elementos tengan el tamaño mínimo correcto para touch */
+@media (hover: none) and (pointer: coarse) {
+    .btn,
+    .sidebar-tab,
+    .device-item,
+    .zoom-btn,
+    .sidebar-toggle {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .device-item {
+        padding: 12px 8px;
+    }
+    
+    .zoom-btn {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+/* Corregir el estilo del overlay cuando el sidebar está colapsado */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 997;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.sidebar.open ~ .sidebar-overlay {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Asegurar que los mensajes de error sean visibles */
+.error-message,
+.warning-message,
+.info-message {
+    display: block;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.warning-message {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+}
+
+.info-message {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+}
+
+/* Corrección final: asegurar que todos los elementos tengan box-sizing correcto */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}

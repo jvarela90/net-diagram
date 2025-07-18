@@ -1,1311 +1,996 @@
 /**
- * main.js - Sistema de integración principal para Network Diagram Creator
- * Conecta todos los módulos y maneja la inicialización de la aplicación
+ * Network Diagram Creator - Aplicación Principal
+ * Versión corregida que soluciona los problemas de inicialización
  */
 
-// Estado global de la aplicación
-window.NetworkDiagram = {
-    initialized: false,
-    config: null,
-    layerManager: null,
-    deviceManager: null,
-    connectionManager: null,
-    canvasManager: null,
-    fileManager: null,
-    components: {},
-    currentProject: {
-        name: 'Nuevo Proyecto',
-        devices: [],
-        connections: [],
-        settings: {}
-    }
-};
-
-/**
- * Clase principal de la aplicación
- */
 class NetworkDiagramApp {
     constructor() {
-        this.config = null;
-        this.managers = {};
-        this.isInitialized = false;
-        this.canvas = null;
-        this.ctx = null;
-        this.selectedDevice = null;
-        this.connectionMode = false;
-        this.currentTool = 'select';
-        this.zoom = 1;
-        this.panX = 0;
-        this.panY = 0;
-        this.devices = new Map();
-        this.connections = [];
+        this.initialized = false;
+        this.version = '2.0.0';
+        this.modules = new Map();
+        this.eventBus = new EventTarget();
+        
+        // Estado de la aplicación
+        this.state = {
+            loading: true,
+            error: null,
+            currentTool: 'select',
+            selectedItems: [],
+            clipboard: null,
+            isDirty: false
+        };
+        
+        // Configuración por defecto
+        this.config = {
+            autoSave: true,
+            autoSaveInterval: 30000,
+            maxUndoSteps: 50,
+            gridSize: 20,
+            snapToGrid: true,
+            theme: 'light'
+        };
+        
+        console.log('🚀 NetworkDiagramApp constructor ejecutado');
     }
 
-    /**
-     * Inicializa la aplicación
-     */
-    async init() {
+    async initialize() {
+        if (this.initialized) {
+            console.log('✅ Aplicación ya inicializada');
+            return;
+        }
+
         try {
-            console.log('🚀 Inicializando Network Diagram Creator...');
+            console.log('🔧 Inicializando NetworkDiagramApp...');
             
-            // 1. Cargar configuración
-            await this.loadConfig();
+            // Verificar dependencias críticas
+            this.checkCriticalDependencies();
             
-            // 2. Inicializar canvas
-            this.initializeCanvas();
+            // Cargar configuración
+            await this.loadConfiguration();
             
-            // 3. Inicializar managers
-            this.initializeManagers();
+            // Inicializar módulos en orden
+            await this.initializeModules();
             
-            // 4. Crear interfaz de usuario
-            this.createUserInterface();
+            // Configurar UI
+            await this.setupUI();
             
-            // 5. Configurar event listeners
+            // Configurar eventos
             this.setupEventListeners();
             
-            // 6. Cargar bibliotecas de dispositivos
-            this.loadDeviceLibrary();
+            // Cargar datos iniciales
+            await this.loadInitialData();
             
-            // 7. Marcar como inicializado
-            this.isInitialized = true;
-            window.NetworkDiagram.initialized = true;
+            // Configurar auto-guardado
+            this.setupAutoSave();
             
-            console.log('✅ Aplicación inicializada correctamente');
+            // Marcar como inicializado
+            this.initialized = true;
+            this.state.loading = false;
             
-            // Mostrar notificación de éxito
-            this.showNotification('Aplicación cargada correctamente', 'success');
+            // Emitir evento de inicialización completa
+            this.emit('app:ready');
+            
+            console.log('✅ NetworkDiagramApp inicializado correctamente');
             
         } catch (error) {
-            console.error('❌ Error al inicializar la aplicación:', error);
-            this.showNotification('Error al inicializar la aplicación: ' + error.message, 'error');
+            console.error('❌ Error inicializando NetworkDiagramApp:', error);
+            this.state.error = error;
+            this.state.loading = false;
+            throw error;
         }
     }
 
-    /**
-     * Carga la configuración desde el archivo JSON
-     */
-    async loadConfig() {
+    checkCriticalDependencies() {
+        const requiredGlobals = [
+            'StateManager',
+            'LayerManager', 
+            'AppInitializer'
+        ];
+
+        const missing = requiredGlobals.filter(name => !window[name]);
+        
+        if (missing.length > 0) {
+            throw new Error(`Dependencias críticas faltantes: ${missing.join(', ')}`);
+        }
+
+        // Verificar que StateManager esté inicializado
+        if (!window.StateManager.initialized) {
+            throw new Error('StateManager no está inicializado');
+        }
+
+        console.log('✅ Dependencias críticas verificadas');
+    }
+
+    async loadConfiguration() {
         try {
-            // Si ya existe configuración cargada, usarla
-            if (window.defaultConfigs) {
-                this.config = window.defaultConfigs;
+            // Cargar configuración guardada
+            const savedConfig = localStorage.getItem('network-diagram-config');
+            if (savedConfig) {
+                const parsed = JSON.parse(savedConfig);
+                this.config = { ...this.config, ...parsed };
+            }
+            
+            // Aplicar tema
+            this.applyTheme(this.config.theme);
+            
+            console.log('⚙️ Configuración cargada:', this.config);
+        } catch (error) {
+            console.warn('⚠️ Error cargando configuración, usando valores por defecto:', error);
+        }
+    }
+
+    async initializeModules() {
+        console.log('🔧 Inicializando módulos de la aplicación...');
+        
+        // Orden específico de inicialización
+        const moduleInitOrder = [
+            'LayerManager',
+            'DeviceManager', 
+            'ConnectionManager',
+            'CanvasManager',
+            'SelectionManager',
+            'UIManager',
+            'ToolbarManager',
+            'SidebarManager',
+            'NotificationManager',
+            'ModalManager',
+            'FileManager',
+            'ExportManager',
+            'TemplateManager',
+            'ValidationManager'
+        ];
+
+        for (const moduleName of moduleInitOrder) {
+            try {
+                const module = window[moduleName];
+                
+                if (module && typeof module.initialize === 'function') {
+                    console.log(`🔧 Inicializando ${moduleName}...`);
+                    await module.initialize();
+                    this.modules.set(moduleName, module);
+                    console.log(`✅ ${moduleName} inicializado`);
+                } else if (module) {
+                    // Módulo existe pero no tiene método initialize
+                    this.modules.set(moduleName, module);
+                    console.log(`📝 ${moduleName} registrado (sin inicialización)`);
+                } else {
+                    console.warn(`⚠️ ${moduleName} no encontrado, continuando...`);
+                }
+            } catch (error) {
+                console.error(`❌ Error inicializando ${moduleName}:`, error);
+                // No detener la inicialización por módulos opcionales
+                if (['LayerManager', 'DeviceManager', 'CanvasManager'].includes(moduleName)) {
+                    throw error;
+                }
+            }
+        }
+
+        console.log(`✅ ${this.modules.size} módulos inicializados`);
+    }
+
+    async setupUI() {
+        console.log('🎨 Configurando interfaz de usuario...');
+        
+        // Configurar toolbar
+        this.setupToolbar();
+        
+        // Configurar sidebar
+        this.setupSidebar();
+        
+        // Configurar canvas
+        this.setupCanvas();
+        
+        // Configurar atajos de teclado
+        this.setupKeyboardShortcuts();
+        
+        // Configurar drag & drop
+        this.setupDragAndDrop();
+        
+        console.log('✅ Interfaz de usuario configurada');
+    }
+
+    setupToolbar() {
+        // Configurar herramientas del toolbar
+        const tools = [
+            { id: 'select', element: 'select-tool', icon: '🔍', tooltip: 'Seleccionar (V)' },
+            { id: 'device', element: 'device-tool', icon: '🖥️', tooltip: 'Agregar dispositivo (D)' },
+            { id: 'connection', element: 'connection-tool', icon: '🔗', tooltip: 'Conectar (C)' },
+            { id: 'text', element: 'text-tool', icon: '📝', tooltip: 'Agregar texto (T)' }
+        ];
+
+        tools.forEach(tool => {
+            const element = document.getElementById(tool.element);
+            if (element) {
+                element.addEventListener('click', () => this.setActiveTool(tool.id));
+                element.title = tool.tooltip;
+            }
+        });
+
+        // Configurar botones de archivo
+        this.setupFileButtons();
+        
+        // Configurar botones de zoom
+        this.setupZoomButtons();
+        
+        // Configurar botones de configuración
+        this.setupSettingsButtons();
+    }
+
+    setupFileButtons() {
+        const fileButtons = [
+            { id: 'new-btn', action: () => this.newProject() },
+            { id: 'open-btn', action: () => this.openProject() },
+            { id: 'save-btn', action: () => this.saveProject() }
+        ];
+
+        fileButtons.forEach(({ id, action }) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('click', action);
+            }
+        });
+    }
+
+    setupZoomButtons() {
+        const zoomButtons = [
+            { id: 'zoom-in', action: () => this.zoomIn() },
+            { id: 'zoom-out', action: () => this.zoomOut() },
+            { id: 'zoom-fit', action: () => this.zoomToFit() }
+        ];
+
+        zoomButtons.forEach(({ id, action }) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('click', action);
+            }
+        });
+    }
+
+    setupSettingsButtons() {
+        const settingsButtons = [
+            { id: 'settings-btn', action: () => this.showSettings() },
+            { id: 'help-btn', action: () => this.showHelp() }
+        ];
+
+        settingsButtons.forEach(({ id, action }) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('click', action);
+            }
+        });
+    }
+
+    setupSidebar() {
+        // Configurar comportamiento del sidebar
+        const collapseBtns = document.querySelectorAll('.collapse-btn');
+        collapseBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const section = e.target.closest('.sidebar-section');
+                const content = section.querySelector('.section-content');
+                const isCollapsed = content.style.display === 'none';
+                
+                content.style.display = isCollapsed ? 'block' : 'none';
+                btn.querySelector('span').textContent = isCollapsed ? '−' : '+';
+            });
+        });
+
+        // Configurar búsqueda de dispositivos
+        const deviceSearch = document.getElementById('device-search');
+        if (deviceSearch) {
+            deviceSearch.addEventListener('input', (e) => {
+                this.filterDevices(e.target.value);
+            });
+        }
+    }
+
+    setupCanvas() {
+        const canvasContainer = document.getElementById('canvas-container');
+        if (!canvasContainer) {
+            console.warn('⚠️ Canvas container no encontrado');
+            return;
+        }
+
+        // Configurar eventos del canvas
+        canvasContainer.addEventListener('click', (e) => this.handleCanvasClick(e));
+        canvasContainer.addEventListener('contextmenu', (e) => this.handleCanvasRightClick(e));
+        canvasContainer.addEventListener('wheel', (e) => this.handleCanvasWheel(e));
+        canvasContainer.addEventListener('mousemove', (e) => this.handleCanvasMouseMove(e));
+        
+        // Configurar botones del canvas
+        const canvasButtons = [
+            { id: 'grid-toggle', action: () => this.toggleGrid() },
+            { id: 'snap-toggle', action: () => this.toggleSnap() },
+            { id: 'rulers-toggle', action: () => this.toggleRulers() }
+        ];
+
+        canvasButtons.forEach(({ id, action }) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('click', action);
+            }
+        });
+    }
+
+    setupKeyboardShortcuts() {
+        const shortcuts = [
+            { key: 'v', action: () => this.setActiveTool('select') },
+            { key: 'd', action: () => this.setActiveTool('device') },
+            { key: 'c', action: () => this.setActiveTool('connection') },
+            { key: 't', action: () => this.setActiveTool('text') },
+            { key: 'Delete', action: () => this.deleteSelected() },
+            { key: 'Escape', action: () => this.cancelCurrentOperation() },
+            { key: '+', action: () => this.zoomIn() },
+            { key: '-', action: () => this.zoomOut() },
+            { key: '0', action: () => this.zoomToFit() }
+        ];
+
+        document.addEventListener('keydown', (e) => {
+            // Ignorar si está en un input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
                 return;
             }
 
-            // Intentar cargar desde archivo
-            const response = await fetch('./data/default-configs.json');
-            if (response.ok) {
-                this.config = await response.json();
-            } else {
-                // Configuración de respaldo
-                this.config = this.getDefaultConfig();
-                console.warn('⚠️ Usando configuración por defecto');
+            const shortcut = shortcuts.find(s => s.key === e.key);
+            if (shortcut) {
+                e.preventDefault();
+                shortcut.action();
             }
-            
-            window.NetworkDiagram.config = this.config;
-            
-        } catch (error) {
-            console.warn('⚠️ No se pudo cargar configuración externa, usando configuración por defecto');
-            this.config = this.getDefaultConfig();
+        });
+    }
+
+    setupDragAndDrop() {
+        const canvasContainer = document.getElementById('canvas-container');
+        if (!canvasContainer) return;
+
+        // Permitir drop en el canvas
+        canvasContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        });
+
+        canvasContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            this.handleCanvasDrop(e);
+        });
+    }
+
+    setupEventListeners() {
+        console.log('📡 Configurando event listeners...');
+
+        // Escuchar cambios de estado
+        if (window.StateManager) {
+            window.StateManager.subscribe('currentLayer', (layer) => {
+                this.onLayerChanged(layer);
+            });
+
+            window.StateManager.subscribe('selectedDevices', (devices) => {
+                this.onSelectionChanged(devices);
+            });
         }
+
+        // Escuchar eventos de módulos
+        this.eventBus.addEventListener('tool:changed', (e) => {
+            this.onToolChanged(e.detail);
+        });
+
+        this.eventBus.addEventListener('device:added', (e) => {
+            this.onDeviceAdded(e.detail);
+        });
+
+        this.eventBus.addEventListener('project:saved', (e) => {
+            this.onProjectSaved(e.detail);
+        });
+
+        console.log('✅ Event listeners configurados');
     }
 
-    /**
-     * Configuración por defecto en caso de que no se pueda cargar el archivo
-     */
-    getDefaultConfig() {
-        return {
-            deviceTypes: {
-                router: {
-                    name: "Router",
-                    icon: "RT",
-                    category: "network",
-                    color: "#FF6B6B",
-                    properties: {
-                        ip: "",
-                        mask: "255.255.255.0",
-                        description: "",
-                        status: "active"
-                    }
-                },
-                switch: {
-                    name: "Switch",
-                    icon: "SW",
-                    category: "network",
-                    color: "#4ECDC4",
-                    properties: {
-                        ip: "",
-                        mask: "255.255.255.0",
-                        description: "",
-                        status: "active"
-                    }
-                },
-                firewall: {
-                    name: "Firewall",
-                    icon: "FW",
-                    category: "security",
-                    color: "#FF9FF3",
-                    properties: {
-                        ip: "",
-                        mask: "255.255.255.0",
-                        description: "",
-                        status: "active"
-                    }
-                },
-                server: {
-                    name: "Servidor",
-                    icon: "SV",
-                    category: "compute",
-                    color: "#45B7D1",
-                    properties: {
-                        ip: "",
-                        mask: "255.255.255.0",
-                        description: "",
-                        status: "active"
-                    }
-                },
-                workstation: {
-                    name: "PC",
-                    icon: "PC",
-                    category: "endpoint",
-                    color: "#54A0FF",
-                    properties: {
-                        ip: "",
-                        mask: "255.255.255.0",
-                        description: "",
-                        status: "active"
-                    }
-                }
-            },
-            connectionTypes: {
-                ethernet: {
-                    name: "Ethernet",
-                    color: "#2D3748",
-                    style: "solid",
-                    width: 2
-                },
-                fiber: {
-                    name: "Fibra Óptica",
-                    color: "#FF6B6B",
-                    style: "solid",
-                    width: 3
-                },
-                wireless: {
-                    name: "Inalámbrico",
-                    color: "#9B59B6",
-                    style: "dotted",
-                    width: 2
-                }
-            },
-            layers: {
-                "Core": {
-                    name: "Core",
-                    description: "Núcleo de la red",
-                    color: "#45B7D1",
-                    order: 2,
-                    yPosition: 250
-                },
-                "Distribution": {
-                    name: "Distribution",
-                    description: "Capa de distribución",
-                    color: "#96CEB4",
-                    order: 3,
-                    yPosition: 350
-                },
-                "Access": {
-                    name: "Access",
-                    description: "Capa de acceso",
-                    color: "#FECA57",
-                    order: 4,
-                    yPosition: 450
-                },
-                "User": {
-                    name: "User",
-                    description: "Dispositivos de usuario",
-                    color: "#54A0FF",
-                    order: 6,
-                    yPosition: 650
-                }
-            }
-        };
-    }
+    async loadInitialData() {
+        console.log('📚 Cargando datos iniciales...');
 
-    /**
-     * Inicializa el canvas principal
-     */
-    initializeCanvas() {
-        this.canvas = document.getElementById('main-canvas');
-        if (!this.canvas) {
-            // Crear canvas si no existe
-            this.canvas = document.createElement('canvas');
-            this.canvas.id = 'main-canvas';
-            this.canvas.width = 2000;
-            this.canvas.height = 1500;
-            
-            const container = document.querySelector('.canvas-container') || document.querySelector('.main-content');
-            if (container) {
-                container.appendChild(this.canvas);
-            } else {
-                document.body.appendChild(this.canvas);
-            }
-        }
-        
-        this.ctx = this.canvas.getContext('2d');
-        
-        // Configurar canvas responsive
-        this.resizeCanvas();
-        
-        // Limpiar canvas
-        this.clearCanvas();
-        
-        console.log('✅ Canvas inicializado');
-    }
-
-    /**
-     * Inicializa todos los managers
-     */
-    initializeManagers() {
         try {
-            // Layer Manager
-            if (window.LayerManager) {
-                this.managers.layerManager = new LayerManager();
-                window.NetworkDiagram.layerManager = this.managers.layerManager;
-                console.log('✅ LayerManager inicializado');
-            } else {
-                console.warn('⚠️ LayerManager no disponible, creando implementación básica');
-                this.managers.layerManager = this.createBasicLayerManager();
-            }
-
-            // Device Manager básico
-            this.managers.deviceManager = this.createDeviceManager();
+            // Cargar biblioteca de dispositivos
+            await this.loadDeviceLibrary();
             
-            // Connection Manager básico
-            this.managers.connectionManager = this.createConnectionManager();
+            // Cargar plantillas
+            await this.loadTemplates();
             
-            console.log('✅ Managers inicializados');
+            // Intentar cargar último proyecto
+            await this.loadLastProject();
             
+            console.log('✅ Datos iniciales cargados');
         } catch (error) {
-            console.error('❌ Error inicializando managers:', error);
+            console.warn('⚠️ Error cargando datos iniciales:', error);
         }
     }
 
-    /**
-     * Crea un DeviceManager básico
-     */
-    createDeviceManager() {
-        return {
-            devices: new Map(),
-            
-            createDevice: (type, x, y, properties = {}) => {
-                const deviceConfig = this.config.deviceTypes[type];
-                if (!deviceConfig) {
-                    throw new Error(`Tipo de dispositivo ${type} no encontrado`);
-                }
-
-                const device = {
-                    id: 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                    type: type,
-                    name: properties.name || `${deviceConfig.name}-${this.devices.size + 1}`,
-                    x: x,
-                    y: y,
-                    width: 80,
-                    height: 60,
-                    properties: { ...deviceConfig.properties, ...properties },
-                    config: deviceConfig
-                };
-
-                this.devices.set(device.id, device);
-                this.renderDevice(device);
-                
-                return device;
+    async loadDeviceLibrary() {
+        const deviceCategories = [
+            {
+                id: 'network',
+                name: 'Dispositivos de Red',
+                icon: '🌐',
+                devices: [
+                    { type: 'router', name: 'Router', icon: 'R', description: 'Dispositivo de enrutamiento' },
+                    { type: 'switch', name: 'Switch', icon: 'SW', description: 'Conmutador de red' },
+                    { type: 'firewall', name: 'Firewall', icon: 'FW', description: 'Cortafuegos' },
+                    { type: 'access-point', name: 'Access Point', icon: 'AP', description: 'Punto de acceso WiFi' }
+                ]
             },
-            
-            removeDevice: (deviceId) => {
-                this.devices.delete(deviceId);
-                this.redrawCanvas();
+            {
+                id: 'servers',
+                name: 'Servidores',
+                icon: '🖥️',
+                devices: [
+                    { type: 'server', name: 'Servidor', icon: 'SRV', description: 'Servidor genérico' },
+                    { type: 'database', name: 'Base de Datos', icon: 'DB', description: 'Servidor de base de datos' },
+                    { type: 'web-server', name: 'Servidor Web', icon: 'WEB', description: 'Servidor web' },
+                    { type: 'mail-server', name: 'Servidor Email', icon: 'MAIL', description: 'Servidor de correo' }
+                ]
             },
-            
-            getDevice: (deviceId) => {
-                return this.devices.get(deviceId);
-            },
-            
-            getAllDevices: () => {
-                return Array.from(this.devices.values());
+            {
+                id: 'endpoints',
+                name: 'Dispositivos Finales',
+                icon: '💻',
+                devices: [
+                    { type: 'workstation', name: 'PC', icon: 'PC', description: 'Estación de trabajo' },
+                    { type: 'laptop', name: 'Laptop', icon: 'LAP', description: 'Computadora portátil' },
+                    { type: 'phone', name: 'Teléfono IP', icon: 'TEL', description: 'Teléfono IP' },
+                    { type: 'printer', name: 'Impresora', icon: 'PRT', description: 'Impresora de red' }
+                ]
             }
-        };
+        ];
+
+        // Renderizar categorías en el sidebar
+        this.renderDeviceCategories(deviceCategories);
     }
 
-    /**
-     * Crea un ConnectionManager básico
-     */
-    createConnectionManager() {
-        return {
-            connections: [],
-            
-            createConnection: (device1Id, device2Id, type = 'ethernet') => {
-                const device1 = this.devices.get(device1Id);
-                const device2 = this.devices.get(device2Id);
-                
-                if (!device1 || !device2) {
-                    throw new Error('Dispositivos no encontrados');
-                }
-
-                const connection = {
-                    id: 'conn_' + Date.now(),
-                    device1: device1Id,
-                    device2: device2Id,
-                    type: type,
-                    properties: {}
-                };
-
-                this.connections.push(connection);
-                this.redrawCanvas();
-                
-                return connection;
-            },
-            
-            removeConnection: (connectionId) => {
-                this.connections = this.connections.filter(c => c.id !== connectionId);
-                this.redrawCanvas();
-            }
-        };
-    }
-
-    /**
-     * Crea un LayerManager básico si no está disponible
-     */
-    createBasicLayerManager() {
-        return {
-            layers: new Map(),
-            deviceLayers: new Map(),
-            
-            init: () => {
-                Object.entries(this.config.layers).forEach(([name, config]) => {
-                    this.layers.set(name, {
-                        ...config,
-                        devices: new Set(),
-                        visible: true
-                    });
-                });
-            },
-            
-            assignDeviceToLayer: (deviceId, layerName) => {
-                if (this.layers.has(layerName)) {
-                    this.deviceLayers.set(deviceId, layerName);
-                    this.layers.get(layerName).devices.add(deviceId);
-                    return true;
-                }
-                return false;
-            },
-            
-            getDeviceLayer: (deviceId) => {
-                return this.deviceLayers.get(deviceId);
-            }
-        };
-    }
-
-    /**
-     * Crea la interfaz de usuario
-     */
-    createUserInterface() {
-        // Verificar si ya existe la estructura
-        if (!document.querySelector('.sidebar')) {
-            this.createSidebarStructure();
-        }
-        
-        // Crear controles de zoom si no existen
-        if (!document.querySelector('.zoom-controls')) {
-            this.createZoomControls();
-        }
-        
-        console.log('✅ Interfaz de usuario creada');
-    }
-
-    /**
-     * Crea la estructura del sidebar
-     */
-    createSidebarStructure() {
-        const sidebar = document.createElement('div');
-        sidebar.className = 'sidebar';
-        
-        sidebar.innerHTML = `
-            <div class="sidebar-section">
-                <div class="sidebar-title">
-                    <span>Dispositivos</span>
-                </div>
-                <div class="device-library" id="device-library">
-                    <!-- Los dispositivos se cargarán aquí -->
-                </div>
-            </div>
-            <div class="sidebar-section">
-                <div class="sidebar-title">
-                    <span>Capas</span>
-                </div>
-                <div class="layer-panel" id="layer-panel">
-                    <!-- Las capas se cargarán aquí -->
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(sidebar);
-    }
-
-    /**
-     * Carga la biblioteca de dispositivos
-     */
-    loadDeviceLibrary() {
-        const container = document.getElementById('device-library');
+    renderDeviceCategories(categories) {
+        const container = document.getElementById('device-categories');
         if (!container) return;
 
         container.innerHTML = '';
 
-        Object.entries(this.config.deviceTypes).forEach(([type, config]) => {
-            const deviceElement = document.createElement('div');
-            deviceElement.className = 'device-item';
-            deviceElement.dataset.deviceType = type;
-            deviceElement.draggable = true;
-            
-            deviceElement.innerHTML = `
-                <div class="device-icon" style="background-color: ${config.color}">
-                    ${config.icon}
+        categories.forEach(category => {
+            const categoryElement = document.createElement('div');
+            categoryElement.className = 'device-category';
+            categoryElement.innerHTML = `
+                <div class="category-header" data-category="${category.id}">
+                    <span class="category-icon">${category.icon}</span>
+                    <span class="category-name">${category.name}</span>
+                    <span class="category-toggle">−</span>
                 </div>
-                <div class="device-name">${config.name}</div>
+                <div class="category-devices" id="devices-${category.id}">
+                    ${category.devices.map(device => `
+                        <div class="device-item" 
+                             data-device-type="${device.type}"
+                             draggable="true"
+                             title="${device.description}">
+                            <span class="device-icon">${device.icon}</span>
+                            <span class="device-name">${device.name}</span>
+                        </div>
+                    `).join('')}
+                </div>
             `;
 
-            // Event listeners para drag and drop
-            deviceElement.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('text/device-type', type);
-            });
+            container.appendChild(categoryElement);
 
-            deviceElement.addEventListener('click', () => {
-                this.selectDeviceType(type);
-            });
+            // Configurar eventos
+            this.setupCategoryEvents(categoryElement, category);
+        });
+    }
 
-            container.appendChild(deviceElement);
+    setupCategoryEvents(categoryElement, category) {
+        const header = categoryElement.querySelector('.category-header');
+        const devices = categoryElement.querySelector('.category-devices');
+        const toggle = categoryElement.querySelector('.category-toggle');
+
+        // Toggle de categoría
+        header.addEventListener('click', () => {
+            const isCollapsed = devices.style.display === 'none';
+            devices.style.display = isCollapsed ? 'block' : 'none';
+            toggle.textContent = isCollapsed ? '−' : '+';
         });
 
-        console.log('✅ Biblioteca de dispositivos cargada');
-    }
+        // Drag de dispositivos
+        const deviceItems = categoryElement.querySelectorAll('.device-item');
+        deviceItems.forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', item.dataset.deviceType);
+                e.dataTransfer.effectAllowed = 'copy';
+                item.classList.add('dragging');
+            });
 
-    /**
-     * Crea controles de zoom
-     */
-    createZoomControls() {
-        const zoomControls = document.createElement('div');
-        zoomControls.className = 'zoom-controls';
-        
-        zoomControls.innerHTML = `
-            <button class="zoom-btn" id="zoom-in" title="Acercar">+</button>
-            <div class="zoom-level" id="zoom-level">100%</div>
-            <button class="zoom-btn" id="zoom-out" title="Alejar">-</button>
-            <button class="zoom-btn" id="zoom-fit" title="Ajustar">⌂</button>
-        `;
-        
-        document.body.appendChild(zoomControls);
-        
-        // Event listeners para zoom
-        document.getElementById('zoom-in').addEventListener('click', () => this.setZoom(this.zoom * 1.2));
-        document.getElementById('zoom-out').addEventListener('click', () => this.setZoom(this.zoom / 1.2));
-        document.getElementById('zoom-fit').addEventListener('click', () => this.fitToCanvas());
-    }
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+            });
 
-    /**
-     * Configura todos los event listeners
-     */
-    setupEventListeners() {
-        // Canvas events
-        this.canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
-        this.canvas.addEventListener('mousemove', (e) => this.handleCanvasMouseMove(e));
-        this.canvas.addEventListener('dragover', (e) => {
-            e.preventDefault();
+            // Click para agregar dispositivo
+            item.addEventListener('click', () => {
+                this.addDeviceToCenter(item.dataset.deviceType);
+            });
         });
-        this.canvas.addEventListener('drop', (e) => this.handleCanvasDrop(e));
-
-        // Toolbar events
-        this.setupToolbarEvents();
-        
-        // Window events
-        window.addEventListener('resize', () => this.resizeCanvas());
-        
-        console.log('✅ Event listeners configurados');
     }
 
-    /**
-     * Configura eventos de la toolbar
-     */
-    setupToolbarEvents() {
-        // Herramientas básicas
-        const tools = ['select', 'connect', 'pan'];
-        tools.forEach(tool => {
-            const btn = document.querySelector(`[data-tool="${tool}"]`);
-            if (btn) {
-                btn.addEventListener('click', () => this.setTool(tool));
+    async loadTemplates() {
+        const templates = [
+            {
+                id: 'basic-office',
+                name: 'Oficina Básica',
+                description: 'Red simple para oficina pequeña',
+                thumbnail: '🏢',
+                devices: [
+                    { type: 'router', x: 400, y: 200, layer: 'core' },
+                    { type: 'switch', x: 400, y: 350, layer: 'access' },
+                    { type: 'workstation', x: 200, y: 450, layer: 'user' },
+                    { type: 'workstation', x: 600, y: 450, layer: 'user' }
+                ]
+            },
+            {
+                id: 'enterprise',
+                name: 'Red Empresarial',
+                description: 'Topología empresarial con DMZ',
+                thumbnail: '🏭',
+                devices: [
+                    { type: 'router', x: 400, y: 100, layer: 'core' },
+                    { type: 'firewall', x: 400, y: 200, layer: 'dmz' },
+                    { type: 'switch', x: 200, y: 350, layer: 'access' },
+                    { type: 'switch', x: 600, y: 350, layer: 'access' },
+                    { type: 'server', x: 500, y: 250, layer: 'dmz' }
+                ]
+            }
+        ];
+
+        this.renderTemplates(templates);
+    }
+
+    renderTemplates(templates) {
+        const container = document.getElementById('template-grid');
+        if (!container) return;
+
+        container.innerHTML = templates.map(template => `
+            <div class="template-item" data-template-id="${template.id}">
+                <div class="template-thumbnail">${template.thumbnail}</div>
+                <div class="template-info">
+                    <h4>${template.name}</h4>
+                    <p>${template.description}</p>
+                </div>
+            </div>
+        `).join('');
+
+        // Configurar eventos de plantillas
+        container.addEventListener('click', (e) => {
+            const templateItem = e.target.closest('.template-item');
+            if (templateItem) {
+                const templateId = templateItem.dataset.templateId;
+                this.loadTemplate(templateId, templates);
             }
         });
-
-        // Botón conectar (fallback)
-        const connectBtn = document.getElementById('btn-connect') || 
-                          document.querySelector('.btn-connect') ||
-                          document.querySelector('[data-action="connect"]');
-        
-        if (connectBtn) {
-            connectBtn.addEventListener('click', () => {
-                this.connectionMode = !this.connectionMode;
-                connectBtn.classList.toggle('active', this.connectionMode);
-                this.canvas.style.cursor = this.connectionMode ? 'crosshair' : 'default';
-            });
-        }
-
-        // Otros botones de la toolbar
-        this.setupToolbarButtons();
     }
 
-    /**
-     * Configura botones adicionales de la toolbar
-     */
-    setupToolbarButtons() {
-        const buttons = {
-            'nuevo': () => this.newProject(),
-            'guardar': () => this.saveProject(),
-            'cargar': () => this.loadProject(),
-            'exportar': () => this.exportProject(),
-            'limpiar': () => this.clearCanvas(),
-            'auto-organizar': () => this.autoOrganize(),
-            'validar': () => this.validateTopology()
+    async loadLastProject() {
+        try {
+            const lastProject = localStorage.getItem('network-diagram-last-project');
+            if (lastProject) {
+                const projectData = JSON.parse(lastProject);
+                await this.loadProjectData(projectData);
+                console.log('📂 Último proyecto cargado');
+            }
+        } catch (error) {
+            console.warn('⚠️ Error cargando último proyecto:', error);
+        }
+    }
+
+    setupAutoSave() {
+        if (!this.config.autoSave) return;
+
+        setInterval(() => {
+            if (this.state.isDirty && window.StateManager) {
+                this.saveProject(false); // Guardado silencioso
+            }
+        }, this.config.autoSaveInterval);
+
+        console.log(`💾 Auto-guardado configurado cada ${this.config.autoSaveInterval / 1000}s`);
+    }
+
+    // Métodos de herramientas
+    setActiveTool(toolId) {
+        if (this.state.currentTool === toolId) return;
+
+        // Desactivar herramienta anterior
+        const prevBtn = document.querySelector('.toolbar-btn.active');
+        if (prevBtn) {
+            prevBtn.classList.remove('active');
+        }
+
+        // Activar nueva herramienta
+        const newBtn = document.getElementById(`${toolId}-tool`);
+        if (newBtn) {
+            newBtn.classList.add('active');
+        }
+
+        this.state.currentTool = toolId;
+        
+        // Notificar cambio de herramienta
+        this.emit('tool:changed', { tool: toolId });
+        
+        // Actualizar cursor del canvas
+        this.updateCanvasCursor(toolId);
+
+        console.log(`🔧 Herramienta activa: ${toolId}`);
+    }
+
+    updateCanvasCursor(toolId) {
+        const canvasContainer = document.getElementById('canvas-container');
+        if (!canvasContainer) return;
+
+        const cursors = {
+            select: 'default',
+            device: 'crosshair',
+            connection: 'crosshair',
+            text: 'text'
         };
 
-        Object.entries(buttons).forEach(([action, handler]) => {
-            const btn = document.querySelector(`[data-action="${action}"]`) ||
-                      document.getElementById(`btn-${action}`) ||
-                      document.querySelector(`.btn-${action}`);
-            
-            if (btn) {
-                btn.addEventListener('click', handler);
-            }
-        });
+        canvasContainer.style.cursor = cursors[toolId] || 'default';
     }
 
-    /**
-     * Maneja clics en el canvas
-     */
+    // Métodos de canvas
     handleCanvasClick(e) {
-        const rect = this.canvas.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / this.zoom - this.panX;
-        const y = (e.clientY - rect.top) / this.zoom - this.panY;
+        if (!this.initialized) return;
 
-        const clickedDevice = this.getDeviceAt(x, y);
+        const rect = e.target.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
 
-        if (this.connectionMode && clickedDevice) {
-            this.handleConnectionMode(clickedDevice);
-        } else if (clickedDevice) {
-            this.selectDevice(clickedDevice);
-        } else {
-            this.selectedDevice = null;
-            this.redrawCanvas();
+        switch (this.state.currentTool) {
+            case 'device':
+                this.showDeviceSelector(x, y);
+                break;
+            case 'text':
+                this.addTextLabel(x, y);
+                break;
+            default:
+                this.handleSelection(x, y, e.ctrlKey);
         }
+
+        this.updateCanvasInfo(x, y);
     }
 
-    /**
-     * Maneja movimiento del mouse en el canvas
-     */
-    handleCanvasMouseMove(e) {
-        const rect = this.canvas.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / this.zoom - this.panX;
-        const y = (e.clientY - rect.top) / this.zoom - this.panY;
-
-        const hoveredDevice = this.getDeviceAt(x, y);
-        this.canvas.style.cursor = hoveredDevice ? 'pointer' : 'default';
-
-        // Tooltip básico
-        if (hoveredDevice) {
-            this.canvas.title = `${hoveredDevice.name} (${hoveredDevice.type})`;
-        } else {
-            this.canvas.title = '';
-        }
-    }
-
-    /**
-     * Maneja drop en el canvas
-     */
-    handleCanvasDrop(e) {
+    handleCanvasRightClick(e) {
         e.preventDefault();
         
-        const deviceType = e.dataTransfer.getData('text/device-type');
+        const rect = e.target.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        this.showContextMenu(x, y, e.clientX, e.clientY);
+    }
+
+    handleCanvasWheel(e) {
+        if (e.ctrlKey) {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -0.1 : 0.1;
+            this.adjustZoom(delta);
+        }
+    }
+
+    handleCanvasMouseMove(e) {
+        const rect = e.target.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        this.updateCanvasInfo(x, y);
+    }
+
+    handleCanvasDrop(e) {
+        const deviceType = e.dataTransfer.getData('text/plain');
         if (!deviceType) return;
 
-        const rect = this.canvas.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / this.zoom - this.panX;
-        const y = (e.clientY - rect.top) / this.zoom - this.panY;
+        const rect = e.target.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
 
-        this.createDeviceAt(deviceType, x, y);
+        this.addDevice(deviceType, x, y);
     }
 
-    /**
-     * Crea un dispositivo en las coordenadas especificadas
-     */
-    createDeviceAt(type, x, y) {
-        try {
-            const device = this.managers.deviceManager.createDevice(type, x, y);
-            
-            // Asignar a capa por defecto
-            if (this.managers.layerManager) {
-                this.managers.layerManager.assignDeviceToLayer(device.id, 'Access');
-            }
-            
-            this.showNotification(`Dispositivo ${device.name} creado`, 'success');
-            
-        } catch (error) {
-            console.error('Error creando dispositivo:', error);
-            this.showNotification('Error creando dispositivo: ' + error.message, 'error');
+    updateCanvasInfo(x, y) {
+        const coordsElement = document.getElementById('canvas-coordinates');
+        if (coordsElement) {
+            coordsElement.textContent = `X: ${Math.round(x)}, Y: ${Math.round(y)}`;
         }
     }
 
-    /**
-     * Obtiene el dispositivo en las coordenadas especificadas
-     */
-    getDeviceAt(x, y) {
-        for (const device of this.devices.values()) {
-            if (x >= device.x && x <= device.x + device.width &&
-                y >= device.y && y <= device.y + device.height) {
-                return device;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Renderiza un dispositivo en el canvas
-     */
-    renderDevice(device) {
-        const ctx = this.ctx;
-        
-        ctx.save();
-        ctx.scale(this.zoom, this.zoom);
-        ctx.translate(this.panX, this.panY);
-
-        // Fondo del dispositivo
-        ctx.fillStyle = device.config.color;
-        ctx.fillRect(device.x, device.y, device.width, device.height);
-
-        // Borde
-        ctx.strokeStyle = device === this.selectedDevice ? '#007bff' : '#666';
-        ctx.lineWidth = device === this.selectedDevice ? 3 : 1;
-        ctx.strokeRect(device.x, device.y, device.width, device.height);
-
-        // Icono
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(device.config.icon, device.x + device.width/2, device.y + 25);
-
-        // Nombre
-        ctx.fillStyle = 'black';
-        ctx.font = '10px Arial';
-        ctx.fillText(device.name, device.x + device.width/2, device.y + device.height - 5);
-
-        // Estado
-        const statusColor = device.properties.status === 'active' ? '#28a745' : '#dc3545';
-        ctx.fillStyle = statusColor;
-        ctx.beginPath();
-        ctx.arc(device.x + device.width - 8, device.y + 8, 4, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.restore();
-    }
-
-    /**
-     * Redibuja todo el canvas
-     */
-    redrawCanvas() {
-        this.clearCanvas();
-        
-        // Dibujar grid
-        this.drawGrid();
-        
-        // Dibujar conexiones
-        this.drawConnections();
-        
-        // Dibujar dispositivos
-        for (const device of this.devices.values()) {
-            this.renderDevice(device);
-        }
-    }
-
-    /**
-     * Limpia el canvas
-     */
-    clearCanvas() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    }
-
-    /**
-     * Dibuja el grid de fondo
-     */
-    drawGrid() {
-        const ctx = this.ctx;
-        const gridSize = 20 * this.zoom;
-        
-        ctx.save();
-        ctx.strokeStyle = '#e0e0e0';
-        ctx.lineWidth = 1;
-        
-        for (let x = 0; x < this.canvas.width; x += gridSize) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, this.canvas.height);
-            ctx.stroke();
-        }
-        
-        for (let y = 0; y < this.canvas.height; y += gridSize) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(this.canvas.width, y);
-            ctx.stroke();
-        }
-        
-        ctx.restore();
-    }
-
-    /**
-     * Dibuja todas las conexiones
-     */
-    drawConnections() {
-        this.connections.forEach(connection => {
-            this.drawConnection(connection);
-        });
-    }
-
-    /**
-     * Dibuja una conexión específica
-     */
-    drawConnection(connection) {
-        const device1 = this.devices.get(connection.device1);
-        const device2 = this.devices.get(connection.device2);
-        
-        if (!device1 || !device2) return;
-
-        const ctx = this.ctx;
-        const connectionConfig = this.config.connectionTypes[connection.type];
-        
-        ctx.save();
-        ctx.scale(this.zoom, this.zoom);
-        ctx.translate(this.panX, this.panY);
-
-        ctx.strokeStyle = connectionConfig.color;
-        ctx.lineWidth = connectionConfig.width;
-        
-        if (connectionConfig.style === 'dotted') {
-            ctx.setLineDash([5, 5]);
-        } else if (connectionConfig.style === 'dashed') {
-            ctx.setLineDash([10, 5]);
+    // Métodos de dispositivos
+    addDevice(deviceType, x, y) {
+        if (!window.DeviceManager) {
+            console.error('DeviceManager no disponible');
+            return;
         }
 
-        ctx.beginPath();
-        ctx.moveTo(device1.x + device1.width/2, device1.y + device1.height/2);
-        ctx.lineTo(device2.x + device2.width/2, device2.y + device2.height/2);
-        ctx.stroke();
-
-        ctx.restore();
-    }
-
-    /**
-     * Ajusta el tamaño del canvas
-     */
-    resizeCanvas() {
-        const container = this.canvas.parentElement;
-        if (container) {
-            this.canvas.width = container.clientWidth;
-            this.canvas.height = container.clientHeight;
-            this.redrawCanvas();
-        }
-    }
-
-    /**
-     * Establece el nivel de zoom
-     */
-    setZoom(newZoom) {
-        this.zoom = Math.max(0.1, Math.min(3, newZoom));
-        const zoomLevel = document.getElementById('zoom-level');
-        if (zoomLevel) {
-            zoomLevel.textContent = Math.round(this.zoom * 100) + '%';
-        }
-        this.redrawCanvas();
-    }
-
-    /**
-     * Ajusta el zoom para mostrar todo el contenido
-     */
-    fitToCanvas() {
-        this.zoom = 1;
-        this.panX = 0;
-        this.panY = 0;
-        this.setZoom(1);
-    }
-
-    /**
-     * Muestra una notificación
-     */
-    showNotification(message, type = 'info') {
-        // Crear contenedor si no existe
-        let container = document.querySelector('.notifications-container');
-        if (!container) {
-            container = document.createElement('div');
-            container.className = 'notifications-container';
-            document.body.appendChild(container);
-        }
-
-        // Crear notificación
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.innerHTML = `
-            <div class="notification-content">
-                <span class="notification-message">${message}</span>
-                <button class="notification-close">&times;</button>
-            </div>
-        `;
-
-        // Event listener para cerrar
-        notification.querySelector('.notification-close').addEventListener('click', () => {
-            notification.remove();
-        });
-
-        // Añadir al contenedor
-        container.appendChild(notification);
-
-        // Auto-remover después de 5 segundos
-        setTimeout(() => {
-            if (notification.parentElement) {
-                notification.remove();
-            }
-        }, 5000);
-    }
-
-    /**
-     * Métodos para acciones de la toolbar
-     */
-    newProject() {
-        if (confirm('¿Crear nuevo proyecto? Se perderán los cambios no guardados.')) {
-            this.devices.clear();
-            this.connections = [];
-            this.clearCanvas();
-            this.showNotification('Nuevo proyecto creado', 'success');
-        }
-    }
-
-    saveProject() {
-        const project = {
-            name: window.NetworkDiagram.currentProject.name,
-            devices: Array.from(this.devices.values()),
-            connections: this.connections,
-            settings: {
-                zoom: this.zoom,
-                panX: this.panX,
-                panY: this.panY
-            }
+        const device = {
+            type: deviceType,
+            x: x,
+            y: y,
+            layer: window.StateManager.getState().currentLayer,
+            name: this.generateDeviceName(deviceType),
+            properties: {}
         };
 
-        const dataStr = JSON.stringify(project, null, 2);
-        const dataBlob = new Blob([dataStr], {type: 'application/json'});
-        const url = URL.createObjectURL(dataBlob);
+        const deviceId = window.DeviceManager.addDevice(device);
         
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = project.name + '.json';
-        link.click();
-        
-        this.showNotification('Proyecto guardado', 'success');
+        if (deviceId) {
+            this.state.isDirty = true;
+            this.emit('device:added', { deviceId, device });
+            this.showNotification(`Dispositivo ${device.name} agregado`, 'success');
+        }
     }
 
-    loadProject() {
+    addDeviceToCenter(deviceType) {
+        const canvasContainer = document.getElementById('canvas-container');
+        if (!canvasContainer) return;
+
+        const rect = canvasContainer.getBoundingClientRect();
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        this.addDevice(deviceType, centerX, centerY);
+    }
+
+    generateDeviceName(deviceType) {
+        const state = window.StateManager.getState();
+        const existingDevices = Array.from(state.devices.values());
+        const sameTypeDevices = existingDevices.filter(d => d.type === deviceType);
+        
+        const prefixes = {
+            router: 'R',
+            switch: 'SW',
+            firewall: 'FW',
+            server: 'SRV',
+            workstation: 'PC',
+            'access-point': 'AP'
+        };
+
+        const prefix = prefixes[deviceType] || deviceType.toUpperCase();
+        const number = sameTypeDevices.length + 1;
+        
+        return `${prefix}-${number.toString().padStart(2, '0')}`;
+    }
+
+    // Métodos de archivo
+    newProject() {
+        if (this.state.isDirty) {
+            if (!confirm('¿Crear nuevo proyecto? Se perderán los cambios no guardados.')) {
+                return;
+            }
+        }
+
+        // Limpiar estado
+        window.StateManager.reset();
+        this.state.isDirty = false;
+        
+        // Limpiar canvas
+        if (window.CanvasManager) {
+            window.CanvasManager.clear();
+        }
+
+        this.showNotification('Nuevo proyecto creado', 'success');
+        console.log('📄 Nuevo proyecto creado');
+    }
+
+    openProject() {
         const input = document.createElement('input');
         input.type = 'file';
-        input.accept = '.json';
+        input.accept = '.json,.ndcp';
         input.onchange = (e) => {
             const file = e.target.files[0];
             if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        const project = JSON.parse(e.target.result);
-                        this.loadProjectData(project);
-                        this.showNotification('Proyecto cargado correctamente', 'success');
-                    } catch (error) {
-                        this.showNotification('Error cargando proyecto: ' + error.message, 'error');
-                    }
-                };
-                reader.readAsText(file);
+                this.loadProjectFile(file);
             }
         };
         input.click();
     }
 
-    loadProjectData(project) {
-        // Limpiar proyecto actual
-        this.devices.clear();
-        this.connections = [];
+    async loadProjectFile(file) {
+        try {
+            const text = await file.text();
+            const projectData = JSON.parse(text);
+            
+            await this.loadProjectData(projectData);
+            
+            this.showNotification(`Proyecto ${file.name} cargado`, 'success');
+            console.log('📂 Proyecto cargado desde archivo');
+        } catch (error) {
+            console.error('Error cargando proyecto:', error);
+            this.showNotification('Error cargando proyecto', 'error');
+        }
+    }
 
-        // Cargar dispositivos
-        if (project.devices) {
-            project.devices.forEach(deviceData => {
-                this.devices.set(deviceData.id, deviceData);
+    async loadProjectData(projectData) {
+        // Validar datos del proyecto
+        if (!this.validateProjectData(projectData)) {
+            throw new Error('Datos de proyecto inválidos');
+        }
+
+        // Cargar en StateManager
+        window.StateManager.setState({
+            devices: new Map(projectData.devices || []),
+            connections: new Map(projectData.connections || []),
+            layers: new Map(projectData.layers || [])
+        });
+
+        // Actualizar canvas
+        if (window.CanvasManager) {
+            await window.CanvasManager.refresh();
+        }
+
+        this.state.isDirty = false;
+    }
+
+    saveProject(showNotification = true) {
+        try {
+            const projectData = this.exportProjectData();
+            
+            // Guardar en localStorage
+            localStorage.setItem('network-diagram-last-project', JSON.stringify(projectData));
+            
+            // Crear archivo para descarga
+            const blob = new Blob([JSON.stringify(projectData, null, 2)], { 
+                type: 'application/json' 
             });
-        }
-
-        // Cargar conexiones
-        if (project.connections) {
-            this.connections = project.connections;
-        }
-
-        // Aplicar configuraciones
-        if (project.settings) {
-            this.zoom = project.settings.zoom || 1;
-            this.panX = project.settings.panX || 0;
-            this.panY = project.settings.panY || 0;
-        }
-
-        // Actualizar nombre del proyecto
-        if (project.name) {
-            window.NetworkDiagram.currentProject.name = project.name;
-        }
-
-        // Redibujar
-        this.redrawCanvas();
-    }
-
-    exportProject() {
-        // Crear un canvas temporal para exportación
-        const exportCanvas = document.createElement('canvas');
-        const exportCtx = exportCanvas.getContext('2d');
-        
-        // Calcular bounds de todos los dispositivos
-        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-        
-        for (const device of this.devices.values()) {
-            minX = Math.min(minX, device.x);
-            minY = Math.min(minY, device.y);
-            maxX = Math.max(maxX, device.x + device.width);
-            maxY = Math.max(maxY, device.y + device.height);
-        }
-
-        // Añadir padding
-        const padding = 50;
-        minX -= padding;
-        minY -= padding;
-        maxX += padding;
-        maxY += padding;
-
-        // Configurar canvas de exportación
-        exportCanvas.width = maxX - minX;
-        exportCanvas.height = maxY - minY;
-
-        // Fondo blanco
-        exportCtx.fillStyle = 'white';
-        exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-
-        // Dibujar grid
-        this.drawGridOnContext(exportCtx, exportCanvas.width, exportCanvas.height, minX, minY);
-
-        // Dibujar conexiones
-        this.connections.forEach(connection => {
-            this.drawConnectionOnContext(exportCtx, connection, minX, minY);
-        });
-
-        // Dibujar dispositivos
-        for (const device of this.devices.values()) {
-            this.renderDeviceOnContext(exportCtx, device, minX, minY);
-        }
-
-        // Crear enlace de descarga
-        exportCanvas.toBlob(blob => {
             const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = (window.NetworkDiagram.currentProject.name || 'diagrama') + '.png';
-            link.click();
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `network-diagram-${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            
             URL.revokeObjectURL(url);
-        });
 
-        this.showNotification('Diagrama exportado como imagen', 'success');
-    }
-
-    drawGridOnContext(ctx, width, height, offsetX, offsetY) {
-        const gridSize = 20;
-        ctx.strokeStyle = '#f0f0f0';
-        ctx.lineWidth = 1;
-
-        for (let x = 0; x < width; x += gridSize) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, height);
-            ctx.stroke();
-        }
-
-        for (let y = 0; y < height; y += gridSize) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(width, y);
-            ctx.stroke();
-        }
-    }
-
-    renderDeviceOnContext(ctx, device, offsetX, offsetY) {
-        const x = device.x - offsetX;
-        const y = device.y - offsetY;
-
-        // Fondo del dispositivo
-        ctx.fillStyle = device.config.color;
-        ctx.fillRect(x, y, device.width, device.height);
-
-        // Borde
-        ctx.strokeStyle = '#666';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(x, y, device.width, device.height);
-
-        // Icono
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(device.config.icon, x + device.width/2, y + 25);
-
-        // Nombre
-        ctx.fillStyle = 'black';
-        ctx.font = '10px Arial';
-        ctx.fillText(device.name, x + device.width/2, y + device.height - 5);
-
-        // Estado
-        const statusColor = device.properties.status === 'active' ? '#28a745' : '#dc3545';
-        ctx.fillStyle = statusColor;
-        ctx.beginPath();
-        ctx.arc(x + device.width - 8, y + 8, 4, 0, Math.PI * 2);
-        ctx.fill();
-    }
-
-    drawConnectionOnContext(ctx, connection, offsetX, offsetY) {
-        const device1 = this.devices.get(connection.device1);
-        const device2 = this.devices.get(connection.device2);
-        
-        if (!device1 || !device2) return;
-
-        const connectionConfig = this.config.connectionTypes[connection.type];
-        
-        ctx.strokeStyle = connectionConfig.color;
-        ctx.lineWidth = connectionConfig.width;
-        
-        if (connectionConfig.style === 'dotted') {
-            ctx.setLineDash([5, 5]);
-        } else if (connectionConfig.style === 'dashed') {
-            ctx.setLineDash([10, 5]);
-        } else {
-            ctx.setLineDash([]);
-        }
-
-        const x1 = device1.x + device1.width/2 - offsetX;
-        const y1 = device1.y + device1.height/2 - offsetY;
-        const x2 = device2.x + device2.width/2 - offsetX;
-        const y2 = device2.y + device2.height/2 - offsetY;
-
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-        
-        ctx.setLineDash([]);
-    }
-
-    autoOrganize() {
-        if (this.managers.layerManager && this.managers.layerManager.autoOrganizeByLayers) {
-            this.managers.layerManager.autoOrganizeByLayers();
-            this.showNotification('Dispositivos organizados por capas', 'success');
-        } else {
-            // Organización básica
-            let y = 100;
-            let x = 100;
-            const spacing = 120;
-            let devicesInRow = 0;
-            const maxDevicesPerRow = 6;
-
-            for (const device of this.devices.values()) {
-                device.x = x;
-                device.y = y;
-                
-                x += spacing;
-                devicesInRow++;
-                
-                if (devicesInRow >= maxDevicesPerRow) {
-                    x = 100;
-                    y += spacing;
-                    devicesInRow = 0;
-                }
+            this.state.isDirty = false;
+            
+            if (showNotification) {
+                this.showNotification('Proyecto guardado', 'success');
             }
             
-            this.redrawCanvas();
-            this.showNotification('Dispositivos organizados automáticamente', 'success');
+            this.emit('project:saved', { projectData });
+            console.log('💾 Proyecto guardado');
+        } catch (error) {
+            console.error('Error guardando proyecto:', error);
+            this.showNotification('Error guardando proyecto', 'error');
         }
     }
 
-    validateTopology() {
-        const issues = [];
+    exportProjectData() {
+        const state = window.StateManager.getState();
         
-        // Validar dispositivos sin conexiones
-        for (const device of this.devices.values()) {
-            const hasConnections = this.connections.some(conn => 
-                conn.device1 === device.id || conn.device2 === device.id
-            );
-            
-            if (!hasConnections) {
-                issues.push({
-                    type: 'isolated_device',
-                    message: `Dispositivo ${device.name} no tiene conexiones`,
-                    severity: 'warning'
-                });
-            }
-        }
-
-        // Validar conexiones duplicadas
-        const connectionPairs = new Set();
-        this.connections.forEach(conn => {
-            const pair = [conn.device1, conn.device2].sort().join('-');
-            if (connectionPairs.has(pair)) {
-                issues.push({
-                    type: 'duplicate_connection',
-                    message: 'Conexión duplicada detectada',
-                    severity: 'warning'
-                });
-            }
-            connectionPairs.add(pair);
-        });
-
-        // Mostrar resultados
-        if (issues.length === 0) {
-            this.showNotification('Topología validada correctamente', 'success');
-        } else {
-            const warningCount = issues.filter(i => i.severity === 'warning').length;
-            const errorCount = issues.filter(i => i.severity === 'error').length;
-            
-            let message = `Validación completada: ${warningCount} advertencias, ${errorCount} errores`;
-            this.showNotification(message, errorCount > 0 ? 'error' : 'warning');
-            
-            // Log detallado en consola
-            console.log('Problemas de topología encontrados:', issues);
-        }
-    }
-
-    selectDevice(device) {
-        this.selectedDevice = device;
-        this.redrawCanvas();
-        
-        // Mostrar propiedades básicas
-        console.log('Dispositivo seleccionado:', device);
-    }
-
-    selectDeviceType(type) {
-        console.log('Tipo de dispositivo seleccionado:', type);
-        // Aquí se podría implementar la lógica para el modo de colocación
-    }
-
-    setTool(tool) {
-        this.currentTool = tool;
-        
-        // Actualizar UI de herramientas
-        document.querySelectorAll('[data-tool]').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        
-        const activeBtn = document.querySelector(`[data-tool="${tool}"]`);
-        if (activeBtn) {
-            activeBtn.classList.add('active');
-        }
-        
-        // Configurar cursor
-        switch(tool) {
-            case 'connect':
-                this.canvas.style.cursor = 'crosshair';
-                this.connectionMode = true;
-                break;
-            case 'pan':
-                this.canvas.style.cursor = 'move';
-                this.connectionMode = false;
-                break;
-            default:
-                this.canvas.style.cursor = 'default';
-                this.connectionMode = false;
-        }
-    }
-
-    handleConnectionMode(device) {
-        if (!this.selectedDevice) {
-            this.selectedDevice = device;
-            this.showNotification('Selecciona el segundo dispositivo para conectar', 'info');
-        } else if (this.selectedDevice.id !== device.id) {
-            // Crear conexión
-            try {
-                this.managers.connectionManager.createConnection(
-                    this.selectedDevice.id, 
-                    device.id, 
-                    'ethernet'
-                );
-                this.showNotification(
-                    `Conexión creada entre ${this.selectedDevice.name} y ${device.name}`, 
-                    'success'
-                );
-                this.selectedDevice = null;
-                this.connectionMode = false;
-                this.setTool('select');
-            } catch (error) {
-                this.showNotification('Error creando conexión: ' + error.message, 'error');
-            }
-        }
-    }
-
-    /**
-     * Método de utilidad para debugging
-     */
-    getDebugInfo() {
         return {
-            initialized: this.isInitialized,
-            devices: this.devices.size,
-            connections: this.connections.length,
-            zoom: this.zoom,
-            selectedDevice: this.selectedDevice?.id,
-            connectionMode: this.connectionMode,
-            currentTool: this.currentTool
+            version: this.version,
+            metadata: {
+                name: state.project.name,
+                createdAt: new Date().toISOString(),
+                author: 'Network Diagram Creator'
+            },
+            devices: Array.from(state.devices.entries()),
+            connections: Array.from(state.connections.entries()),
+            layers: Array.from(state.layers.entries()),
+            config: this.config
         };
     }
-}
 
-// Función de inicialización global
-window.initializeNetworkDiagram = function() {
-    // Verificar si ya está inicializado
-    if (window.NetworkDiagram.initialized) {
-        console.log('📋 Aplicación ya inicializada');
-        return;
+    validateProjectData(data) {
+        return data && 
+               typeof data === 'object' && 
+               Array.isArray(data.devices) && 
+               Array.isArray(data.connections);
     }
 
-    // Crear y inicializar la aplicación
-    window.networkDiagramApp = new NetworkDiagramApp();
-    window.networkDiagramApp.init().catch(error => {
-        console.error('Error crítico en la inicialización:', error);
-        alert('Error al cargar la aplicación. Revisa la consola para más detalles.');
-    });
-};
+    // Métodos de zoom
+    zoomIn() {
+        this.adjustZoom(0.1);
+    }
 
-// Auto-inicialización cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🎯 DOM cargado, inicializando Network Diagram Creator...');
-    
-    // Esperar un poco para que otros scripts se carguen
-    setTimeout(() => {
-        window.initializeNetworkDiagram();
-    }, 100);
-});
+    zoomOut() {
+        this.adjustZoom(-0.1);
+    }
 
-// Inicialización inmediata si el DOM ya está listo
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    console.log('🎯 DOM ya está listo, inicializando inmediatamente...');
-    setTimeout(() => {
-        window.initializeNetworkDiagram();
-    }, 100);
+    zoomToFit() {
+        if (window.CanvasManager) {
+            window.CanvasManager.zoomToFit();
+        }
+    }
+
+    adjustZoom(delta) {
+        if (window.CanvasManager) {
+            window.CanvasManager.adjustZoom(delta);
+        }
+        
+        this.updateZoomDisplay();
+    }
+
+    updateZoomDisplay() {
+        const state = window.StateManager.getState();
+        const zoomElement = document.getElementById('canvas-zoom');
+        if (zoomElement) {
+            const zoom = Math.round(state.canvas.zoom * 100);
+            zoomElement.textContent = `Zoom: ${zoom}%`;
+        }
+    }
+
+    // Event handlers
+    onLayerChanged(layerId) {
+        console.log(`📋 Capa cambiada a: ${layerId}`);
+        
+        // Actualizar UI si es necesario
+        if (window.CanvasManager) {
+            window.CanvasManager.setActiveLayer(layerId);
+        }
+    }
+
+    onSelectionChanged(selectedDevices) {
+        this.state.selectedItems = selectedDevices;
+        
+        // Actualizar display de selección
+        const selectionElement = document.getElementById('canvas-selection');
+        if (selectionElement) {
+            const count = selectedDevices.length;
+            selectionElement.textContent = `${count} seleccionado${count !== 1 ? 's' : ''}`;
+        }
+        
+        // Mostrar/ocultar panel de propiedades
+        this.updatePropertiesPanel(selectedDevices);
+    }
+
+    onToolChanged(data) {
+        console.log(`🔧 Herramienta cambiada: ${data.tool}`);
+    }
+
+    onDeviceAdded(data) {
+        this.state.isDirty = true;
+        console.log(`➕ Dispositivo agregado: ${data.device.name}`);
+    }
+
+    onProjectSaved(data) {
+        console.log('💾 Proyecto guardado exitosamente');
+    }
+
+    // Métodos de utilidad
+    emit(eventName, data = {}) {
+        this.eventBus.dispatchEvent(new CustomEvent(eventName, { detail: data }));
+    }
+
+    showNotification(message, type = 'info') {
+        if (window.NotificationManager) {
+            window.NotificationManager.show(message, type);
+        } else {
+            console.log(`${type.toUpperCase()}: ${message}`);
+        }
+    }
+
+    applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        console.log(`🎨 Tema aplicado: ${theme}`);
+    }
+
+    // Métodos públicos para debugging
+    getDebugInfo() {
+        return {
+            version: this.version,
+            initialized: this.initialized,
+            modules: Array.from(this.modules.keys()),
+            state: this.state,
+            config: this.config
+        };
+    }
+
+    destroy() {
+        // Cleanup
+        this.modules.clear();
+        this.initialized = false;
+        console.log('🧹 NetworkDiagramApp destruido');
+    }
 }
 
-// Exportar para uso global
-window.NetworkDiagramApp = NetworkDiagramApp;
+// Crear instancia global
+window.NetworkDiagramApp = new NetworkDiagramApp();
+
+// Alias para facilidad de uso
+window.app = window.NetworkDiagramApp;
