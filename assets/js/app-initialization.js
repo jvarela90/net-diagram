@@ -143,13 +143,13 @@ class AppInitializer {
         await window.LayerManager.initialize();
         
         console.log('🔧 Inicializando DeviceManager...');
-        await window.DeviceManager.initialize();
+        await window.DeviceManager.init();
         
         console.log('🔧 Inicializando ConnectionManager...');
-        await window.ConnectionManager.initialize();
+        await window.ConnectionManager.init();
         
         console.log('🔧 Inicializando CanvasManager...');
-        await window.CanvasManager.initialize();
+        await window.CanvasManager.init();
 
         console.log('✅ Core inicializado');
     }
