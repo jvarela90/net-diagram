@@ -1,0 +1,332 @@
+{
+  "deviceTypes": {
+    "router": {
+      "name": "Router",
+      "category": "network",
+      "icon": "R",
+      "description": "Router estándar",
+      "defaultInterfaces": [
+        { "type": "gigabitethernet", "count": 4, "prefix": "Gi0/" },
+        { "type": "serial", "count": 2, "prefix": "S0/" },
+        { "type": "console", "count": 1, "prefix": "Con0/" }
+      ]
+    },
+    "core-router": {
+      "name": "Core Router",
+      "category": "network",
+      "icon": "CR",
+      "description": "Router de núcleo principal",
+      "defaultInterfaces": [
+        { "type": "tengigabitethernet", "count": 8, "prefix": "10Gi0/" },
+        { "type": "gigabitethernet", "count": 8, "prefix": "Gi0/" },
+        { "type": "serial", "count": 4, "prefix": "S0/" },
+        { "type": "console", "count": 1, "prefix": "Con0/" }
+      ]
+    },
+    "edge-router": {
+      "name": "Edge Router",
+      "category": "network",
+      "icon": "ER",
+      "description": "Router de borde/frontera",
+      "defaultInterfaces": [
+        { "type": "gigabitethernet", "count": 8, "prefix": "Gi0/" },
+        { "type": "serial", "count": 4, "prefix": "S0/" },
+        { "type": "console", "count": 1, "prefix": "Con0/" }
+      ]
+    },
+    "switch": {
+      "name": "Switch L2",
+      "category": "network",
+      "icon": "SW",
+      "description": "Switch de capa 2",
+      "defaultInterfaces": [
+        { "type": "fastethernet", "count": 24, "prefix": "Fa0/" },
+        { "type": "gigabitethernet", "count": 2, "prefix": "Gi0/" },
+        { "type": "fiber", "count": 2, "prefix": "Fo0/" }
+      ]
+    },
+    "l3-switch": {
+      "name": "Switch L3",
+      "category": "network",
+      "icon": "L3",
+      "description": "Switch de capa 3",
+      "defaultInterfaces": [
+        { "type": "fastethernet", "count": 24, "prefix": "Fa0/" },
+        { "type": "gigabitethernet", "count": 4, "prefix": "Gi0/" },
+        { "type": "fiber", "count": 4, "prefix": "Fo0/" }
+      ]
+    },
+    "hub": {
+      "name": "Hub",
+      "category": "network",
+      "icon": "H",
+      "description": "Concentrador de red",
+      "defaultInterfaces": [
+        { "type": "fastethernet", "count": 8, "prefix": "Fa0/" }
+      ]
+    },
+    "firewall": {
+      "name": "Firewall",
+      "category": "security",
+      "icon": "FW",
+      "description": "Cortafuegos",
+      "defaultInterfaces": [
+        { "type": "gigabitethernet", "count": 6, "prefix": "Gi0/" },
+        { "type": "console", "count": 1, "prefix": "Con0/" }
+      ]
+    },
+    "ips": {
+      "name": "IPS",
+      "category": "security",
+      "icon": "IPS",
+      "description": "Sistema prevención intrusos",
+      "defaultInterfaces": [
+        { "type": "gigabitethernet", "count": 4, "prefix": "Gi0/" }
+      ]
+    },
+    "waf": {
+      "name": "WAF",
+      "category": "security",
+      "icon": "WAF",
+      "description": "Web Application Firewall",
+      "defaultInterfaces": [
+        { "type": "gigabitethernet", "count": 4, "prefix": "Gi0/" }
+      ]
+    },
+    "vpn": {
+      "name": "VPN Gateway",
+      "category": "security",
+      "icon": "VPN",
+      "description": "Puerta de enlace VPN",
+      "defaultInterfaces": [
+        { "type": "gigabitethernet", "count": 2, "prefix": "Gi0/" }
+      ]
+    },
+    "loadbalancer": {
+      "name": "Load Balancer",
+      "category": "network",
+      "icon": "LB",
+      "description": "Balanceador de carga",
+      "defaultInterfaces": [
+        { "type": "gigabitethernet", "count": 6, "prefix": "Gi0/" }
+      ]
+    },
+    "ap": {
+      "name": "Access Point",
+      "category": "wireless",
+      "icon": "AP",
+      "description": "Punto de acceso WiFi",
+      "defaultInterfaces": [
+        { "type": "fastethernet", "count": 1, "prefix": "Fa0/" },
+        { "type": "wireless", "count": 4, "prefix": "Wlan" }
+      ]
+    },
+    "controller": {
+      "name": "WiFi Controller",
+      "category": "wireless",
+      "icon": "WC",
+      "description": "Controlador inalámbrico",
+      "defaultInterfaces": [
+        { "type": "gigabitethernet", "count": 4, "prefix": "Gi0/" }
+      ]
+    },
+    "modem": {
+      "name": "Módem",
+      "category": "wireless",
+      "icon": "M",
+      "description": "Módem ADSL/Cable",
+      "defaultInterfaces": [
+        { "type": "fastethernet", "count": 1, "prefix": "Fa0/" }
+      ]
+    },
+    "server": {
+      "name": "Servidor",
+      "category": "servers",
+      "icon": "SV",
+      "description": "Servidor genérico",
+      "defaultInterfaces": [
+        { "type": "gigabitethernet", "count": 2, "prefix": "eth" },
+        { "type": "wireless", "count": 1, "prefix": "wlan" }
+      ]
+    },
+    "web-server": {
+      "name": "Servidor Web",
+      "category": "servers",
+      "icon": "WS",
+      "description": "Apache/Nginx/IIS",
+      "defaultInterfaces": [
+        { "type": "gigabitethernet", "count": 2, "prefix": "eth" }
+      ]
+    },
+    "db-server": {
+      "name": "Servidor BD",
+      "category": "servers",
+      "icon": "DB",
+      "description": "Base de datos",
+      "defaultInterfaces": [
+        { "type": "gigabitethernet", "count": 2, "prefix": "eth" }
+      ]
+    },
+    "dns-server": {
+      "name": "Servidor DNS",
+      "category": "servers",
+      "icon": "DNS",
+      "description": "Servidor de nombres",
+      "defaultInterfaces": [
+        { "type": "gigabitethernet", "count": 2, "prefix": "eth" }
+      ]
+    },
+    "mail-server": {
+      "name": "Servidor Mail",
+      "category": "servers",
+      "icon": "MS",
+      "description": "Correo electrónico",
+      "defaultInterfaces": [
+        { "type": "gigabitethernet", "count": 2, "prefix": "eth" }
+      ]
+    },
+    "pc": {
+      "name": "PC Escritorio",
+      "category": "endpoints",
+      "icon": "PC",
+      "description": "Computadora personal",
+      "defaultInterfaces": [
+        { "type": "gigabitethernet", "count": 1, "prefix": "eth" },
+        { "type": "wireless", "count": 1, "prefix": "wlan" }
+      ]
+    },
+    "notebook": {
+      "name": "Laptop",
+      "category": "endpoints",
+      "icon": "NB",
+      "description": "Computadora portátil",
+      "defaultInterfaces": [
+        { "type": "gigabitethernet", "count": 1, "prefix": "eth" },
+        { "type": "wireless", "count": 1, "prefix": "wlan" }
+      ]
+    },
+    "printer": {
+      "name": "Impresora",
+      "category": "endpoints",
+      "icon": "PR",
+      "description": "Impresora de red",
+      "defaultInterfaces": [
+        { "type": "fastethernet", "count": 1, "prefix": "eth" },
+        { "type": "wireless", "count": 1, "prefix": "wlan" }
+      ]
+    },
+    "phone": {
+      "name": "Teléfono IP",
+      "category": "endpoints",
+      "icon": "PH",
+      "description": "VoIP",
+      "defaultInterfaces": [
+        { "type": "fastethernet", "count": 1, "prefix": "eth" }
+      ]
+    },
+    "nas": {
+      "name": "NAS",
+      "category": "storage",
+      "icon": "NAS",
+      "description": "Network Attached Storage",
+      "defaultInterfaces": [
+        { "type": "gigabitethernet", "count": 2, "prefix": "eth" }
+      ]
+    },
+    "san": {
+      "name": "SAN",
+      "category": "storage",
+      "icon": "SAN",
+      "description": "Storage Area Network",
+      "defaultInterfaces": [
+        { "type": "fiber", "count": 4, "prefix": "fc" }
+      ]
+    },
+    "iot-device": {
+      "name": "Dispositivo IoT",
+      "category": "iot",
+      "icon": "IoT",
+      "description": "Internet de las cosas",
+      "defaultInterfaces": [
+        { "type": "wireless", "count": 1, "prefix": "wlan" }
+      ]
+    },
+    "sensor": {
+      "name": "Sensor",
+      "category": "iot",
+      "icon": "SN",
+      "description": "Sensor inteligente",
+      "defaultInterfaces": [
+        { "type": "wireless", "count": 1, "prefix": "wlan" }
+      ]
+    },
+    "camera": {
+      "name": "Cámara IP",
+      "category": "iot",
+      "icon": "CAM",
+      "description": "Videovigilancia",
+      "defaultInterfaces": [
+        { "type": "fastethernet", "count": 1, "prefix": "eth" },
+        { "type": "wireless", "count": 1, "prefix": "wlan" }
+      ]
+    }
+  },
+  "interfaceTypes": {
+    "fastethernet": {
+      "name": "FastEthernet",
+      "speed": "100 Mbps",
+      "connector": "RJ45",
+      "media": ["utp"],
+      "icon": "Fe",
+      "color": "#27ae60"
+    },
+    "gigabitethernet": {
+      "name": "GigabitEthernet",
+      "speed": "1 Gbps",
+      "connector": "RJ45",
+      "media": ["utp", "fiber"],
+      "icon": "Ge",
+      "color": "#3498db"
+    },
+    "tengigabitethernet": {
+      "name": "10GigabitEthernet",
+      "speed": "10 Gbps",
+      "connector": "SFP+",
+      "media": ["fiber"],
+      "icon": "10G",
+      "color": "#e74c3c"
+    },
+    "serial": {
+      "name": "Serial",
+      "speed": "2 Mbps",
+      "connector": "DB-60",
+      "media": ["serial"],
+      "icon": "S",
+      "color": "#9b59b6"
+    },
+    "fiber": {
+      "name": "Fiber Optic",
+      "speed": "1 Gbps",
+      "connector": "LC/SC",
+      "media": ["fiber"],
+      "icon": "Fo",
+      "color": "#f39c12"
+    },
+    "wireless": {
+      "name": "Wireless",
+      "speed": "300 Mbps",
+      "connector": "Antenna",
+      "media": ["wireless"],
+      "icon": "Wl",
+      "color": "#1abc9c"
+    },
+    "console": {
+      "name": "Console",
+      "speed": "9600 bps",
+      "connector": "RJ45",
+      "media": ["console"],
+      "icon": "Co",
+      "color": "#34495e"
+    }
+  }
+}
