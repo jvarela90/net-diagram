@@ -88,8 +88,11 @@ class NetworkDiagramApp {
             'Notifications',
             'CanvasManager',
             'LayerManager',
+            'InterfaceManager',        // Nuevo módulo
             'DeviceManager',
             'ConnectionManager',
+            'SmartConnectionManager', // Nuevo módulo
+            'CableLabelGenerator',    // Nuevo módulo
             'Modal',
             'Sidebar',
             'Toolbar',
