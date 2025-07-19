@@ -610,4 +610,5 @@ ${doc.connections.map(c => `- **${c.from}** (${c.interface1 || 'N/A'}) ↔ **${c
 };
 
 // Exportar para uso global
-window.Toolbar = Toolbar;
+//window.Toolbar = Toolbar;
+window.ToolbarManager = Toolbar;

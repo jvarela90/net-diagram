@@ -505,4 +505,5 @@ const Notifications = {
 };
 
 // Exportar para uso global
-window.Notifications = Notifications;
+//window.Notifications = Notifications;
+window.NotificationManager = Notifications;

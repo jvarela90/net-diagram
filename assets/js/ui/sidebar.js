@@ -716,4 +716,5 @@ const Sidebar = {
 };
 
 // Exportar para uso global
-window.Sidebar = Sidebar;
+//window.Sidebar = Sidebar;
+window.SidebarManager = Sidebar;

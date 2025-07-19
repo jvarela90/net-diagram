@@ -835,4 +835,5 @@ const Modal = {
 };
 
 // Exportar para uso global
-window.Modal = Modal;
+//window.Modal = Modal;
+window.ModalManager = Modal;

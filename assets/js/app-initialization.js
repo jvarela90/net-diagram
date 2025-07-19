@@ -21,6 +21,7 @@
             'StateManager',
             'FileManager',
             'NotificationManager',
+            //'Notification',
             'ModalManager',
             'ToolbarManager',
             'SidebarManager'
@@ -120,6 +121,11 @@
                     await window.NotificationManager.init();
                     console.log('✓ NotificationManager inicializado');
                 }
+
+                //if (window.Notification && window.Notification.init) {
+                //    await window.NotificationManager.init();
+                //    console.log('✓ NotificationManager inicializado');
+                //}
 
                 if (window.ToolbarManager && window.ToolbarManager.init) {
                     await window.ToolbarManager.init();

@@ -44,6 +44,7 @@
                         state: window.StateManager,
                         files: window.FileManager,
                         notifications: window.NotificationManager,
+                        //notifications: window.Notification,
                         modal: window.ModalManager,
                         toolbar: window.ToolbarManager,
                         sidebar: window.SidebarManager
