@@ -1,539 +1,412 @@
 /**
- * Network Diagram Creator Pro - Main Application
- * Archivo principal de la aplicación
+ * Network Diagram Creator - Aplicación Principal
+ * Coordina todos los módulos y maneja el estado global
  */
 
-class NetworkDiagramApp {
-    constructor() {
-        this.version = '2.0';
-        this.initialized = false;
-        this.modules = {};
-        
-        // Estado global de la aplicación
-        this.state = {
-            devices: [],
-            connections: [],
-            selectedDevice: null,
-            connectionMode: false,
-            currentLayer: 'core',
-            currentZoom: 1,
-            layerVisibility: {
-                isp: true, wan: true, core: true, distribution: true,
-                access: true, dmz: true, user: true, iot: true
-            },
-            counters: {
-                device: 0,
-                connection: 0
-            }
-        };
+(function() {
+    'use strict';
 
-        // Configuración
-        this.config = {
-            autoSave: true,
-            autoSaveInterval: 30000, // 30 segundos
-            maxZoom: 3,
-            minZoom: 0.25,
-            canvasSize: { width: 3000, height: 2000 }
-        };
-    }
+    // Aplicación principal
+    window.App = {
+        // Estado de la aplicación
+        state: {
+            currentTool: 'select',
+            selectedDevices: [],
+            selectedConnections: [],
+            isConnecting: false,
+            connectingFrom: null,
+            isDragging: false,
+            isMultiSelecting: false,
+            clipboard: null,
+            history: [],
+            historyIndex: -1
+        },
 
-    /**
-     * Inicializa la aplicación
-     */
-    async init() {
-        if (this.initialized) return;
+        // Referencia a los módulos
+        modules: {},
 
-        try {
-            console.log(`🚀 Iniciando Network Diagram Creator Pro v${this.version}`);
+        // Inicializar la aplicación
+        init: async function() {
+            console.log('App.init() llamado');
             
-            // Inicializar módulos en orden específico
-            await this.initializeModules();
-            
-            // Configurar eventos globales
-            this.setupGlobalEvents();
-            
-            // Cargar datos iniciales
-            await this.loadInitialData();
-            
-            // Inicializar UI
-            this.initializeUI();
-            
-            // Configurar auto-guardado
-            if (this.config.autoSave) {
-                this.setupAutoSave();
-            }
-            
-            this.initialized = true;
-            
-            // Notificar inicialización completada
-            Notifications.show('¡Network Diagram Creator Pro iniciado correctamente!', 'success');
-            this.setStatus('Sistema listo - Selecciona dispositivos para comenzar');
-            
-            console.log('✅ Aplicación inicializada correctamente');
-            
-        } catch (error) {
-            console.error('❌ Error al inicializar la aplicación:', error);
-            Notifications.show('Error al inicializar la aplicación', 'error');
-        }
-    }
-
-    /**
-     * Inicializa todos los módulos de la aplicación
-     */
-    async initializeModules() {
-        // Orden de inicialización importante
-        const modules = [
-            'Helpers',
-            'Validators', 
-            'Notifications',
-            'CanvasManager',
-            'LayerManager',
-            'InterfaceManager',        // Nuevo módulo
-            'DeviceManager',
-            'ConnectionManager',
-            'SmartConnectionManager', // Nuevo módulo
-            'CableLabelGenerator',    // Nuevo módulo
-            'Modal',
-            'Sidebar',
-            'Toolbar',
-            'FileManager',
-            'NetworkTemplates',
-            'Monitoring'
-        ];
-
-        for (const moduleName of modules) {
             try {
-                if (window[moduleName] && typeof window[moduleName].init === 'function') {
-                    await window[moduleName].init(this);
-                    this.modules[moduleName] = window[moduleName];
-                    console.log(`✓ Módulo ${moduleName} inicializado`);
+                // Usar el inicializador
+                if (window.AppInitializer) {
+                    await window.AppInitializer.init();
+                    
+                    // Guardar referencias a los módulos
+                    this.modules = {
+                        canvas: window.CanvasManager,
+                        devices: window.DeviceManager,
+                        connections: window.ConnectionManager,
+                        layers: window.LayerManager,
+                        interface: window.InterfaceManager,
+                        state: window.StateManager,
+                        files: window.FileManager,
+                        notifications: window.NotificationManager,
+                        modal: window.ModalManager,
+                        toolbar: window.ToolbarManager,
+                        sidebar: window.SidebarManager
+                    };
+                    
+                    // Configurar handlers
+                    this.setupHandlers();
+                    
+                    // Cargar proyecto guardado si existe
+                    this.loadLastProject();
+                    
+                } else {
+                    throw new Error('AppInitializer no está disponible');
                 }
+                
             } catch (error) {
-                console.error(`❌ Error inicializando módulo ${moduleName}:`, error);
+                console.error('Error al inicializar App:', error);
+                this.showError(error);
             }
-        }
-    }
+        },
 
-    /**
-     * Configura eventos globales de la aplicación
-     */
-    setupGlobalEvents() {
-        // Eventos de teclado
-        document.addEventListener('keydown', this.handleKeyboard.bind(this));
-        
-        // Eventos de ventana
-        window.addEventListener('beforeunload', this.handleBeforeUnload.bind(this));
-        window.addEventListener('resize', this.handleResize.bind(this));
-        
-        // Eventos de visibilidad (para pausar operaciones cuando la página no está visible)
-        document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
-        
-        // Prevenir menú contextual por defecto en el canvas
-        document.getElementById('canvas-container').addEventListener('contextmenu', e => e.preventDefault());
-    }
+        // Configurar manejadores de eventos
+        setupHandlers: function() {
+            // Botones del header
+            const newBtn = document.getElementById('newDiagram');
+            const saveBtn = document.getElementById('saveDiagram');
+            const loadBtn = document.getElementById('loadDiagram');
+            const exportBtn = document.getElementById('exportDiagram');
 
-    /**
-     * Carga datos iniciales necesarios para la aplicación
-     */
-    async loadInitialData() {
-        try {
-            // Intentar cargar auto-guardado si existe
-            const autoSaveData = this.loadAutoSave();
-            if (autoSaveData) {
-                await this.loadDiagramData(autoSaveData);
-                Notifications.show('Sesión anterior restaurada', 'info');
-            }
-            
-            // Cargar configuraciones por defecto si no hay datos
-            if (this.state.devices.length === 0) {
-                // Cargar plantilla de ejemplo si está habilitada
-                // await NetworkTemplates.load('basic-enterprise');
-            }
-        } catch (error) {
-            console.error('Error cargando datos iniciales:', error);
-        }
-    }
+            if (newBtn) newBtn.addEventListener('click', () => this.newDiagram());
+            if (saveBtn) saveBtn.addEventListener('click', () => this.saveDiagram());
+            if (loadBtn) loadBtn.addEventListener('click', () => this.loadDiagram());
+            if (exportBtn) exportBtn.addEventListener('click', () => this.exportDiagram());
 
-    /**
-     * Inicializa la interfaz de usuario
-     */
-    initializeUI() {
-        // Inicializar componentes UI
-        Sidebar.render();
-        Toolbar.render();
-        Modal.init();
-        
-        // Configurar estado inicial
-        LayerManager.setCurrentLayer(this.state.currentLayer);
-        CanvasManager.setZoom(this.state.currentZoom);
-        
-        // Actualizar estadísticas
-        this.updateStats();
-    }
+            // Escuchar eventos personalizados
+            document.addEventListener('device:selected', (e) => this.handleDeviceSelection(e.detail));
+            document.addEventListener('connection:created', (e) => this.handleConnectionCreated(e.detail));
+            document.addEventListener('tool:changed', (e) => this.handleToolChange(e.detail));
 
-    /**
-     * Configura el sistema de auto-guardado
-     */
-    setupAutoSave() {
-        setInterval(() => {
-            if (this.state.devices.length > 0 || this.state.connections.length > 0) {
-                this.autoSave();
-            }
-        }, this.config.autoSaveInterval);
-    }
+            console.log('Handlers configurados');
+        },
 
-    /**
-     * Maneja atajos de teclado globales
-     */
-    handleKeyboard(e) {
-        // Solo procesar si no estamos en un input/textarea
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-        if (e.ctrlKey || e.metaKey) {
-            switch(e.key) {
-                case 'n':
-                    e.preventDefault();
-                    this.newDiagram();
-                    break;
-                case 's':
-                    e.preventDefault();
-                    FileManager.saveDiagram();
-                    break;
-                case 'o':
-                    e.preventDefault();
-                    document.getElementById('file-input').click();
-                    break;
-                case '=':
-                case '+':
-                    e.preventDefault();
-                    CanvasManager.zoomIn();
-                    break;
-                case '-':
-                    e.preventDefault();
-                    CanvasManager.zoomOut();
-                    break;
-                case '0':
-                    e.preventDefault();
-                    CanvasManager.resetZoom();
-                    break;
-            }
-        } else {
-            switch(e.key) {
-                case 'Escape':
-                    this.handleEscape();
-                    break;
-                case 'Delete':
-                    if (this.state.selectedDevice) {
-                        DeviceManager.deleteSelected();
+        // Crear nuevo diagrama
+        newDiagram: function() {
+            if (this.state.history.length > 0) {
+                this.modules.modal.confirm(
+                    '¿Crear nuevo diagrama?',
+                    'Se perderán los cambios no guardados.',
+                    () => {
+                        this.clearDiagram();
+                        this.modules.notifications.show('Nuevo diagrama creado', 'info');
                     }
-                    break;
-                case 'c':
-                    ConnectionManager.toggleMode();
-                    break;
+                );
+            } else {
+                this.clearDiagram();
             }
-        }
-    }
+        },
 
-    /**
-     * Maneja la tecla Escape
-     */
-    handleEscape() {
-        if (this.state.connectionMode) {
-            ConnectionManager.toggleMode();
-        }
-        DeviceManager.clearSelection();
-        Modal.closeAll();
-    }
+        // Limpiar diagrama
+        clearDiagram: function() {
+            if (this.modules.devices) this.modules.devices.clear();
+            if (this.modules.connections) this.modules.connections.clear();
+            if (this.modules.canvas) this.modules.canvas.clear();
+            
+            this.state.history = [];
+            this.state.historyIndex = -1;
+            this.state.selectedDevices = [];
+            this.state.selectedConnections = [];
+        },
 
-    /**
-     * Maneja el evento antes de cerrar la ventana
-     */
-    handleBeforeUnload(e) {
-        if (this.hasUnsavedChanges()) {
-            e.preventDefault();
-            e.returnValue = '¿Estás seguro de que quieres salir? Hay cambios sin guardar.';
-            return e.returnValue;
-        }
-    }
-
-    /**
-     * Maneja cambios de tamaño de ventana
-     */
-    handleResize() {
-        // Reajustar canvas si es necesario
-        CanvasManager.handleResize();
-    }
-
-    /**
-     * Maneja cambios de visibilidad de la página
-     */
-    handleVisibilityChange() {
-        if (document.hidden) {
-            // Pausar animaciones y polling cuando la página no está visible
-            Monitoring.pause();
-        } else {
-            // Reanudar cuando vuelve a estar visible
-            Monitoring.resume();
-        }
-    }
-
-    /**
-     * Crea un nuevo diagrama
-     */
-    async newDiagram() {
-        if (this.hasUnsavedChanges()) {
-            const confirmed = await this.confirmAction('¿Crear nuevo diagrama? Se perderán los cambios no guardados.');
-            if (!confirmed) return;
-        }
-
-        this.clearDiagram();
-        Notifications.show('Nuevo diagrama creado', 'info');
-        this.setStatus('Nuevo diagrama - Listo para comenzar');
-    }
-
-    /**
-     * Limpia el diagrama actual
-     */
-    clearDiagram() {
-        // Limpiar dispositivos
-        this.state.devices.forEach(device => {
-            const element = document.getElementById(device.id);
-            if (element) element.remove();
-        });
-
-        // Limpiar conexiones
-        this.state.connections.forEach(connection => {
-            const element = document.getElementById(connection.id);
-            const label = document.getElementById(`label_${connection.id}`);
-            if (element) element.remove();
-            if (label) label.remove();
-        });
-
-        // Resetear estado
-        this.state.devices = [];
-        this.state.connections = [];
-        this.state.selectedDevice = null;
-        this.state.connectionMode = false;
-        this.state.counters = { device: 0, connection: 0 };
-
-        // Actualizar UI
-        this.updateStats();
-        DeviceManager.clearSelection();
-        ConnectionManager.reset();
-    }
-
-    /**
-     * Carga datos de diagrama
-     */
-    async loadDiagramData(data) {
-        try {
-            this.clearDiagram();
-
-            if (data.settings) {
-                this.state.currentLayer = data.settings.currentLayer || 'core';
-                this.state.layerVisibility = data.settings.layerVisibility || this.state.layerVisibility;
-                this.state.currentZoom = data.settings.zoom || 1;
+        // Guardar diagrama
+        saveDiagram: function() {
+            try {
+                const data = this.exportData();
+                this.modules.files.save(data);
+                this.modules.notifications.show('Diagrama guardado correctamente', 'success');
+            } catch (error) {
+                this.modules.notifications.show('Error al guardar: ' + error.message, 'error');
             }
+        },
 
-            if (data.devices) {
-                this.state.devices = data.devices;
-                this.state.counters.device = Math.max(...data.devices.map(d => parseInt(d.id.split('_')[1]))) || 0;
+        // Cargar diagrama
+        loadDiagram: function() {
+            this.modules.files.load((data) => {
+                try {
+                    this.importData(data);
+                    this.modules.notifications.show('Diagrama cargado correctamente', 'success');
+                } catch (error) {
+                    this.modules.notifications.show('Error al cargar: ' + error.message, 'error');
+                }
+            });
+        },
+
+        // Exportar diagrama
+        exportDiagram: function() {
+            this.modules.modal.show({
+                title: 'Exportar Diagrama',
+                content: `
+                    <div class="export-options">
+                        <button class="btn btn-primary" onclick="App.exportAs('png')">
+                            <i class="fas fa-image"></i> Exportar como PNG
+                        </button>
+                        <button class="btn btn-primary" onclick="App.exportAs('svg')">
+                            <i class="fas fa-vector-square"></i> Exportar como SVG
+                        </button>
+                        <button class="btn btn-primary" onclick="App.exportAs('pdf')">
+                            <i class="fas fa-file-pdf"></i> Exportar como PDF
+                        </button>
+                        <button class="btn btn-primary" onclick="App.exportAs('json')">
+                            <i class="fas fa-code"></i> Exportar como JSON
+                        </button>
+                    </div>
+                `
+            });
+        },
+
+        // Exportar en formato específico
+        exportAs: function(format) {
+            try {
+                this.modules.modal.close();
                 
-                // Renderizar dispositivos
-                data.devices.forEach(device => {
-                    DeviceManager.render(device);
-                });
-            }
-
-            if (data.connections) {
-                this.state.connections = data.connections;
-                this.state.counters.connection = Math.max(...data.connections.map(c => parseInt(c.id.split('_')[1]))) || 0;
+                switch(format) {
+                    case 'png':
+                    case 'svg':
+                    case 'pdf':
+                        this.modules.canvas.export(format);
+                        break;
+                    case 'json':
+                        const data = this.exportData();
+                        this.modules.files.download(JSON.stringify(data, null, 2), 'diagram.json', 'application/json');
+                        break;
+                }
                 
-                // Renderizar conexiones
-                data.connections.forEach(connection => {
-                    ConnectionManager.render(connection);
-                });
+                this.modules.notifications.show(`Exportado como ${format.toUpperCase()}`, 'success');
+            } catch (error) {
+                this.modules.notifications.show('Error al exportar: ' + error.message, 'error');
             }
+        },
 
-            // Actualizar UI
-            LayerManager.setCurrentLayer(this.state.currentLayer);
-            CanvasManager.setZoom(this.state.currentZoom);
-            this.updateStats();
-
-        } catch (error) {
-            console.error('Error cargando datos del diagrama:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Actualiza las estadísticas mostradas en la UI
-     */
-    updateStats() {
-        document.getElementById('device-count').textContent = this.state.devices.length;
-        document.getElementById('connection-count').textContent = this.state.connections.length;
-        
-        // Actualizar monitoreo si está activo
-        if (Monitoring.isEnabled()) {
-            Monitoring.updateStats();
-        }
-    }
-
-    /**
-     * Establece el texto de estado
-     */
-    setStatus(message) {
-        document.getElementById('status-text').textContent = message;
-    }
-
-    /**
-     * Auto-guardado
-     */
-    autoSave() {
-        try {
-            const saveData = {
+        // Exportar datos del diagrama
+        exportData: function() {
+            return {
+                version: '3.0',
                 timestamp: new Date().toISOString(),
-                devices: this.state.devices,
-                connections: this.state.connections,
-                settings: {
-                    currentLayer: this.state.currentLayer,
-                    layerVisibility: this.state.layerVisibility,
-                    zoom: this.state.currentZoom
+                canvas: {
+                    width: this.modules.canvas.width,
+                    height: this.modules.canvas.height,
+                    zoom: this.modules.canvas.zoom
+                },
+                devices: this.modules.devices.export(),
+                connections: this.modules.connections.export(),
+                layers: this.modules.layers.export(),
+                metadata: {
+                    title: document.getElementById('diagramTitle')?.value || 'Sin título',
+                    description: document.getElementById('diagramDescription')?.value || '',
+                    author: 'Network Diagram Creator'
                 }
             };
-            localStorage.setItem('networkDiagramAutoSave', JSON.stringify(saveData));
-        } catch (e) {
-            console.warn('Auto-guardado no disponible:', e);
+        },
+
+        // Importar datos del diagrama
+        importData: function(data) {
+            // Validar versión
+            if (!data.version || data.version < '3.0') {
+                throw new Error('Formato de archivo no compatible');
+            }
+
+            // Limpiar diagrama actual
+            this.clearDiagram();
+
+            // Importar canvas
+            if (data.canvas) {
+                this.modules.canvas.setSize(data.canvas.width, data.canvas.height);
+                this.modules.canvas.setZoom(data.canvas.zoom || 1);
+            }
+
+            // Importar capas
+            if (data.layers) {
+                this.modules.layers.import(data.layers);
+            }
+
+            // Importar dispositivos
+            if (data.devices) {
+                this.modules.devices.import(data.devices);
+            }
+
+            // Importar conexiones
+            if (data.connections) {
+                this.modules.connections.import(data.connections);
+            }
+
+            // Actualizar metadatos
+            if (data.metadata) {
+                const titleEl = document.getElementById('diagramTitle');
+                const descEl = document.getElementById('diagramDescription');
+                if (titleEl) titleEl.value = data.metadata.title || '';
+                if (descEl) descEl.value = data.metadata.description || '';
+            }
+
+            // Redibujar
+            this.modules.canvas.render();
+        },
+
+        // Cargar último proyecto
+        loadLastProject: function() {
+            const lastProject = localStorage.getItem('lastProject');
+            if (lastProject) {
+                try {
+                    const data = JSON.parse(lastProject);
+                    this.importData(data);
+                    console.log('Último proyecto cargado');
+                } catch (error) {
+                    console.warn('No se pudo cargar el último proyecto:', error);
+                }
+            }
+        },
+
+        // Auto-guardar
+        enableAutosave: function() {
+            setInterval(() => {
+                try {
+                    const data = this.exportData();
+                    localStorage.setItem('lastProject', JSON.stringify(data));
+                    console.log('Auto-guardado completado');
+                } catch (error) {
+                    console.error('Error en auto-guardado:', error);
+                }
+            }, 30000); // Cada 30 segundos
+        },
+
+        // Manejar selección de dispositivos
+        handleDeviceSelection: function(device) {
+            if (this.state.currentTool === 'select') {
+                this.state.selectedDevices = [device];
+                this.modules.sidebar.showDeviceProperties(device);
+            }
+        },
+
+        // Manejar creación de conexiones
+        handleConnectionCreated: function(connection) {
+            this.addToHistory({
+                type: 'connection:create',
+                data: connection
+            });
+        },
+
+        // Manejar cambio de herramienta
+        handleToolChange: function(tool) {
+            this.state.currentTool = tool;
+            
+            // Limpiar estados según la herramienta
+            if (tool !== 'connect') {
+                this.state.isConnecting = false;
+                this.state.connectingFrom = null;
+            }
+        },
+
+        // Agregar a historial (para undo/redo)
+        addToHistory: function(action) {
+            // Eliminar acciones posteriores al índice actual
+            this.state.history = this.state.history.slice(0, this.state.historyIndex + 1);
+            
+            // Agregar nueva acción
+            this.state.history.push(action);
+            this.state.historyIndex++;
+            
+            // Limitar tamaño del historial
+            if (this.state.history.length > 50) {
+                this.state.history.shift();
+                this.state.historyIndex--;
+            }
+        },
+
+        // Deshacer
+        undo: function() {
+            if (this.state.historyIndex > 0) {
+                this.state.historyIndex--;
+                const action = this.state.history[this.state.historyIndex];
+                this.revertAction(action);
+            }
+        },
+
+        // Rehacer
+        redo: function() {
+            if (this.state.historyIndex < this.state.history.length - 1) {
+                this.state.historyIndex++;
+                const action = this.state.history[this.state.historyIndex];
+                this.applyAction(action);
+            }
+        },
+
+        // Mostrar error
+        showError: function(error) {
+            console.error('Error en la aplicación:', error);
+            
+            if (this.modules.notifications) {
+                this.modules.notifications.show(error.message, 'error');
+            } else {
+                alert('Error: ' + error.message);
+            }
+        },
+
+        // Revertir acción (para undo)
+        revertAction: function(action) {
+            switch(action.type) {
+                case 'device:create':
+                    this.modules.devices.remove(action.data.id);
+                    break;
+                case 'device:delete':
+                    this.modules.devices.restore(action.data);
+                    break;
+                case 'connection:create':
+                    this.modules.connections.remove(action.data.id);
+                    break;
+                case 'connection:delete':
+                    this.modules.connections.restore(action.data);
+                    break;
+            }
+        },
+
+        // Aplicar acción (para redo)
+        applyAction: function(action) {
+            switch(action.type) {
+                case 'device:create':
+                    this.modules.devices.restore(action.data);
+                    break;
+                case 'device:delete':
+                    this.modules.devices.remove(action.data.id);
+                    break;
+                case 'connection:create':
+                    this.modules.connections.restore(action.data);
+                    break;
+                case 'connection:delete':
+                    this.modules.connections.remove(action.data.id);
+                    break;
+            }
+        },
+
+        // Obtener herramienta actual
+        getCurrentTool: function() {
+            return this.state.currentTool;
+        },
+
+        // Establecer herramienta
+        setTool: function(tool) {
+            this.state.currentTool = tool;
+            document.dispatchEvent(new CustomEvent('tool:changed', { detail: tool }));
+        },
+
+        // API pública para módulos externos
+        api: {
+            getState: () => this.state,
+            setTool: (tool) => this.setTool(tool),
+            undo: () => this.undo(),
+            redo: () => this.redo(),
+            save: () => this.saveDiagram(),
+            load: () => this.loadDiagram(),
+            export: (format) => this.exportAs(format),
+            new: () => this.newDiagram()
         }
-    }
+    };
 
-    /**
-     * Carga auto-guardado
-     */
-    loadAutoSave() {
-        try {
-            const saved = localStorage.getItem('networkDiagramAutoSave');
-            return saved ? JSON.parse(saved) : null;
-        } catch (e) {
-            console.warn('Error cargando auto-guardado:', e);
-            return null;
-        }
-    }
+    // Exponer globalmente
+    window.App = window.App;
 
-    /**
-     * Verifica si hay cambios sin guardar
-     */
-    hasUnsavedChanges() {
-        // Implementar lógica para detectar cambios
-        return this.state.devices.length > 0 || this.state.connections.length > 0;
-    }
-
-    /**
-     * Muestra un diálogo de confirmación
-     */
-    async confirmAction(message) {
-        return new Promise(resolve => {
-            resolve(confirm(message));
-        });
-    }
-
-    /**
-     * Obtiene el estado actual de la aplicación
-     */
-    getState() {
-        return { ...this.state };
-    }
-
-    /**
-     * Actualiza el estado de la aplicación
-     */
-    setState(newState) {
-        this.state = { ...this.state, ...newState };
-        this.updateStats();
-    }
-
-    /**
-     * Obtiene un dispositivo por ID
-     */
-    getDevice(id) {
-        return this.state.devices.find(d => d.id === id);
-    }
-
-    /**
-     * Obtiene una conexión por ID
-     */
-    getConnection(id) {
-        return this.state.connections.find(c => c.id === id);
-    }
-
-    /**
-     * Añade un dispositivo al estado
-     */
-    addDevice(device) {
-        this.state.devices.push(device);
-        this.updateStats();
-        
-        if (this.config.autoSave) {
-            setTimeout(() => this.autoSave(), 1000);
-        }
-    }
-
-    /**
-     * Elimina un dispositivo del estado
-     */
-    removeDevice(deviceId) {
-        this.state.devices = this.state.devices.filter(d => d.id !== deviceId);
-        
-        // Eliminar conexiones relacionadas
-        this.state.connections = this.state.connections.filter(c => 
-            c.device1 !== deviceId && c.device2 !== deviceId
-        );
-        
-        this.updateStats();
-    }
-
-    /**
-     * Añade una conexión al estado
-     */
-    addConnection(connection) {
-        this.state.connections.push(connection);
-        this.updateStats();
-        
-        if (this.config.autoSave) {
-            setTimeout(() => this.autoSave(), 500);
-        }
-    }
-
-    /**
-     * Elimina una conexión del estado
-     */
-    removeConnection(connectionId) {
-        this.state.connections = this.state.connections.filter(c => c.id !== connectionId);
-        this.updateStats();
-    }
-
-    /**
-     * Genera el siguiente ID para dispositivos
-     */
-    getNextDeviceId() {
-        return `device_${++this.state.counters.device}`;
-    }
-
-    /**
-     * Genera el siguiente ID para conexiones
-     */
-    getNextConnectionId() {
-        return `connection_${++this.state.counters.connection}`;
-    }
-}
-
-// Instancia global de la aplicación
-const App = new NetworkDiagramApp();
-
-// Inicializar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
-    App.init();
-});
-
-// Exportar para uso global
-window.App = App;
+})();

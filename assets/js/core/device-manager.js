@@ -1,516 +1,422 @@
 /**
- * Device Manager - Gestión de dispositivos
+ * Device Manager - Gestión de dispositivos de red
  */
 
-const DeviceManager = {
-    app: null,
-    draggedDeviceType: null,
-    isDragging: false,
-    dragOffset: { x: 0, y: 0 },
+(function() {
+    'use strict';
 
-    /**
-     * Inicializa el gestor de dispositivos
-     */
-    init(app) {
-        this.app = app;
-        this.setupEventListeners();
-        console.log('✓ DeviceManager inicializado');
-    },
-
-    /**
-     * Configura los event listeners
-     */
-    setupEventListeners() {
-        const workspace = document.getElementById('canvas-container');
+    window.DeviceManager = {
+        // Almacén de dispositivos
+        devices: new Map(),
         
-        // Eventos de drag & drop
-        workspace.addEventListener('dragover', this.handleDragOver.bind(this));
-        workspace.addEventListener('drop', this.handleDrop.bind(this));
-        workspace.addEventListener('click', this.handleWorkspaceClick.bind(this));
-        
-        // Event listeners para dispositivos se configuran dinámicamente en render()
-    },
-
-    /**
-     * Crea un nuevo dispositivo
-     */
-    create(type, x, y, customData = {}) {
-        const device = {
-            id: this.app.getNextDeviceId(),
-            type: type,
-            x: Math.max(0, Math.min(x, 2800)),
-            y: Math.max(0, Math.min(y, 1800)),
-            layer: this.app.state.currentLayer,
-            name: this.generateDeviceName(type),
-            ...this.getDefaultProperties(type),
-            ...customData
-        };
-
-        this.app.addDevice(device);
-        this.render(device);
-        
-        this.app.setStatus(`Dispositivo ${device.name} agregado a ${device.layer} layer`);
-        Notifications.show(`Dispositivo ${device.name} creado`, 'success');
-        
-        return device;
-    },
-
-    /**
-     * Renderiza un dispositivo en el canvas
-     */
-    render(device) {
-        const deviceElement = document.createElement('div');
-        deviceElement.className = `device-on-canvas status-${device.status} layer-${device.layer}`;
-        deviceElement.id = device.id;
-        deviceElement.style.left = device.x + 'px';
-        deviceElement.style.top = device.y + 'px';
-
-        // Aplicar visibilidad de capa
-        if (!this.app.state.layerVisibility[device.layer]) {
-            deviceElement.style.display = 'none';
-        }
-
-        const iconClass = `${device.type}-icon`;
-        const iconText = this.getDeviceIcon(device.type);
-
-        deviceElement.innerHTML = `
-            <div class="device-header">
-                <div class="device-icon ${iconClass}">${iconText}</div>
-                <div class="device-status-indicator status-${device.status}"></div>
-            </div>
-            <div class="device-label">${device.name}</div>
-            <div class="device-details">
-                ${device.ip || 'Sin IP'}<br>
-                ${device.layer.toUpperCase()}
-            </div>
-            <div class="device-metrics">
-                CPU: ${device.cpu}% | RAM: ${device.memory}%
-            </div>
-        `;
-
-        // Configurar event listeners
-        this.setupDeviceEventListeners(deviceElement, device);
-
-        document.getElementById('canvas-container').appendChild(deviceElement);
-    },
-
-    /**
-     * Configura event listeners para un dispositivo específico
-     */
-    setupDeviceEventListeners(element, device) {
-        element.addEventListener('mousedown', (e) => this.handleDeviceMouseDown(e, device));
-        element.addEventListener('click', (e) => this.handleDeviceClick(e, device));
-        element.addEventListener('contextmenu', (e) => this.handleDeviceRightClick(e, device));
-        element.addEventListener('mouseenter', (e) => this.showDeviceTooltip(e, device));
-        element.addEventListener('mouseleave', this.hideTooltip);
-    },
-
-    /**
-     * Actualiza la visualización de un dispositivo
-     */
-    updateRender(device) {
-        const deviceElement = document.getElementById(device.id);
-        if (!deviceElement) return;
-
-        deviceElement.className = `device-on-canvas status-${device.status} layer-${device.layer}`;
-        
-        const iconText = this.getDeviceIcon(device.type);
-        deviceElement.innerHTML = `
-            <div class="device-header">
-                <div class="device-icon ${device.type}-icon">${iconText}</div>
-                <div class="device-status-indicator status-${device.status}"></div>
-            </div>
-            <div class="device-label">${device.name}</div>
-            <div class="device-details">
-                ${device.ip || 'Sin IP'}<br>
-                ${device.layer.toUpperCase()}
-            </div>
-            <div class="device-metrics">
-                CPU: ${device.cpu}% | RAM: ${device.memory}%
-            </div>
-        `;
-
-        // Reconfigurar event listeners
-        this.setupDeviceEventListeners(deviceElement, device);
-    },
-
-    /**
-     * Elimina un dispositivo
-     */
-    delete(deviceId) {
-        const device = this.app.getDevice(deviceId);
-        if (!device) return;
-
-        // Eliminar conexiones relacionadas
-        const relatedConnections = this.app.state.connections.filter(c => 
-            c.device1 === deviceId || c.device2 === deviceId
-        );
-
-        relatedConnections.forEach(connection => {
-            ConnectionManager.delete(connection.id);
-        });
-
-        // Eliminar elemento del DOM
-        const deviceElement = document.getElementById(deviceId);
-        if (deviceElement) deviceElement.remove();
-
-        // Eliminar del estado
-        this.app.removeDevice(deviceId);
-
-        Notifications.show(`Dispositivo ${device.name} eliminado`, 'info');
-        this.app.setStatus('Dispositivo eliminado exitosamente');
-    },
-
-    /**
-     * Elimina el dispositivo seleccionado
-     */
-    deleteSelected() {
-        if (!this.app.state.selectedDevice) return;
-        
-        const deviceName = this.app.state.selectedDevice.name;
-        if (confirm(`¿Estás seguro de que quieres eliminar ${deviceName}?`)) {
-            this.delete(this.app.state.selectedDevice.id);
-            this.clearSelection();
-            Modal.closeProperties();
-        }
-    },
-
-    /**
-     * Selecciona un dispositivo
-     */
-    select(device) {
-        this.clearSelection();
-        this.app.setState({ selectedDevice: device });
-        document.getElementById(device.id).classList.add('selected');
-        this.app.setStatus(`${device.name} seleccionado | Tipo: ${device.type} | Capa: ${device.layer}`);
-    },
-
-    /**
-     * Limpia la selección actual
-     */
-    clearSelection() {
-        document.querySelectorAll('.device-on-canvas.selected').forEach(el => {
-            el.classList.remove('selected');
-        });
-        this.app.setState({ selectedDevice: null });
-    },
-
-    /**
-     * Maneja el inicio del arrastre de dispositivo
-     */
-    handleDeviceMouseDown(e, device) {
-        if (e.button === 0) {
-            this.isDragging = true;
-            this.select(device);
-            
-            const rect = e.currentTarget.getBoundingClientRect();
-            this.dragOffset.x = e.clientX - rect.left;
-            this.dragOffset.y = e.clientY - rect.top;
-
-            document.addEventListener('mousemove', this.handleMouseMove.bind(this));
-            document.addEventListener('mouseup', this.handleMouseUp.bind(this));
-            
-            e.preventDefault();
-        }
-    },
-
-    /**
-     * Maneja el movimiento del mouse durante el arrastre
-     */
-    handleMouseMove(e) {
-        if (this.isDragging && this.app.state.selectedDevice) {
-            const workspace = document.getElementById('canvas-container');
-            const rect = workspace.getBoundingClientRect();
-            
-            const newX = (e.clientX - rect.left - this.dragOffset.x) / this.app.state.currentZoom;
-            const newY = (e.clientY - rect.top - this.dragOffset.y) / this.app.state.currentZoom;
-            
-            this.app.state.selectedDevice.x = Math.max(0, Math.min(newX, 2800));
-            this.app.state.selectedDevice.y = Math.max(0, Math.min(newY, 1800));
-            
-            const deviceElement = document.getElementById(this.app.state.selectedDevice.id);
-            deviceElement.style.left = this.app.state.selectedDevice.x + 'px';
-            deviceElement.style.top = this.app.state.selectedDevice.y + 'px';
-            
-            ConnectionManager.updateAll();
-        }
-    },
-
-    /**
-     * Maneja el fin del arrastre
-     */
-    handleMouseUp() {
-        this.isDragging = false;
-        document.removeEventListener('mousemove', this.handleMouseMove.bind(this));
-        document.removeEventListener('mouseup', this.handleMouseUp.bind(this));
-    },
-
-    /**
-     * Maneja el click en un dispositivo
-     */
-    handleDeviceClick(e, device) {
-        if (this.app.state.connectionMode) {
-            ConnectionManager.handleDeviceClick(device);
-        } else {
-            this.select(device);
-        }
-        e.stopPropagation();
-    },
-
-    /**
-     * Maneja el click derecho en un dispositivo
-     */
-    handleDeviceRightClick(e, device) {
-        e.preventDefault();
-        this.select(device);
-        Modal.openProperties(device);
-    },
-
-    /**
-     * Maneja el drag over en el workspace
-     */
-    handleDragOver(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'copy';
-    },
-
-    /**
-     * Maneja el drop en el workspace
-     */
-    handleDrop(e) {
-        e.preventDefault();
-        if (this.draggedDeviceType) {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / this.app.state.currentZoom;
-            const y = (e.clientY - rect.top) / this.app.state.currentZoom;
-            
-            this.create(this.draggedDeviceType, x, y);
-            this.draggedDeviceType = null;
-        }
-    },
-
-    /**
-     * Maneja el click en el workspace
-     */
-    handleWorkspaceClick(e) {
-        if (!this.app.state.connectionMode) {
-            this.clearSelection();
-        }
-    },
-
-    /**
-     * Configura el tipo de dispositivo siendo arrastrado
-     */
-    setDraggedDeviceType(type) {
-        this.draggedDeviceType = type;
-    },
-
-    /**
-     * Genera un nombre para el dispositivo
-     */
-    generateDeviceName(type) {
-        const prefixes = {
-            'core-router': 'CR',
-            'edge-router': 'ER', 
-            'router': 'R',
-            'l3-switch': 'L3SW',
-            'switch': 'SW',
-            'hub': 'HUB',
-            'firewall': 'FW',
-            'ips': 'IPS',
-            'waf': 'WAF',
-            'loadbalancer': 'LB',
-            'vpn': 'VPN',
-            'modem': 'MDM',
-            'ap': 'AP',
-            'controller': 'WLC',
-            'server': 'SRV',
-            'web-server': 'WEB',
-            'db-server': 'DB',
-            'dns-server': 'DNS',
-            'mail-server': 'MAIL',
-            'pc': 'PC',
-            'notebook': 'LAP',
-            'printer': 'PRT',
-            'phone': 'IP',
-            'nas': 'NAS',
-            'san': 'SAN',
-            'iot-device': 'IOT',
-            'sensor': 'SNS',
-            'camera': 'CAM'
-        };
-        
-        const prefix = prefixes[type] || 'DEV';
-        const counter = this.app.state.counters.device + 1;
-        return `${prefix}-${String(counter).padStart(3, '0')}`;
-    },
-
-    /**
-     * Obtiene las propiedades por defecto de un dispositivo
-     */
-    getDefaultProperties(type) {
-        return {
-            model: '',
-            brand: '',
-            serial: '',
-            ip: '',
-            subnet: '',
-            gateway: '',
-            dns: '',
-            mac: '',
-            vlan: '',
-            location: '',
-            description: '',
-            notes: '',
-            status: 'up',
-            cpu: Math.floor(Math.random() * 50) + 10,
-            memory: Math.floor(Math.random() * 60) + 20,
-            bandwidth: Math.floor(Math.random() * 40) + 10,
-            temperature: Math.floor(Math.random() * 30) + 25,
-            uptime: '99.' + Math.floor(Math.random() * 9) + '%',
-            ports: this.getDefaultPorts(type),
-            snmp: 'public',
-            backup: 'none',
-            firmware: '',
-            warranty: '',
-            purchase: '',
-            cost: 0,
-            alerts: ''
-        };
-    },
-
-    /**
-     * Obtiene los puertos por defecto según el tipo de dispositivo
-     */
-    getDefaultPorts(type) {
-        const defaultPorts = {
-            'router': '22, 23, 80, 443',
-            'switch': '22, 23, 80, 443',
-            'firewall': '22, 80, 443',
-            'server': '22, 80, 443',
-            'web-server': '80, 443',
-            'db-server': '3306, 5432',
-            'dns-server': '53',
-            'mail-server': '25, 110, 143, 993, 995',
-            'pc': '3389',
-            'printer': '9100, 631'
-        };
-        return defaultPorts[type] || '';
-    },
-
-    /**
-     * Obtiene el icono de un dispositivo
-     */
-    getDeviceIcon(type) {
-        const icons = {
-            'core-router': 'CR', 'edge-router': 'ER', 'router': 'R',
-            'l3-switch': 'L3', 'switch': 'SW', 'hub': 'H',
-            'firewall': 'FW', 'ips': 'IPS', 'waf': 'WAF',
-            'loadbalancer': 'LB', 'vpn': 'VPN', 'modem': 'M',
-            'ap': 'AP', 'controller': 'WC', 'server': 'SV',
-            'web-server': 'WS', 'db-server': 'DB', 'dns-server': 'DNS',
-            'mail-server': 'MS', 'pc': 'PC', 'notebook': 'NB',
-            'printer': 'PR', 'phone': 'PH', 'nas': 'NAS',
-            'san': 'SAN', 'iot-device': 'IoT', 'sensor': 'SN',
-            'camera': 'CAM'
-        };
-        return icons[type] || 'D';
-    },
-
-    /**
-     * Muestra tooltip del dispositivo
-     */
-    showDeviceTooltip(e, device) {
-        const tooltip = document.createElement('div');
-        tooltip.className = 'tooltip visible';
-        tooltip.innerHTML = `
-            <strong>${device.name}</strong><br>
-            Tipo: ${device.type}<br>
-            IP: ${device.ip || 'Sin IP'}<br>
-            Estado: ${device.status}<br>
-            CPU: ${device.cpu}%<br>
-            RAM: ${device.memory}%<br>
-            Capa: ${device.layer}
-        `;
-        
-        tooltip.style.position = 'fixed';
-        tooltip.style.left = e.pageX + 10 + 'px';
-        tooltip.style.top = e.pageY + 10 + 'px';
-        tooltip.style.background = 'rgba(0,0,0,0.8)';
-        tooltip.style.color = 'white';
-        tooltip.style.padding = '8px';
-        tooltip.style.borderRadius = '4px';
-        tooltip.style.fontSize = '12px';
-        tooltip.style.zIndex = '1000';
-        
-        document.body.appendChild(tooltip);
-        e.target.tooltipElement = tooltip;
-    },
-
-    /**
-     * Oculta tooltip
-     */
-    hideTooltip(e) {
-        if (e.target.tooltipElement) {
-            e.target.tooltipElement.remove();
-            e.target.tooltipElement = null;
-        }
-    },
-
-    /**
-     * Organiza los dispositivos automáticamente
-     */
-    autoArrange() {
-        if (this.app.state.devices.length === 0) {
-            Notifications.show('No hay dispositivos para organizar', 'warning');
-            return;
-        }
-
-        // Agrupar dispositivos por capa
-        const layerGroups = {};
-        this.app.state.devices.forEach(device => {
-            if (!layerGroups[device.layer]) {
-                layerGroups[device.layer] = [];
+        // Tipos de dispositivos disponibles
+        deviceTypes: {
+            router: {
+                name: 'Router',
+                icon: 'fa-route',
+                category: 'networking',
+                defaultPorts: 4,
+                defaultLayer: 'core'
+            },
+            switch: {
+                name: 'Switch',
+                icon: 'fa-ethernet',
+                category: 'networking',
+                defaultPorts: 24,
+                defaultLayer: 'access'
+            },
+            firewall: {
+                name: 'Firewall',
+                icon: 'fa-shield-alt',
+                category: 'security',
+                defaultPorts: 6,
+                defaultLayer: 'dmz'
+            },
+            server: {
+                name: 'Server',
+                icon: 'fa-server',
+                category: 'computing',
+                defaultPorts: 2,
+                defaultLayer: 'dmz'
+            },
+            workstation: {
+                name: 'Workstation',
+                icon: 'fa-desktop',
+                category: 'endpoint',
+                defaultPorts: 1,
+                defaultLayer: 'user'
+            },
+            laptop: {
+                name: 'Laptop',
+                icon: 'fa-laptop',
+                category: 'endpoint',
+                defaultPorts: 1,
+                defaultLayer: 'user'
+            },
+            accesspoint: {
+                name: 'Access Point',
+                icon: 'fa-wifi',
+                category: 'wireless',
+                defaultPorts: 1,
+                defaultLayer: 'access'
+            },
+            phone: {
+                name: 'IP Phone',
+                icon: 'fa-phone',
+                category: 'endpoint',
+                defaultPorts: 1,
+                defaultLayer: 'user'
+            },
+            printer: {
+                name: 'Printer',
+                icon: 'fa-print',
+                category: 'endpoint',
+                defaultPorts: 1,
+                defaultLayer: 'user'
+            },
+            camera: {
+                name: 'IP Camera',
+                icon: 'fa-video',
+                category: 'iot',
+                defaultPorts: 1,
+                defaultLayer: 'iot'
             }
-            layerGroups[device.layer].push(device);
-        });
+        },
 
-        // Definir posiciones de capas
-        const layerPositions = {
-            'isp': { y: 50 },
-            'wan': { y: 200 },
-            'core': { y: 350 },
-            'distribution': { y: 500 },
-            'access': { y: 650 },
-            'dmz': { y: 800 },
-            'user': { y: 950 },
-            'iot': { y: 1100 }
-        };
+        // Inicializar módulo
+        init: async function() {
+            console.log('Inicializando DeviceManager...');
+            
+            // Cargar tipos de dispositivos personalizados si existen
+            try {
+                const response = await fetch('data/device-types.json');
+                if (response.ok) {
+                    const customTypes = await response.json();
+                    Object.assign(this.deviceTypes, customTypes);
+                }
+            } catch (error) {
+                console.warn('No se pudieron cargar tipos personalizados:', error);
+            }
 
-        // Organizar dispositivos
-        Object.keys(layerGroups).forEach(layer => {
-            const layerDevices = layerGroups[layer];
-            const layerY = layerPositions[layer]?.y || 300;
-            const spacing = Math.min(200, 2400 / Math.max(layerDevices.length, 1));
-            const startX = (2400 - (layerDevices.length - 1) * spacing) / 2;
+            // Inicializar panel de dispositivos
+            this.initDevicePanel();
+            
+            // Configurar drag & drop
+            this.setupDragAndDrop();
+            
+            return true;
+        },
 
-            layerDevices.forEach((device, index) => {
-                device.x = startX + index * spacing;
-                device.y = layerY;
+        // Inicializar panel de dispositivos
+        initDevicePanel: function() {
+            const panel = document.querySelector('.device-categories');
+            if (!panel) return;
+
+            // Agrupar dispositivos por categoría
+            const categories = {};
+            Object.entries(this.deviceTypes).forEach(([key, type]) => {
+                if (!categories[type.category]) {
+                    categories[type.category] = [];
+                }
+                categories[type.category].push({ key, ...type });
+            });
+
+            // Crear HTML para cada categoría
+            let html = '';
+            Object.entries(categories).forEach(([category, devices]) => {
+                html += `
+                    <div class="device-category">
+                        <h4>${this.formatCategoryName(category)}</h4>
+                        <div class="device-list">
+                `;
                 
-                const deviceElement = document.getElementById(device.id);
-                if (deviceElement) {
-                    deviceElement.style.left = device.x + 'px';
-                    deviceElement.style.top = device.y + 'px';
+                devices.forEach(device => {
+                    html += `
+                        <div class="device-item" draggable="true" data-device-type="${device.key}">
+                            <i class="fas ${device.icon}"></i>
+                            <span>${device.name}</span>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            panel.innerHTML = html;
+        },
+
+        // Formatear nombre de categoría
+        formatCategoryName: function(category) {
+            const names = {
+                networking: 'Redes',
+                security: 'Seguridad',
+                computing: 'Computación',
+                endpoint: 'Dispositivos Finales',
+                wireless: 'Inalámbrico',
+                iot: 'IoT'
+            };
+            return names[category] || category;
+        },
+
+        // Configurar drag & drop
+        setupDragAndDrop: function() {
+            // Dispositivos arrastrables
+            document.querySelectorAll('.device-item').forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.effectAllowed = 'copy';
+                    e.dataTransfer.setData('deviceType', e.target.dataset.deviceType);
+                    e.target.classList.add('dragging');
+                });
+
+                item.addEventListener('dragend', (e) => {
+                    e.target.classList.remove('dragging');
+                });
+            });
+
+            // Canvas como zona de drop
+            const canvas = document.getElementById('networkCanvas');
+            if (canvas) {
+                canvas.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'copy';
+                });
+
+                canvas.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const deviceType = e.dataTransfer.getData('deviceType');
+                    if (deviceType) {
+                        const rect = canvas.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        this.createDevice(deviceType, x, y);
+                    }
+                });
+            }
+        },
+
+        // Crear dispositivo
+        createDevice: function(type, x, y, properties = {}) {
+            const deviceType = this.deviceTypes[type];
+            if (!deviceType) {
+                console.error('Tipo de dispositivo no válido:', type);
+                return null;
+            }
+
+            const id = this.generateId();
+            const device = {
+                id,
+                type,
+                name: properties.name || `${deviceType.name}-${id}`,
+                x: x || 100,
+                y: y || 100,
+                width: 80,
+                height: 80,
+                layer: properties.layer || deviceType.defaultLayer,
+                status: 'active',
+                properties: {
+                    ip: properties.ip || '',
+                    mac: properties.mac || '',
+                    model: properties.model || '',
+                    location: properties.location || '',
+                    description: properties.description || '',
+                    ports: properties.ports || deviceType.defaultPorts,
+                    vlan: properties.vlan || '',
+                    ...properties
+                },
+                connections: [],
+                selected: false
+            };
+
+            this.devices.set(id, device);
+            
+            // Disparar evento
+            document.dispatchEvent(new CustomEvent('device:created', { 
+                detail: device 
+            }));
+
+            // Redibujar
+            if (window.CanvasManager) {
+                window.CanvasManager.render();
+            }
+
+            return device;
+        },
+
+        // Generar ID único
+        generateId: function() {
+            return 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        },
+
+        // Obtener dispositivo por ID
+        getDevice: function(id) {
+            return this.devices.get(id);
+        },
+
+        // Obtener todos los dispositivos
+        getAllDevices: function() {
+            return Array.from(this.devices.values());
+        },
+
+        // Actualizar dispositivo
+        updateDevice: function(id, updates) {
+            const device = this.devices.get(id);
+            if (!device) return false;
+
+            // Actualizar propiedades
+            Object.assign(device, updates);
+            if (updates.properties) {
+                Object.assign(device.properties, updates.properties);
+            }
+
+            // Disparar evento
+            document.dispatchEvent(new CustomEvent('device:updated', { 
+                detail: device 
+            }));
+
+            // Redibujar
+            if (window.CanvasManager) {
+                window.CanvasManager.render();
+            }
+
+            return true;
+        },
+
+        // Eliminar dispositivo
+        removeDevice: function(id) {
+            const device = this.devices.get(id);
+            if (!device) return false;
+
+            // Eliminar conexiones asociadas
+            if (window.ConnectionManager) {
+                device.connections.forEach(connId => {
+                    window.ConnectionManager.removeConnection(connId);
+                });
+            }
+
+            this.devices.delete(id);
+
+            // Disparar evento
+            document.dispatchEvent(new CustomEvent('device:removed', { 
+                detail: { id } 
+            }));
+
+            // Redibujar
+            if (window.CanvasManager) {
+                window.CanvasManager.render();
+            }
+
+            return true;
+        },
+
+        // Mover dispositivo
+        moveDevice: function(id, x, y) {
+            const device = this.devices.get(id);
+            if (!device) return false;
+
+            device.x = x;
+            device.y = y;
+
+            // Actualizar conexiones
+            if (window.ConnectionManager) {
+                window.ConnectionManager.updateDeviceConnections(id);
+            }
+
+            return true;
+        },
+
+        // Seleccionar dispositivo
+        selectDevice: function(id, multi = false) {
+            if (!multi) {
+                // Deseleccionar todos
+                this.devices.forEach(device => {
+                    device.selected = false;
+                });
+            }
+
+            const device = this.devices.get(id);
+            if (device) {
+                device.selected = true;
+                document.dispatchEvent(new CustomEvent('device:selected', { 
+                    detail: device 
+                }));
+            }
+        },
+
+        // Obtener dispositivos seleccionados
+        getSelectedDevices: function() {
+            return Array.from(this.devices.values()).filter(d => d.selected);
+        },
+
+        // Eliminar dispositivos seleccionados
+        deleteSelected: function() {
+            const selected = this.getSelectedDevices();
+            selected.forEach(device => {
+                this.removeDevice(device.id);
+            });
+        },
+
+        // Limpiar todos los dispositivos
+        clear: function() {
+            this.devices.clear();
+            if (window.CanvasManager) {
+                window.CanvasManager.render();
+            }
+        },
+
+        // Exportar dispositivos
+        export: function() {
+            return Array.from(this.devices.values()).map(device => ({
+                ...device,
+                connections: undefined // Las conexiones se exportan por separado
+            }));
+        },
+
+        // Importar dispositivos
+        import: function(devices) {
+            if (!Array.isArray(devices)) return;
+
+            devices.forEach(deviceData => {
+                const device = {
+                    ...deviceData,
+                    connections: []
+                };
+                this.devices.set(device.id, device);
+            });
+
+            // Redibujar
+            if (window.CanvasManager) {
+                window.CanvasManager.render();
+            }
+        },
+
+        // Buscar dispositivos en un área
+        getDevicesInArea: function(x1, y1, x2, y2) {
+            const devices = [];
+            this.devices.forEach(device => {
+                if (device.x >= x1 && device.x <= x2 &&
+                    device.y >= y1 && device.y <= y2) {
+                    devices.push(device);
                 }
             });
-        });
+            return devices;
+        },
 
-        ConnectionManager.updateAll();
-        this.app.setStatus('Dispositivos organizados automáticamente por capas');
-        Notifications.show('Topología organizada exitosamente', 'success');
-    }
-};
+        // Obtener dispositivo en coordenadas
+        getDeviceAt: function(x, y) {
+            for (const device of this.devices.values()) {
+                if (x >= device.x && x <= device.x + device.width &&
+                    y >= device.y && y <= device.y + device.height) {
+                    return device;
+                }
+            }
+            return null;
+        }
+    };
 
-// Exportar para uso global
-window.DeviceManager = DeviceManager;
+    // Exponer globalmente
+    window.DeviceManager = window.DeviceManager;
+
+})();

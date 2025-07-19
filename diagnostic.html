@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico - Network Diagram Creator</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #fff;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background: #2a2a2a;
+        }
+        .success {
+            color: #4CAF50;
+        }
+        .error {
+            color: #F44336;
+        }
+        .warning {
+            color: #FF9800;
+        }
+        h2 {
+            color: #2196F3;
+            margin-bottom: 10px;
+        }
+        ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+        li {
+            margin: 5px 0;
+        }
+        .file-check {
+            margin: 10px 0;
+        }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Diagnóstico de Network Diagram Creator</h1>
+    
+    <div class="section">
+        <h2>1. Verificación de Archivos JavaScript</h2>
+        <div id="jsFiles"></div>
+    </div>
+    
+    <div class="section">
+        <h2>2. Verificación de Archivos CSS</h2>
+        <div id="cssFiles"></div>
+    </div>
+    
+    <div class="section">
+        <h2>3. Verificación de Módulos Cargados</h2>
+        <div id="modules"></div>
+    </div>
+    
+    <div class="section">
+        <h2>4. Verificación de Dependencias</h2>
+        <div id="dependencies"></div>
+    </div>
+    
+    <div class="section">
+        <h2>5. Prueba de Inicialización</h2>
+        <button onclick="testInit()">Probar Inicialización</button>
+        <div id="initTest"></div>
+    </div>
+    
+    <div class="section">
+        <h2>6. Recomendaciones</h2>
+        <div id="recommendations"></div>
+    </div>
+
+    <script>
+        // Lista de archivos JS requeridos
+        const requiredJS = [
+            'assets/js/utils/helpers.js',
+            'assets/js/utils/validators.js',
+            'assets/js/utils/error-handler.js',
+            'assets/js/state-manager.js',
+            'assets/js/core/canvas-manager.js',
+            'assets/js/core/layer-manager.js',
+            'assets/js/core/device-manager.js',
+            'assets/js/core/connection-manager.js',
+            'assets/js/core/interface-manager.js',
+            'assets/js/ui/modal.js',
+            'assets/js/ui/notifications.js',
+            'assets/js/ui/sidebar.js',
+            'assets/js/ui/toolbar.js',
+            'assets/js/utils/file-manager.js',
+            'assets/js/app-initialization.js',
+            'assets/js/app.js'
+        ];
+        
+        // Lista de archivos CSS requeridos
+        const requiredCSS = [
+            'assets/css/main.css',
+            'assets/css/components.css',
+            'assets/css/themes.css',
+            'assets/css/responsive.css'
+        ];
+        
+        // Lista de módulos esperados
+        const expectedModules = [
+            'DeviceManager',
+            'ConnectionManager',
+            'CanvasManager',
+            'LayerManager',
+            'InterfaceManager',
+            'StateManager',
+            'FileManager',
+            'NotificationManager',
+            'ModalManager',
+            'ToolbarManager',
+            'SidebarManager',
+            'AppInitializer',
+            'App'
+        ];
+        
+        // Verificar archivos JS
+        async function checkJSFiles() {
+            const container = document.getElementById('jsFiles');
+            let html = '<ul>';
+            let missingFiles = [];
+            
+            for (const file of requiredJS) {
+                try {
+                    const response = await fetch(file);
+                    if (response.ok) {
+                        html += `<li class="success">✓ ${file}</li>`;
+                    } else {
+                        html += `<li class="error">✗ ${file} (${response.status})</li>`;
+                        missingFiles.push(file);
+                    }
+                } catch (error) {
+                    html += `<li class="error">✗ ${file} (Error: ${error.message})</li>`;
+                    missingFiles.push(file);
+                }
+            }
+            
+            html += '</ul>';
+            
+            if (missingFiles.length > 0) {
+                html += `<p class="warning">Archivos faltantes: ${missingFiles.length}</p>`;
+            } else {
+                html += `<p class="success">Todos los archivos JS están presentes</p>`;
+            }
+            
+            container.innerHTML = html;
+            return missingFiles;
+        }
+        
+        // Verificar archivos CSS
+        async function checkCSSFiles() {
+            const container = document.getElementById('cssFiles');
+            let html = '<ul>';
+            let missingFiles = [];
+            
+            for (const file of requiredCSS) {
+                try {
+                    const response = await fetch(file);
+                    if (response.ok) {
+                        html += `<li class="success">✓ ${file}</li>`;
+                    } else {
+                        html += `<li class="error">✗ ${file} (${response.status})</li>`;
+                        missingFiles.push(file);
+                    }
+                } catch (error) {
+                    html += `<li class="error">✗ ${file} (Error: ${error.message})</li>`;
+                    missingFiles.push(file);
+                }
+            }
+            
+            html += '</ul>';
+            
+            if (missingFiles.length > 0) {
+                html += `<p class="warning">Archivos CSS faltantes: ${missingFiles.length}</p>`;
+            } else {
+                html += `<p class="success">Todos los archivos CSS están presentes</p>`;
+            }
+            
+            container.innerHTML = html;
+            return missingFiles;
+        }
+        
+        // Verificar módulos cargados
+        function checkModules() {
+            const container = document.getElementById('modules');
+            let html = '<ul>';
+            let missingModules = [];
+            
+            for (const module of expectedModules) {
+                if (window[module]) {
+                    html += `<li class="success">✓ ${module}</li>`;
+                    
+                    // Verificar métodos importantes
+                    if (window[module].init) {
+                        html += `<li class="success" style="margin-left: 20px;">  ✓ ${module}.init()</li>`;
+                    } else {
+                        html += `<li class="warning" style="margin-left: 20px;">  ⚠ ${module}.init() no encontrado</li>`;
+                    }
+                } else {
+                    html += `<li class="error">✗ ${module}</li>`;
+                    missingModules.push(module);
+                }
+            }
+            
+            html += '</ul>';
+            
+            if (missingModules.length > 0) {
+                html += `<p class="error">Módulos faltantes: ${missingModules.join(', ')}</p>`;
+            } else {
+                html += `<p class="success">Todos los módulos están cargados</p>`;
+            }
+            
+            container.innerHTML = html;
+            return missingModules;
+        }
+        
+        // Verificar dependencias externas
+        function checkDependencies() {
+            const container = document.getElementById('dependencies');
+            let html = '<ul>';
+            
+            // Font Awesome
+            if (document.querySelector('link[href*="font-awesome"]')) {
+                html += '<li class="success">✓ Font Awesome</li>';
+            } else {
+                html += '<li class="warning">⚠ Font Awesome no encontrado</li>';
+            }
+            
+            // LocalStorage
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                html += '<li class="success">✓ LocalStorage disponible</li>';
+            } catch (e) {
+                html += '<li class="error">✗ LocalStorage no disponible</li>';
+            }
+            
+            // Canvas API
+            const canvas = document.createElement('canvas');
+            if (canvas.getContext) {
+                html += '<li class="success">✓ Canvas API disponible</li>';
+            } else {
+                html += '<li class="error">✗ Canvas API no disponible</li>';
+            }
+            
+            html += '</ul>';
+            container.innerHTML = html;
+        }
+        
+        // Probar inicialización
+        async function testInit() {
+            const container = document.getElementById('initTest');
+            container.innerHTML = '<p>Probando inicialización...</p>';
+            
+            try {
+                // Cargar todos los archivos JS en orden
+                for (const file of requiredJS) {
+                    const script = document.createElement('script');
+                    script.src = file;
+                    document.head.appendChild(script);
+                    
+                    // Esperar a que se cargue
+                    await new Promise((resolve) => {
+                        script.onload = resolve;
+                        script.onerror = () => resolve();
+                    });
+                }
+                
+                // Esperar un momento para que se inicialicen
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Verificar si App está disponible
+                if (window.App && window.App.init) {
+                    container.innerHTML = '<p class="success">✓ App está disponible y listo para inicializar</p>';
+                    
+                    // Intentar inicializar
+                    try {
+                        await window.App.init();
+                        container.innerHTML += '<p class="success">✓ Inicialización exitosa</p>';
+                    } catch (error) {
+                        container.innerHTML += `<p class="error">✗ Error en inicialización: ${error.message}</p>`;
+                    }
+                } else {
+                    container.innerHTML = '<p class="error">✗ App no está disponible</p>';
+                }
+            } catch (error) {
+                container.innerHTML = `<p class="error">✗ Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Generar recomendaciones
+        async function generateRecommendations() {
+            const container = document.getElementById('recommendations');
+            let recommendations = [];
+            
+            const missingJS = await checkJSFiles();
+            const missingCSS = await checkCSSFiles();
+            const missingModules = checkModules();
+            
+            if (missingJS.length > 0) {
+                recommendations.push(`
+                    <div class="error">
+                        <h3>Archivos JavaScript Faltantes</h3>
+                        <p>Necesitas crear los siguientes archivos:</p>
+                        <ul>${missingJS.map(f => `<li>${f}</li>`).join('')}</ul>
+                    </div>
+                `);
+            }
+            
+            if (missingCSS.length > 0) {
+                recommendations.push(`
+                    <div class="error">
+                        <h3>Archivos CSS Faltantes</h3>
+                        <p>Necesitas crear los siguientes archivos:</p>
+                        <ul>${missingCSS.map(f => `<li>${f}</li>`).join('')}</ul>
+                    </div>
+                `);
+            }
+            
+            if (missingModules.length > 0) {
+                recommendations.push(`
+                    <div class="warning">
+                        <h3>Módulos No Cargados</h3>
+                        <p>Los siguientes módulos no están disponibles en window:</p>
+                        <ul>${missingModules.map(m => `<li>${m}</li>`).join('')}</ul>
+                    </div>
+                `);
+            }
+            
+            if (recommendations.length === 0) {
+                recommendations.push('<p class="success">¡Todo parece estar en orden! El proyecto debería funcionar correctamente.</p>');
+            }
+            
+            container.innerHTML = recommendations.join('');
+        }
+        
+        // Ejecutar verificaciones al cargar
+        window.addEventListener('load', () => {
+            checkDependencies();
+            generateRecommendations();
+        });
+    </script>
+</body>
+</html>
