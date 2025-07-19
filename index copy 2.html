@@ -10,6 +10,10 @@
     <meta name="author" content="Network Diagram Creator">
     <meta name="keywords" content="red, diagrama, network, topology, cisco, switch, router">
     
+    <!-- Preload critical resources -->
+    <link rel="preload" href="assets/css/main.css" as="style">
+    <link rel="preload" href="assets/js/app.js" as="script">
+    
     <!-- CSS crítico en línea para evitar FOUC -->
     <style>
         /* CSS crítico para pantalla de carga */
@@ -23,7 +27,6 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f8f9fa;
             overflow: hidden;
-            line-height: 1.5;
         }
         
         .loading-screen {
@@ -126,7 +129,6 @@
             display: flex;
             gap: 1rem;
             justify-content: center;
-            flex-wrap: wrap;
         }
         
         .btn {
@@ -138,7 +140,6 @@
             text-decoration: none;
             display: inline-block;
             transition: all 0.2s;
-            margin: 0.25rem;
         }
         
         .btn-primary {
@@ -167,8 +168,17 @@
     </style>
     
     <!-- CSS principal -->
+    <link rel="stylesheet" href="assets/css/themes.css">
     <link rel="stylesheet" href="assets/css/main.css">
-    <link rel="stylesheet" href="fixed.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
+    
+
+    <!-- Comentado 
+    <link rel="stylesheet" href="assets/css/layers.css">
+    <link rel="stylesheet" href="assets/css/canvas.css">
+    <link rel="stylesheet" href="assets/css/modals.css">
+    -->
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
@@ -198,7 +208,7 @@
             <p id="error-message">Ha ocurrido un error al cargar la aplicación.</p>
             <details id="error-details" style="margin-top: 1rem; text-align: left;">
                 <summary>Detalles técnicos</summary>
-                <pre id="error-stack" style="font-size: 12px; background: #f8f9fa; padding: 1rem; border-radius: 4px; margin-top: 0.5rem; white-space: pre-wrap; word-wrap: break-word;"></pre>
+                <pre id="error-stack" style="font-size: 12px; background: #f8f9fa; padding: 1rem; border-radius: 4px; margin-top: 0.5rem;"></pre>
             </details>
             <div class="error-actions">
                 <button class="btn btn-primary" onclick="location.reload()">
@@ -219,7 +229,7 @@
         <div class="header-container">
             <!-- Logo y título -->
             <div class="header-brand">
-                <img src="assets/icons/logo.svg" alt="Logo" class="brand-logo" onerror="this.style.display='none'" style="width: 32px; height: 32px; border-radius: 4px;">
+                <img src="assets/icons/logo.svg" alt="Logo" class="brand-logo" onerror="this.style.display='none'">
                 <h1 class="brand-title">Network Diagram Creator</h1>
                 <span class="brand-version">Pro v2.0</span>
             </div>
@@ -315,7 +325,7 @@
                     </div>
                     
                     <div class="device-categories" id="device-categories">
-                        <!-- Categorías de dispositivos se cargarán aquí dinámicamente -->
+                        <!-- Categorías de dispositivos se cargarán aquí -->
                     </div>
                 </div>
             </div>
@@ -333,7 +343,7 @@
                 </div>
                 <div class="section-content">
                     <div class="template-grid" id="template-grid">
-                        <!-- Plantillas se cargarán aquí dinámicamente -->
+                        <!-- Plantillas se cargarán aquí -->
                     </div>
                 </div>
             </div>
@@ -422,11 +432,9 @@
         <!-- Los modales se crearán dinámicamente aquí -->
     </div>
 
-    <!-- Scripts críticos del core - ORDEN CORREGIDO -->
-    
-    <!-- 1. Variables globales y funciones de utilidad críticas -->
+    <!-- Scripts críticos del core -->
     <script>
-        // Variables globales para debugging y configuración
+        // Variables globales para debugging
         window.DEBUG_MODE = localStorage.getItem('debug-mode') === 'true' || 
                            window.location.search.includes('debug=true');
         
@@ -440,7 +448,7 @@
             debugMode: window.DEBUG_MODE
         };
 
-        // Funciones de utilidad para manejo de errores y UI
+        // Funciones de utilidad para manejo de errores
         function resetApplication() {
             if (confirm('¿Estás seguro de que quieres reiniciar la aplicación? Se perderán los datos no guardados.')) {
                 localStorage.clear();
@@ -549,201 +557,62 @@
         detectBrowserCapabilities();
     </script>
 
-    <!-- 2. StateManager - DEBE SER EL PRIMERO -->
-    <script src="state-manager.js"></script>
+    <!-- Scripts del sistema de manejo de errores -->
+    <!-- <script src="assets/js/utils/error-handler.js"></script> -->
+    <!-- <script src="assets/js/utils/logger.js"></script> -->
+    <!-- <script src="assets/js/utils/performance-monitor.js"></script> -->
 
-    <!-- 3. Sistema de inicialización -->
-    <script src="app-initialization.js"></script>
+    <!-- Sistema de estado y inicialización -->
+    <script src="assets/js/state-manager.js"></script>
+    <script src="assets/js/app-initialization.js"></script>
     
-    <!-- 4. Managers principales (en orden de dependencias) -->
-    <script src="layer-manager.js"></script>
+    <!-- Managers principales (en orden de dependencias) -->
+    <script src="assets/js/core/layer-manager.js"></script>
+    <script src="assets/js/core/device-manager.js"></script>
+    <script src="assets/js/core/connection-manager.js"></script>
     <script src="assets/js/core/canvas-manager.js"></script>
+    <!-- <script src="assets/js/core/selection-manager.js"></script>-->
     
-    <!-- 5. Managers adicionales (con fallbacks) -->
-    <script>
-        // DeviceManager básico si no existe el archivo
-        if (!window.DeviceManager) {
-            console.log('📦 Creando DeviceManager básico...');
-            window.DeviceManager = {
-                initialized: false,
-                devices: new Map(),
-                
-                async initialize() {
-                    console.log('🔧 Inicializando DeviceManager básico...');
-                    this.initialized = true;
-                    console.log('✅ DeviceManager básico inicializado');
-                },
-                
-                addDevice(device) {
-                    if (!device.id) {
-                        device.id = `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                    }
-                    
-                    this.devices.set(device.id, device);
-                    
-                    if (window.StateManager) {
-                        window.StateManager.addDevice(device);
-                    }
-                    
-                    console.log(`➕ Dispositivo agregado: ${device.name || device.id}`);
-                    return device.id;
-                },
-                
-                removeDevice(deviceId) {
-                    this.devices.delete(deviceId);
-                    
-                    if (window.StateManager) {
-                        window.StateManager.removeDevice(deviceId);
-                    }
-                    
-                    console.log(`➖ Dispositivo eliminado: ${deviceId}`);
-                    return true;
-                },
-                
-                getDevice(deviceId) {
-                    return this.devices.get(deviceId);
-                },
-                
-                getAllDevices() {
-                    return Array.from(this.devices.values());
-                },
-                
-                loadDeviceTypes(deviceTypes) {
-                    console.log('📚 Tipos de dispositivos cargados:', Object.keys(deviceTypes));
-                    return Promise.resolve();
-                }
-            };
-        }
+    <!-- UI Managers -->
+    <!-- <script src="assets/js/ui/ui-manager.js"></script> -->
+    <!-- <script src="assets/js/ui/toolbar-manager.js"></script> -->
+    <script src="assets/js/ui/toolbar.js"></script>
+    <!-- <script src="assets/js/ui/sidebar-manager.js"></script> -->
+    <script src="assets/js/ui/sidebar.js"></script>
+    <!-- <script src="assets/js/ui/notification-manager.js"></script> -->
+    <script src="assets/js/ui/notifications.js"></script>
+    <!-- <script src="assets/js/ui/modal-manager.js"></script> -->
+     <script src="assets/js/ui/modal.js"></script>
+    
+    <!-- Utilidades y helpers -->
+    <!-- <script src="assets/js/utils/file-manager.js"></script> -->
+    <!-- <script src="assets/js/utils/export-manager.js"></script> -->
+    <script src="assets/js/templates/network-templates.js"></script>
+    <script src="assets/js/utils/validators.js"></script>
+    
+    <!-- Aplicación principal -->
+    <script src="assets/js/main.js"></script>
 
-        // ConnectionManager básico
-        if (!window.ConnectionManager) {
-            console.log('📦 Creando ConnectionManager básico...');
-            window.ConnectionManager = {
-                initialized: false,
-                connections: new Map(),
-                
-                async initialize() {
-                    console.log('🔧 Inicializando ConnectionManager básico...');
-                    this.initialized = true;
-                    console.log('✅ ConnectionManager básico inicializado');
-                },
-                
-                addConnection(connection) {
-                    if (!connection.id) {
-                        connection.id = `conn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                    }
-                    
-                    this.connections.set(connection.id, connection);
-                    
-                    if (window.StateManager) {
-                        window.StateManager.addConnection(connection);
-                    }
-                    
-                    console.log(`🔗 Conexión agregada: ${connection.id}`);
-                    return connection.id;
-                }
-            };
-        }
-
-        // NotificationManager básico
-        if (!window.NotificationManager) {
-            console.log('📦 Creando NotificationManager básico...');
-            window.NotificationManager = {
-                initialized: false,
-                
-                async initialize() {
-                    this.initialized = true;
-                    console.log('✅ NotificationManager básico inicializado');
-                },
-                
-                show(message, type = 'info') {
-                    console.log(`${type.toUpperCase()}: ${message}`);
-                    
-                    // Crear notificación visual simple
-                    const container = document.getElementById('notifications-container');
-                    if (container) {
-                        const notification = document.createElement('div');
-                        notification.className = `notification ${type}`;
-                        notification.innerHTML = `
-                            <div class="notification-content">
-                                <span class="notification-message">${message}</span>
-                                <button class="notification-close" onclick="this.parentElement.parentElement.remove()">×</button>
-                            </div>
-                        `;
-                        
-                        container.appendChild(notification);
-                        
-                        // Auto-remover después de 5 segundos
-                        setTimeout(() => {
-                            if (notification.parentElement) {
-                                notification.remove();
-                            }
-                        }, 5000);
-                    }
-                }
-            };
-        }
-
-        // Otros managers básicos
-        ['UIManager', 'ToolbarManager', 'SidebarManager', 'ModalManager', 'FileManager', 
-         'ExportManager', 'TemplateManager', 'ValidationManager', 'SelectionManager'].forEach(managerName => {
-            if (!window[managerName]) {
-                window[managerName] = {
-                    initialized: false,
-                    async initialize() {
-                        this.initialized = true;
-                        console.log(`✅ ${managerName} básico inicializado`);
-                    }
-                };
-            }
-        });
-    </script>
-
-    <!-- 6. Aplicación principal -->
-    <script src="main.js"></script>
-
-    <!-- 7. Inicialización principal -->
+    <!-- Script de inicialización principal -->
     <script>
         // Inicialización cuando el DOM esté listo
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 console.log('🚀 Iniciando Network Diagram Creator v2.0...');
                 
+                // Crear instancia del inicializador
+                const initializer = new AppInitializer();
+                
+                // Configurar listeners de progreso
                 updateLoadingProgress(5, 'Validando entorno del navegador...', 'Paso 1 de 6');
                 
-                // Verificar dependencias críticas
-                const criticalDependencies = ['StateManager', 'AppInitializer'];
-                for (const dep of criticalDependencies) {
-                    if (!window[dep]) {
-                        throw new Error(`Dependencia crítica faltante: ${dep}`);
-                    }
-                }
+                // Pequeña pausa para mostrar la pantalla de carga
+                await new Promise(resolve => setTimeout(resolve, 200));
                 
-                updateLoadingProgress(15, 'Inicializando sistema de estado...', 'Paso 2 de 6');
-                
-                // Inicializar StateManager primero
-                if (!window.StateManager.initialized) {
-                    await window.StateManager.initialize();
-                }
-                
-                updateLoadingProgress(30, 'Configurando sistema de inicialización...', 'Paso 3 de 6');
-                
-                // Crear e inicializar el AppInitializer
-                const initializer = new AppInitializer();
+                // Inicializar aplicación
                 await initializer.initialize();
                 
-                updateLoadingProgress(60, 'Inicializando aplicación principal...', 'Paso 4 de 6');
-                
-                // Inicializar aplicación principal
-                if (window.NetworkDiagramApp) {
-                    await window.NetworkDiagramApp.initialize();
-                }
-                
-                updateLoadingProgress(85, 'Configurando interfaz de usuario...', 'Paso 5 de 6');
-                
-                // Configurar manejadores adicionales
-                setupApplicationHandlers();
-                
+                // Progreso final
                 updateLoadingProgress(100, '¡Aplicación lista!', 'Completado');
                 
                 // Pequeña pausa antes de mostrar la aplicación
@@ -751,6 +620,9 @@
                 
                 // Mostrar aplicación
                 showApplication();
+                
+                // Configurar manejadores adicionales
+                setupApplicationHandlers();
                 
                 console.log('✅ Network Diagram Creator iniciado correctamente');
                 
@@ -776,7 +648,7 @@
             window.addEventListener('resize', () => {
                 clearTimeout(resizeTimeout);
                 resizeTimeout = setTimeout(() => {
-                    if (window.CanvasManager && window.CanvasManager.initialized) {
+                    if (window.CanvasManager) {
                         window.CanvasManager.handleResize();
                     }
                 }, 150);
@@ -786,12 +658,12 @@
             document.addEventListener('visibilitychange', () => {
                 if (document.hidden) {
                     // Pausar animaciones cuando la página no es visible
-                    if (window.CanvasManager && window.CanvasManager.pauseAnimations) {
+                    if (window.CanvasManager) {
                         window.CanvasManager.pauseAnimations();
                     }
                 } else {
                     // Reanudar animaciones
-                    if (window.CanvasManager && window.CanvasManager.resumeAnimations) {
+                    if (window.CanvasManager) {
                         window.CanvasManager.resumeAnimations();
                     }
                 }
@@ -807,16 +679,11 @@
             
             // Configurar shortcuts globales
             document.addEventListener('keydown', (e) => {
-                // Ignorar si está en un input
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                    return;
-                }
-
                 // Ctrl+S: Guardar
                 if (e.ctrlKey && e.key === 's') {
                     e.preventDefault();
-                    if (window.NetworkDiagramApp && window.NetworkDiagramApp.saveProject) {
-                        window.NetworkDiagramApp.saveProject();
+                    if (window.ProjectManager) {
+                        window.ProjectManager.saveProject();
                     }
                 }
                 
@@ -838,65 +705,23 @@
                 
                 // Delete: Eliminar seleccionado
                 if (e.key === 'Delete') {
-                    if (window.NetworkDiagramApp && window.NetworkDiagramApp.deleteSelected) {
-                        window.NetworkDiagramApp.deleteSelected();
+                    if (window.SelectionManager) {
+                        window.SelectionManager.deleteSelected();
                     }
                 }
                 
                 // F1: Ayuda
                 if (e.key === 'F1') {
                     e.preventDefault();
-                    if (window.HelpManager && window.HelpManager.show) {
+                    if (window.HelpManager) {
                         window.HelpManager.show();
                     }
                 }
                 
                 // Escape: Cancelar operación actual
                 if (e.key === 'Escape') {
-                    if (window.NetworkDiagramApp && window.NetworkDiagramApp.cancelCurrentOperation) {
-                        window.NetworkDiagramApp.cancelCurrentOperation();
-                    }
-                }
-                
-                // Herramientas rápidas
-                if (!e.ctrlKey && !e.altKey) {
-                    switch(e.key.toLowerCase()) {
-                        case 'v':
-                            if (window.NetworkDiagramApp && window.NetworkDiagramApp.setActiveTool) {
-                                window.NetworkDiagramApp.setActiveTool('select');
-                            }
-                            break;
-                        case 'd':
-                            if (window.NetworkDiagramApp && window.NetworkDiagramApp.setActiveTool) {
-                                window.NetworkDiagramApp.setActiveTool('device');
-                            }
-                            break;
-                        case 'c':
-                            if (window.NetworkDiagramApp && window.NetworkDiagramApp.setActiveTool) {
-                                window.NetworkDiagramApp.setActiveTool('connection');
-                            }
-                            break;
-                        case 't':
-                            if (window.NetworkDiagramApp && window.NetworkDiagramApp.setActiveTool) {
-                                window.NetworkDiagramApp.setActiveTool('text');
-                            }
-                            break;
-                        case '+':
-                        case '=':
-                            if (window.NetworkDiagramApp && window.NetworkDiagramApp.zoomIn) {
-                                window.NetworkDiagramApp.zoomIn();
-                            }
-                            break;
-                        case '-':
-                            if (window.NetworkDiagramApp && window.NetworkDiagramApp.zoomOut) {
-                                window.NetworkDiagramApp.zoomOut();
-                            }
-                            break;
-                        case '0':
-                            if (window.NetworkDiagramApp && window.NetworkDiagramApp.zoomToFit) {
-                                window.NetworkDiagramApp.zoomToFit();
-                            }
-                            break;
+                    if (window.ToolManager) {
+                        window.ToolManager.cancelCurrentOperation();
                     }
                 }
             });
@@ -909,180 +734,24 @@
             window.debugApp = {
                 getState: () => window.StateManager?.getState(),
                 getLayers: () => window.LayerManager?.getAllLayers(),
-                getDevices: () => window.DeviceManager?.getAllDevices(),
-                getConnections: () => window.ConnectionManager?.connections,
-                getCanvas: () => window.CanvasManager,
-                getApp: () => window.NetworkDiagramApp,
+                getDevices: () => Array.from(window.StateManager?.getState().devices.values() || []),
                 resetApp: resetApplication,
                 showError: (msg) => showErrorScreen(new Error(msg)),
-                version: window.APP_CONFIG.version,
-                
-                // Métodos de utilidad para debugging
-                addTestDevice: () => {
-                    if (window.NetworkDiagramApp && window.NetworkDiagramApp.addDeviceToCenter) {
-                        window.NetworkDiagramApp.addDeviceToCenter('router');
-                    }
-                },
-                
-                clearCanvas: () => {
-                    if (window.StateManager) {
-                        window.StateManager.reset();
-                    }
-                },
-                
-                exportState: () => {
-                    const state = window.StateManager?.exportState();
-                    console.log('📄 Estado exportado:', state);
-                    return state;
-                },
-                
-                showStats: () => {
-                    const stats = {
-                        devices: window.StateManager?.getState().devices?.size || 0,
-                        connections: window.StateManager?.getState().connections?.size || 0,
-                        layers: window.StateManager?.getState().layers?.size || 0,
-                        zoom: window.StateManager?.getState().canvas?.zoom || 1,
-                        initialized: {
-                            StateManager: window.StateManager?.initialized,
-                            LayerManager: window.LayerManager?.initialized,
-                            CanvasManager: window.CanvasManager?.initialized,
-                            DeviceManager: window.DeviceManager?.initialized,
-                            App: window.NetworkDiagramApp?.initialized
-                        }
-                    };
-                    console.table(stats);
-                    return stats;
-                }
+                version: window.APP_CONFIG.version
             };
             
-            console.log('🐛 Modo debug activado. Comandos disponibles en window.debugApp:');
-            console.log('  - debugApp.showStats() - Mostrar estadísticas');
-            console.log('  - debugApp.addTestDevice() - Agregar dispositivo de prueba');
-            console.log('  - debugApp.clearCanvas() - Limpiar canvas');
-            console.log('  - debugApp.exportState() - Exportar estado');
-            console.log('  - debugApp.getState() - Ver estado actual');
+            console.log('🐛 Modo debug activado. Usa window.debugApp para debugging.');
         }
-
-        // Configurar eventos específicos de la interfaz
-        document.addEventListener('DOMContentLoaded', () => {
-            // Configurar botones del placeholder
-            const startTutorialBtn = document.getElementById('start-tutorial');
-            if (startTutorialBtn) {
-                startTutorialBtn.addEventListener('click', () => {
-                    if (window.TutorialManager && window.TutorialManager.start) {
-                        window.TutorialManager.start();
-                    } else {
-                        window.NotificationManager?.show('Tutorial no disponible en esta versión', 'info');
-                    }
-                });
-            }
-
-            const loadTemplateBtn = document.getElementById('load-template');
-            if (loadTemplateBtn) {
-                loadTemplateBtn.addEventListener('click', () => {
-                    if (window.TemplateManager && window.TemplateManager.showTemplateDialog) {
-                        window.TemplateManager.showTemplateDialog();
-                    } else {
-                        window.NotificationManager?.show('Abriendo selector de plantillas...', 'info');
-                    }
-                });
-            }
-
-            // Configurar tooltips y ayuda contextual
-            const elementsWithTooltips = document.querySelectorAll('[title]');
-            elementsWithTooltips.forEach(element => {
-                element.addEventListener('mouseenter', (e) => {
-                    // Aquí se podría implementar tooltips personalizados
-                });
-            });
-        });
-
-        // Configuración de performance y monitoreo
-        if (window.performance && window.performance.mark) {
-            window.performance.mark('app-init-start');
-            
-            window.addEventListener('load', () => {
-                window.performance.mark('app-init-end');
-                window.performance.measure('app-initialization', 'app-init-start', 'app-init-end');
-                
-                const measures = window.performance.getEntriesByType('measure');
-                measures.forEach(measure => {
-                    console.log(`⏱️ ${measure.name}: ${measure.duration.toFixed(2)}ms`);
-                });
-            });
-        }
-
-        // Manejo de errores no capturados adicionales
-        window.addEventListener('error', (event) => {
-            console.error('🔴 Error global no manejado:', {
-                message: event.message,
-                filename: event.filename,
-                lineno: event.lineno,
-                colno: event.colno,
-                error: event.error
-            });
-        });
-
-        window.addEventListener('unhandledrejection', (event) => {
-            console.error('🔴 Promise rechazada no manejada:', event.reason);
-            event.preventDefault(); // Prevenir que aparezca en la consola del navegador
-        });
     </script>
 
     <!-- Analytics y tracking (opcional) -->
     <script>
         // Configurar analytics básico (reemplazar con tu proveedor)
-        if (!window.DEBUG_MODE && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        if (!window.DEBUG_MODE && 'localhost' !== location.hostname) {
             (function() {
                 // Aquí iría el código de analytics (Google Analytics, etc.)
-                console.log('📊 Analytics configurado para producción');
-                
-                // Ejemplo de tracking de eventos importantes
-                window.trackEvent = function(eventName, properties = {}) {
-                    if (window.gtag) {
-                        window.gtag('event', eventName, properties);
-                    }
-                    
-                    if (window.DEBUG_MODE) {
-                        console.log('📈 Event tracked:', eventName, properties);
-                    }
-                };
-                
-                // Track de inicialización exitosa
-                document.addEventListener('DOMContentLoaded', () => {
-                    setTimeout(() => {
-                        if (window.NetworkDiagramApp?.initialized) {
-                            window.trackEvent('app_initialized', {
-                                version: window.APP_CONFIG.version,
-                                userAgent: navigator.userAgent,
-                                loadTime: performance.now()
-                            });
-                        }
-                    }, 2000);
-                });
-                
+                console.log('📊 Analytics configurado');
             })();
-        } else {
-            console.log('📊 Analytics deshabilitado en modo desarrollo');
-            window.trackEvent = function(eventName, properties = {}) {
-                console.log('📈 Event (debug):', eventName, properties);
-            };
-        }
-    </script>
-
-    <!-- Service Worker para cache (opcional) -->
-    <script>
-        // Registrar Service Worker para mejor rendimiento
-        if ('serviceWorker' in navigator && location.protocol === 'https:') {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('👷 Service Worker registrado:', registration);
-                    })
-                    .catch(error => {
-                        console.log('❌ Error registrando Service Worker:', error);
-                    });
-            });
         }
     </script>
 </body>
