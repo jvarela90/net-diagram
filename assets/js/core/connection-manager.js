@@ -2,6 +2,13 @@
  * Connection Manager - Gestión de conexiones entre dispositivos
  */
 
+// LÍNEA 1 - Agregar método init:
+init: async function() {
+    this.setupConnectionStyles();
+    console.log('✓ ConnectionManager inicializado');
+    return true;
+}
+
 const ConnectionManager = {
     app: null,
     connectionStart: null,

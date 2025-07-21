@@ -178,6 +178,10 @@ class CanvasManager {
         return canvas;
     }
 
+    async init() {
+        return this.initialize();
+    }
+
     setupContext() {
         this.context = this.canvas.getContext('2d');
         

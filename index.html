@@ -119,67 +119,197 @@
     <div class="notifications" id="notifications"></div>
 
     <!-- Scripts - Orden correcto de carga -->
-    <!-- 1. Utilidades y helpers primero -->
-    <script src="assets/js/utils/helpers.js"></script>
-    <script src="assets/js/utils/validators.js"></script>
-    <script src="assets/js/utils/error-handler.js"></script>
-    
-    <!-- 2. Gestores de estado -->
+    <!-- Core primero -->
     <script src="assets/js/state-manager.js"></script>
-    
-    <!-- 3. Módulos core en orden de dependencia -->
-    <script src="assets/js/core/canvas-manager.js"></script>
+    <script src="assets/js/utils/error-handler.js"></script>
+
+    <!-- Managers principales -->
     <script src="assets/js/core/layer-manager.js"></script>
     <script src="assets/js/core/device-manager.js"></script>
     <script src="assets/js/core/connection-manager.js"></script>
-    <script src="assets/js/core/interface-manager.js"></script>
-    
-    <!-- 4. Módulos de UI -->
-    <script src="assets/js/ui/modal.js"></script>
+    <script src="assets/js/core/canvas-manager.js"></script>
+
+    <!-- UI -->
     <script src="assets/js/ui/notifications.js"></script>
-    <script src="assets/js/ui/sidebar.js"></script>
+    <script src="assets/js/ui/modal.js"></script>
     <script src="assets/js/ui/toolbar.js"></script>
-    
-    <!-- 5. Integraciones y plantillas -->
-    <script src="assets/js/templates/network-templates.js"></script>
-    <script src="assets/js/integrations/validators.js"></script>
-    <script src="assets/js/integrations/monitoring.js"></script>
-    
-    <!-- 6. Gestión de archivos -->
+    <script src="assets/js/ui/sidebar.js"></script>
+
+    <!-- Utilidades -->
+    <script src="assets/js/utils/helpers.js"></script>
+    <script src="assets/js/utils/validators.js"></script>
     <script src="assets/js/utils/file-manager.js"></script>
     <script src="assets/js/utils/cable-label-generator.js"></script>
-    
-    <!-- 7. Inicialización de la aplicación -->
+
+    <!-- Inicializadores -->
     <script src="assets/js/app-initialization.js"></script>
-    <script src="assets/js/app.js"></script>
-    
-    <!-- 8. Script de inicio -->
+    <script src="assets/js/main.js"></script>
+
+    <!-- Script de inicio -->
     <script>
-        // Esperar a que el DOM esté completamente cargado
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM cargado, iniciando aplicación...');
-            
-            // Verificar que los módulos estén disponibles
-            if (typeof window.App === 'undefined') {
-                console.error('Error: App no está definido');
-                return;
-            }
-            
-            // Iniciar la aplicación
-            try {
-                window.App.init();
-            } catch (error) {
-                console.error('Error al inicializar la aplicación:', error);
-                // Mostrar error al usuario
-                document.body.innerHTML = `
-                    <div style="padding: 20px; color: red;">
-                        <h2>Error de Inicialización</h2>
-                        <p>${error.message}</p>
-                        <pre>${error.stack}</pre>
-                    </div>
-                `;
-            }
-        });
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            await window.StateManager.initialize();
+            await window.NetworkDiagramApp.initialize();
+            console.log('✅ Aplicación iniciada correctamente');
+        } catch (error) {
+            console.error('❌ Error iniciando aplicación:', error);
+        }
+    });
     </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Aplicación profesional de mapeo de redes" />
+  <meta name="author" content="Network Diagram Creator" />
+  <title>Network Diagram Creator Pro v3</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/icons/favicon.ico" type="image/x-icon">
+
+  <!-- Preload and Critical Styles -->
+  <link rel="preload" href="assets/css/main.css" as="style">
+  <link rel="preload" href="assets/js/app.js" as="script">
+
+  <!-- CSS Global -->
+  <link rel="stylesheet" href="assets/css/themes.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+  
+  <!-- Iconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Custom Styles -->
+  <style>
+    /* Estilos críticos opcionales aquí */
+    body.loading {
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <!-- Pantalla de Carga -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <h2>Network Diagram Creator</h2>
+      <p>Inicializando aplicación...</p>
+      <div class="loading-progress">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <div class="loading-details">
+        <p id="loading-status">Cargando componentes...</p>
+        <p id="loading-step">Paso 1 de 6</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor Principal -->
+  <div class="app-container hidden" id="mainApp">
+    <!-- Encabezado -->
+    <header class="app-header">
+      <div class="app-title">
+        <i class="fas fa-network-wired"></i>
+        <span>Network Diagram Creator Pro</span>
+        <span class="version">v3.0</span>
+      </div>
+      <div class="theme-controls">
+        <button class="theme-toggle" onclick="UI.toggleTheme()">🌙 Tema</button>
+        <button class="theme-toggle" onclick="Monitoring.toggle()">📊 Monitor</button>
+        <button class="theme-toggle" onclick="UI.showHelp()">❓ Ayuda</button>
+      </div>
+    </header>
+
+    <!-- Estructura Principal -->
+    <div class="main-layout">
+      <!-- Sidebar Izquierdo -->
+      <aside class="sidebar">
+        <div class="sidebar-tabs">
+          <button class="sidebar-tab active" onclick="Sidebar.switchTab('devices')">📱 Dispositivos</button>
+          <button class="sidebar-tab" onclick="Sidebar.switchTab('templates')">📋 Plantillas</button>
+          <button class="sidebar-tab" onclick="Sidebar.switchTab('layers')">🏗️ Capas</button>
+        </div>
+        <div class="sidebar-content">
+          <!-- Dispositivos -->
+          <div id="devices-tab" class="tab-content active">
+            <input type="text" class="search-box" placeholder="🔍 Buscar dispositivos..." onkeyup="Sidebar.filterDevices(this.value)">
+            <div id="device-categories"></div>
+          </div>
+          <!-- Plantillas -->
+          <div id="templates-tab" class="tab-content">
+            <h3>🏗️ Plantillas</h3>
+            <div id="templates-grid"></div>
+          </div>
+          <!-- Capas -->
+          <div id="layers-tab" class="tab-content">
+            <h3>🏗️ Capas</h3>
+            <div id="layer-controls"></div>
+            <select id="current-layer" onchange="LayerManager.setCurrentLayer(this.value)">
+              <option value="core">Core</option>
+              <option value="distribution">Distribution</option>
+              <option value="access">Access</option>
+              <option value="dmz">DMZ</option>
+              <option value="user">Usuario</option>
+              <option value="iot">IoT</option>
+            </select>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Área de Trabajo -->
+      <main class="workspace-container">
+        <div class="advanced-toolbar" id="advanced-toolbar"></div>
+        <div class="canvas-area">
+          <div class="canvas-viewport">
+            <div class="canvas-container" id="canvas-container">
+              <svg id="connection-svg"></svg>
+            </div>
+          </div>
+          <div class="layer-indicator" id="layer-indicator">📍 Capa: Core</div>
+          <div class="monitoring-panel hidden" id="monitoring-panel"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Pantalla de Error -->
+  <div id="error-screen" class="error-screen hidden">
+    <div class="error-content">
+      <h2>🚨 Error de Inicialización</h2>
+      <p id="error-message">Algo falló al cargar la aplicación.</p>
+      <details id="error-details">
+        <summary>Detalles técnicos</summary>
+        <pre id="error-stack"></pre>
+      </details>
+      <div class="error-actions">
+        <button class="btn btn-primary" onclick="location.reload()">🔄 Recargar</button>
+        <button class="btn btn-secondary" onclick="resetApplication()">🛠️ Reiniciar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts esenciales -->
+  <script src="assets/js/utils/helpers.js"></script>
+  <script src="assets/js/utils/validators.js"></script>
+  <script src="assets/js/utils/error-handler.js"></script>
+  <script src="assets/js/state-manager.js"></script>
+  <script src="assets/js/core/canvas-manager.js"></script>
+  <script src="assets/js/core/layer-manager.js"></script>
+  <script src="assets/js/core/device-manager.js"></script>
+  <script src="assets/js/core/connection-manager.js"></script>
+  <script src="assets/js/core/interface-manager.js"></script>
+  <script src="assets/js/ui/modal.js"></script>
+  <script src="assets/js/ui/notifications.js"></script>
+  <script src="assets/js/ui/sidebar.js"></script>
+  <script src="assets/js/ui/toolbar.js"></script>
+  <script src="assets/js/utils/file-manager.js"></script>
+  <script src="assets/js/app-initialization.js"></script>
+  <script src="assets/js/app.js"></script>
 </body>
 </html>

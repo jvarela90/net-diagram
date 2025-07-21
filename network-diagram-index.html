@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Diagram Creator Pro</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --bg-light: #ecf0f1;
+            --text-dark: #2c3e50;
+            --border-radius: 6px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .app-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 60px;
+        }
+
+        .app-header h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-primary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        /* Layout Principal */
+        .app-layout {
+            display: flex;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #dee2e6;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--bg-light);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .device-categories {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .device-category {
+            border: 1px solid #dee2e6;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .category-header {
+            background: var(--bg-light);
+            padding: 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .category-devices {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 15px;
+        }
+
+        .device-item {
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: var(--border-radius);
+            cursor: grab;
+            text-align: center;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .device-item:hover {
+            border-color: var(--secondary-color);
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+        }
+
+        .device-item.dragging {
+            opacity: 0.5;
+        }
+
+        .device-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .device-name {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Área Principal */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+            padding: 10px 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .toolbar-separator {
+            width: 1px;
+            height: 30px;
+            background: #dee2e6;
+            margin: 0 10px;
+        }
+
+        /* Canvas Container */
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: white;
+        }
+
+        #main-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: default;
+        }
+
+        .canvas-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #6c757d;
+        }
+
+        .canvas-placeholder i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            background: var(--primary-color);
+            color: white;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .status-info {
+            display: flex;
+            gap: 20px;
+        }
+
+        /* Loading */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: white;
+            font-size: 18px;
+        }
+
+        .loading-overlay.hidden {
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--secondary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-right: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 250px;
+            }
+            
+            .device-categories {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Notification Area */
+        .notification-area {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 3000;
+            max-width: 400px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="spinner"></div>
+        <span>Cargando Network Diagram Creator...</span>
+    </div>
+
+    <!-- Header -->
+    <header class="app-header">
+        <h1><i class="fas fa-network-wired"></i> Network Diagram Creator Pro</h1>
+        <div class="header-controls">
+            <button class="btn btn-secondary" id="new-btn">
+                <i class="fas fa-file"></i> Nuevo
+            </button>
+            <button class="btn btn-secondary" id="open-btn">
+                <i class="fas fa-folder-open"></i> Abrir
+            </button>
+            <button class="btn btn-primary" id="save-btn">
+                <i class="fas fa-save"></i> Guardar
+            </button>
+            <button class="btn btn-success" id="export-btn">
+                <i class="fas fa-download"></i> Exportar
+            </button>
+        </div>
+    </header>
+
+    <!-- Layout Principal -->
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="main-sidebar">
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <span class="section-title">
+                        <i class="fas fa-microchip"></i> Dispositivos
+                    </span>
+                </div>
+                
+                <div class="device-categories" id="device-categories">
+                    <!-- Dispositivos de Red -->
+                    <div class="device-category">
+                        <div class="category-header" onclick="toggleCategory(this)">
+                            <span><i class="fas fa-network-wired"></i> Red</span>
+                            <span class="category-toggle">−</span>
+                        </div>
+                        <div class="category-devices">
+                            <div class="device-item" draggable="true" data-device-type="router">
+                                <span class="device-icon">🔀</span>
+                                <div class="device-name">Router</div>
+                            </div>
+                            <div class="device-item" draggable="true" data-device-type="switch">
+                                <span class="device-icon">🔗</span>
+                                <div class="device-name">Switch</div>
+                            </div>
+                            <div class="device-item" draggable="true" data-device-type="firewall">
+                                <span class="device-icon">🛡️</span>
+                                <div class="device-name">Firewall</div>
+                            </div>
+                            <div class="device-item" draggable="true" data-device-type="access-point">
+                                <span class="device-icon">📡</span>
+                                <div class="device-name">Access Point</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Servidores -->
+                    <div class="device-category">
+                        <div class="category-header" onclick="toggleCategory(this)">
+                            <span><i class="fas fa-server"></i> Servidores</span>
+                            <span class="category-toggle">−</span>
+                        </div>
+                        <div class="category-devices">
+                            <div class="device-item" draggable="true" data-device-type="server">
+                                <span class="device-icon">🖥️</span>
+                                <div class="device-name">Servidor</div>
+                            </div>
+                            <div class="device-item" draggable="true" data-device-type="database">
+                                <span class="device-icon">🗄️</span>
+                                <div class="device-name">Base Datos</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dispositivos Finales -->
+                    <div class="device-category">
+                        <div class="category-header" onclick="toggleCategory(this)">
+                            <span><i class="fas fa-desktop"></i> Endpoints</span>
+                            <span class="category-toggle">−</span>
+                        </div>
+                        <div class="category-devices">
+                            <div class="device-item" draggable="true" data-device-type="workstation">
+                                <span class="device-icon">💻</span>
+                                <div class="device-name">PC</div>
+                            </div>
+                            <div class="device-item" draggable="true" data-device-type="laptop">
+                                <span class="device-icon">💻</span>
+                                <div class="device-name">Laptop</div>
+                            </div>
+                            <div class="device-item" draggable="true" data-device-type="printer">
+                                <span class="device-icon">🖨️</span>
+                                <div class="device-name">Impresora</div>
+                            </div>
+                            <div class="device-item" draggable="true" data-device-type="phone">
+                                <span class="device-icon">☎️</span>
+                                <div class="device-name">Teléfono IP</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Contenido Principal -->
+        <main class="main-content">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="toolbar-group">
+                    <button class="btn btn-secondary" id="select-tool" title="Herramienta de selección">
+                        <i class="fas fa-mouse-pointer"></i>
+                    </button>
+                    <button class="btn btn-secondary" id="connection-tool" title="Conectar dispositivos">
+                        <i class="fas fa-link"></i>
+                    </button>
+                </div>
+
+                <div class="toolbar-separator"></div>
+
+                <div class="toolbar-group">
+                    <button class="btn btn-secondary" id="zoom-in" title="Acercar">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                    <button class="btn btn-secondary" id="zoom-out" title="Alejar">
+                        <i class="fas fa-search-minus"></i>
+                    </button>
+                    <button class="btn btn-secondary" id="zoom-fit" title="Ajustar a ventana">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+
+                <div class="toolbar-separator"></div>
+
+                <div class="toolbar-group">
+                    <button class="btn btn-secondary" id="grid-toggle" title="Mostrar/ocultar grilla">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button class="btn btn-secondary" id="snap-toggle" title="Ajustar a grilla">
+                        <i class="fas fa-magnet"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Canvas -->
+            <div class="canvas-container" id="canvas-container">
+                <canvas id="main-canvas"></canvas>
+                <div class="canvas-placeholder" id="canvas-placeholder">
+                    <i class="fas fa-network-wired"></i>
+                    <h3>Arrastra dispositivos aquí para crear tu diagrama</h3>
+                    <p>Comienza agregando dispositivos desde el panel lateral</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div class="status-info">
+            <span id="device-count">Dispositivos: 0</span>
+            <span id="connection-count">Conexiones: 0</span>
+            <span id="canvas-coordinates">X: 0, Y: 0</span>
+        </div>
+        <div class="status-info">
+            <span id="canvas-zoom">Zoom: 100%</span>
+            <span id="app-status">Listo</span>
+        </div>
+    </div>
+
+    <!-- Notification Area -->
+    <div class="notification-area" id="notification-area"></div>
+
+    <!-- File Input (hidden) -->
+    <input type="file" id="file-input" accept=".json,.ndcp" style="display: none;">
+
+    <!-- Scripts -->
+    <script>
+        // Variables globales
+        window.NetworkDiagram = {
+            devices: new Map(),
+            connections: new Map(),
+            selectedDevices: [],
+            currentTool: 'select',
+            canvas: null,
+            ctx: null,
+            zoom: 1,
+            panX: 0,
+            panY: 0,
+            isDragging: false,
+            draggedDevice: null,
+            connectionMode: false,
+            connectionStart: null
+        };
+
+        // Funciones básicas de UI
+        function toggleCategory(header) {
+            header.classList.toggle('collapsed');
+            const devices = header.nextElementSibling;
+            const toggle = header.querySelector('.category-toggle');
+            
+            if (header.classList.contains('collapsed')) {
+                devices.style.display = 'none';
+                toggle.textContent = '+';
+            } else {
+                devices.style.display = 'grid';
+                toggle.textContent = '−';
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                background: ${type === 'error' ? '#e74c3c' : type === 'success' ? '#27ae60' : '#3498db'};
+                color: white;
+                padding: 15px 20px;
+                margin-bottom: 10px;
+                border-radius: 6px;
+                transform: translateX(450px);
+                transition: transform 0.3s ease;
+                pointer-events: auto;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            `;
+            notification.textContent = message;
+            
+            document.getElementById('notification-area').appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(450px)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        function updateStatus(message) {
+            document.getElementById('app-status').textContent = message;
+        }
+
+        function updateCounts() {
+            document.getElementById('device-count').textContent = `Dispositivos: ${NetworkDiagram.devices.size}`;
+            document.getElementById('connection-count').textContent = `Conexiones: ${NetworkDiagram.connections.size}`;
+        }
+
+        // Inicialización básica del canvas
+        function initCanvas() {
+            const canvas = document.getElementById('main-canvas');
+            const container = document.getElementById('canvas-container');
+            const ctx = canvas.getContext('2d');
+            
+            NetworkDiagram.canvas = canvas;
+            NetworkDiagram.ctx = ctx;
+            
+            // Configurar tamaño del canvas
+            function resizeCanvas() {
+                const rect = container.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                renderCanvas();
+            }
+            
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+            
+            // Eventos del canvas
+            canvas.addEventListener('mousedown', handleCanvasMouseDown);
+            canvas.addEventListener('mousemove', handleCanvasMouseMove);
+            canvas.addEventListener('mouseup', handleCanvasMouseUp);
+            canvas.addEventListener('wheel', handleCanvasWheel, { passive: false });
+            
+            // Drag and drop
+            container.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+            });
+            
+            container.addEventListener('drop', handleCanvasDrop);
+        }
+
+        // Eventos del canvas
+        function handleCanvasMouseDown(e) {
+            const rect = NetworkDiagram.canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left - NetworkDiagram.panX) / NetworkDiagram.zoom;
+            const y = (e.clientY - rect.top - NetworkDiagram.panY) / NetworkDiagram.zoom;
+            
+            // Buscar dispositivo en esa posición
+            const device = getDeviceAt(x, y);
+            
+            if (device) {
+                if (NetworkDiagram.connectionMode) {
+                    handleConnectionModeClick(device);
+                } else {
+                    NetworkDiagram.isDragging = true;
+                    NetworkDiagram.draggedDevice = device;
+                    NetworkDiagram.dragOffset = {
+                        x: x - device.x,
+                        y: y - device.y
+                    };
+                }
+            }
+        }
+
+        function handleCanvasMouseMove(e) {
+            const rect = NetworkDiagram.canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left - NetworkDiagram.panX) / NetworkDiagram.zoom;
+            const y = (e.clientY - rect.top - NetworkDiagram.panY) / NetworkDiagram.zoom;
+            
+            // Actualizar coordenadas
+            document.getElementById('canvas-coordinates').textContent = `X: ${Math.round(x)}, Y: ${Math.round(y)}`;
+            
+            if (NetworkDiagram.isDragging && NetworkDiagram.draggedDevice) {
+                NetworkDiagram.draggedDevice.x = x - NetworkDiagram.dragOffset.x;
+                NetworkDiagram.draggedDevice.y = y - NetworkDiagram.dragOffset.y;
+                renderCanvas();
+            }
+        }
+
+        function handleCanvasMouseUp(e) {
+            NetworkDiagram.isDragging = false;
+            NetworkDiagram.draggedDevice = null;
+        }
+
+        function handleCanvasWheel(e) {
+            if (e.ctrlKey) {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                NetworkDiagram.zoom = Math.max(0.1, Math.min(3, NetworkDiagram.zoom * delta));
+                document.getElementById('canvas-zoom').textContent = `Zoom: ${Math.round(NetworkDiagram.zoom * 100)}%`;
+                renderCanvas();
+            }
+        }
+
+        // Drop de dispositivos
+        function handleCanvasDrop(e) {
+            e.preventDefault();
+            const deviceType = e.dataTransfer.getData('text/plain');
+            
+            if (deviceType) {
+                const rect = NetworkDiagram.canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left - NetworkDiagram.panX) / NetworkDiagram.zoom;
+                const y = (e.clientY - rect.top - NetworkDiagram.panY) / NetworkDiagram.zoom;
+                
+                addDevice(deviceType, x, y);
+            }
+        }
+
+        // Drag and drop de dispositivos
+        document.querySelectorAll('.device-item').forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', item.dataset.deviceType);
+                item.classList.add('dragging');
+            });
+            
+            item.addEventListener('dragend', (e) => {
+                item.classList.remove('dragging');
+            });
+        });
+
+        // Gestión de dispositivos
+        function addDevice(type, x, y) {
+            const id = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            const device = {
+                id: id,
+                type: type,
+                name: `${type.toUpperCase()}-${NetworkDiagram.devices.size + 1}`,
+                x: x,
+                y: y,
+                width: 80,
+                height: 60
+            };
+            
+            NetworkDiagram.devices.set(id, device);
+            updateCounts();
+            renderCanvas();
+            
+            // Ocultar placeholder si es el primer dispositivo
+            if (NetworkDiagram.devices.size === 1) {
+                document.getElementById('canvas-placeholder').style.display = 'none';
+            }
+            
+            showNotification(`Dispositivo ${device.name} agregado`, 'success');
+        }
+
+        function getDeviceAt(x, y) {
+            for (const device of NetworkDiagram.devices.values()) {
+                if (x >= device.x && x <= device.x + device.width &&
+                    y >= device.y && y <= device.y + device.height) {
+                    return device;
+                }
+            }
+            return null;
+        }
+
+        // Modo conexión
+        function handleConnectionModeClick(device) {
+            if (!NetworkDiagram.connectionStart) {
+                NetworkDiagram.connectionStart = device;
+                showNotification(`Seleccionado ${device.name}. Haz clic en otro dispositivo para conectar.`, 'info');
+            } else if (NetworkDiagram.connectionStart.id !== device.id) {
+                createConnection(NetworkDiagram.connectionStart, device);
+                NetworkDiagram.connectionStart = null;
+                toggleConnectionMode(); // Salir del modo conexión
+            }
+        }
+
+        function createConnection(device1, device2) {
+            const id = 'conn_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            const connection = {
+                id: id,
+                device1: device1.id,
+                device2: device2.id,
+                type: 'ethernet'
+            };
+            
+            NetworkDiagram.connections.set(id, connection);
+            updateCounts();
+            renderCanvas();
+            showNotification(`Conexión creada entre ${device1.name} y ${device2.name}`, 'success');
+        }
+
+        // Renderizado del canvas
+        function renderCanvas() {
+            const ctx = NetworkDiagram.ctx;
+            const canvas = NetworkDiagram.canvas;
+            
+            // Limpiar canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Aplicar transformaciones
+            ctx.save();
+            ctx.translate(NetworkDiagram.panX, NetworkDiagram.panY);
+            ctx.scale(NetworkDiagram.zoom, NetworkDiagram.zoom);
+            
+            // Dibujar grilla
+            drawGrid(ctx);
+            
+            // Dibujar conexiones
+            NetworkDiagram.connections.forEach(connection => {
+                drawConnection(ctx, connection);
+            });
+            
+            // Dibujar dispositivos
+            NetworkDiagram.devices.forEach(device => {
+                drawDevice(ctx, device);
+            });
+            
+            ctx.restore();
+        }
+
+        function drawGrid(ctx) {
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            
+            const gridSize = 20;
+            const width = NetworkDiagram.canvas.width / NetworkDiagram.zoom;
+            const height = NetworkDiagram.canvas.height / NetworkDiagram.zoom;
+            
+            for (let x = 0; x <= width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            
+            for (let y = 0; y <= height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+        }
+
+        function drawDevice(ctx, device) {
+            // Fondo del dispositivo
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(device.x, device.y, device.width, device.height);
+            
+            // Borde
+            ctx.strokeStyle = '#3498db';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(device.x, device.y, device.width, device.height);
+            
+            // Icono del dispositivo
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(getDeviceIcon(device.type), device.x + device.width/2, device.y + 20);
+            
+            // Nombre del dispositivo
+            ctx.font = '10px Arial';
+            ctx.fillText(device.name, device.x + device.width/2, device.y + device.height - 10);
+        }
+
+        function drawConnection(ctx, connection) {
+            const device1 = NetworkDiagram.devices.get(connection.device1);
+            const device2 = NetworkDiagram.devices.get(connection.device2);
+            
+            if (!device1 || !device2) return;
+            
+            const x1 = device1.x + device1.width / 2;
+            const y1 = device1.y + device1.height / 2;
+            const x2 = device2.x + device2.width / 2;
+            const y2 = device2.y + device2.height / 2;
+            
+            ctx.strokeStyle = '#27ae60';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+        }
+
+        function getDeviceIcon(type) {
+            const icons = {
+                'router': 'R',
+                'switch': 'SW',
+                'firewall': 'FW',
+                'server': 'SV',
+                'workstation': 'PC',
+                'laptop': 'LP',
+                'printer': 'PR',
+                'phone': 'PH',
+                'access-point': 'AP',
+                'database': 'DB'
+            };
+            return icons[type] || 'DEV';
+        }
+
+        // Herramientas
+        function setTool(tool) {
+            NetworkDiagram.currentTool = tool;
+            
+            // Actualizar UI
+            document.querySelectorAll('.toolbar button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (tool === 'select') {
+                document.getElementById('select-tool').classList.add('active');
+                NetworkDiagram.connectionMode = false;
+            } else if (tool === 'connection') {
+                document.getElementById('connection-tool').classList.add('active');
+                NetworkDiagram.connectionMode = true;
+            }
+        }
+
+        function toggleConnectionMode() {
+            if (NetworkDiagram.connectionMode) {
+                setTool('select');
+                showNotification('Modo conexión desactivado', 'info');
+            } else {
+                setTool('connection');
+                showNotification('Modo conexión activado. Haz clic en dos dispositivos para conectarlos.', 'info');
+            }
+        }
+
+        // Event listeners para herramientas
+        document.getElementById('select-tool').addEventListener('click', () => setTool('select'));
+        document.getElementById('connection-tool').addEventListener('click', () => toggleConnectionMode);
+
+        // Zoom
+        document.getElementById('zoom-in').addEventListener('click', () => {
+            NetworkDiagram.zoom = Math.min(3, NetworkDiagram.zoom * 1.2);
+            document.getElementById('canvas-zoom').textContent = `Zoom: ${Math.round(NetworkDiagram.zoom * 100)}%`;
+            renderCanvas();
+        });
+
+        document.getElementById('zoom-out').addEventListener('click', () => {
+            NetworkDiagram.zoom = Math.max(0.1, NetworkDiagram.zoom / 1.2);
+            document.getElementById('canvas-zoom').textContent = `Zoom: ${Math.round(NetworkDiagram.zoom * 100)}%`;
+            renderCanvas();
+        });
+
+        document.getElementById('zoom-fit').addEventListener('click', () => {
+            NetworkDiagram.zoom = 1;
+            NetworkDiagram.panX = 0;
+            NetworkDiagram.panY = 0;
+            document.getElementById('canvas-zoom').textContent = `Zoom: 100%`;
+            renderCanvas();
+        });
+
+        // Funciones de archivo
+        document.getElementById('new-btn').addEventListener('click', () => {
+            if (confirm('¿Crear nuevo diagrama? Se perderán los cambios no guardados.')) {
+                NetworkDiagram.devices.clear();
+                NetworkDiagram.connections.clear();
+                updateCounts();
+                renderCanvas();
+                document.getElementById('canvas-placeholder').style.display = 'flex';
+                showNotification('Nuevo diagrama creado', 'success');
+            }
+        });
+
+        document.getElementById('save-btn').addEventListener('click', () => {
+            const data = {
+                devices: Array.from(NetworkDiagram.devices.entries()),
+                connections: Array.from(NetworkDiagram.connections.entries()),
+                metadata: {
+                    created: new Date().toISOString(),
+                    version: '1.0'
+                }
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `network_diagram_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showNotification('Diagrama guardado', 'success');
+        });
+
+        document.getElementById('open-btn').addEventListener('click', () => {
+            document.getElementById('file-input').click();
+        });
+
+        document.getElementById('file-input').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        NetworkDiagram.devices = new Map(data.devices);
+                        NetworkDiagram.connections = new Map(data.connections);
+                        updateCounts();
+                        renderCanvas();
+                        document.getElementById('canvas-placeholder').style.display = 'none';
+                        showNotification('Diagrama cargado', 'success');
+                    } catch (error) {
+                        showNotification('Error al cargar el archivo', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // Inicialización
+        function init() {
+            console.log('Inicializando Network Diagram Creator...');
+            
+            initCanvas();
+            setTool('select');
+            updateStatus('Listo');
+            
+            // Ocultar loading
+            document.getElementById('loading-overlay').classList.add('hidden');
+            
+            showNotification('Network Diagram Creator cargado correctamente', 'success');
+        }
+
+        // Inicializar cuando el DOM esté listo
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
