@@ -91,6 +91,7 @@
         }
 
         /* SOLUCION 1: Sidebar mejorado con scroll */
+        /* Advanced Sidebar */
         .sidebar {
             width: 320px;
             background: var(--primary-color);
@@ -371,6 +372,7 @@
         }
 
         /* SOLUCION 3: Mejorar layer indicator */
+        /* Layer System */
         .layer-indicator {
             position: absolute;
             top: 10px;
@@ -499,6 +501,7 @@
         }
 
         /* SOLUCION 5: Conexiones con z-index correcto */
+        
         .connection-svg {
             position: absolute;
             top: 0;
@@ -509,9 +512,22 @@
             z-index: 5; /* Detrás de dispositivos pero visible */
         }
 
+        .tooltip {
+                position: absolute;
+                background: rgba(0,0,0,0.8);
+                color: white;
+                padding: 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                z-index: 1000;
+                max-width: 300px;
+            }
+
         /* SOLUCION 5: Dispositivos con z-index superior */
+        /* Advanced Device Styling */
         .device-on-canvas {
             position: absolute;
+            /*background: white;*/
             background: rgba(255, 255, 255, 0.8); /* 80% translúcido como solicitado */
             border: 3px solid var(--secondary-color);
             border-radius: var(--border-radius);
@@ -599,6 +615,14 @@
             color: #666;
             line-height: 1.3;
         }
+
+        /*.device-metrics {
+            margin-top: 6px;
+            padding: 4px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+            font-size: 9px;
+        }*/
 
         /* SOLUCION 2: Sistema de interfaces mejorado */
         .device-interfaces {
@@ -985,6 +1009,7 @@
         <!-- Main Layout -->
         <div class="main-layout">
             <!-- SOLUCION 1: Sidebar mejorado -->
+              <!-- Advanced Sidebar -->
             <div class="sidebar">
                 <div class="sidebar-tabs">
                     <button class="sidebar-tab active" onclick="switchSidebarTab('devices')">📱 Dispositivos</button>
@@ -1262,6 +1287,23 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Load Balancing -->
+                        <div class="device-category">
+                            <div class="category-header" onclick="toggleCategory(this)">
+                                <h3>⚖️ BALANCEADORES</h3>
+                                <span class="category-toggle">▼</span>
+                            </div>
+                            <div class="category-devices">
+                                <div class="device-item" draggable="true" data-device-type="loadbalancer">
+                                    <div class="device-icon loadbalancer-icon">LB</div>
+                                    <div class="device-info">
+                                        <div class="device-name">Load Balancer</div>
+                                        <div class="device-description">Balanceador de carga</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Templates Tab -->
@@ -1291,8 +1333,92 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Templates Tab -->
+                    <div id="templates-tab" class="tab-content">
+                        <h3 style="color: white; margin-bottom: 20px;">🏗️ Plantillas de Red</h3>
+                        <div class="templates-grid">
+                            <div class="template-card" onclick="loadTemplate('basic-enterprise')">
+                                <div class="template-title">🏢 Red Empresarial Básica</div>
+                                <div class="template-description">Topología básica empresarial con router, switch y PCs</div>
+                                <div class="template-devices">
+                                    <span class="template-device">1 Router</span>
+                                    <span class="template-device">2 Switches</span>
+                                    <span class="template-device">4 PCs</span>
+                                </div>
+                            </div>
+                            
+                            <div class="template-card" onclick="loadTemplate('dmz-network')">
+                                <div class="template-title">🛡️ Red con DMZ</div>
+                                <div class="template-description">Red empresarial con zona desmilitarizada para servicios públicos</div>
+                                <div class="template-devices">
+                                    <span class="template-device">1 Firewall</span>
+                                    <span class="template-device">2 Switches</span>
+                                    <span class="template-device">2 Servidores</span>
+                                </div>
+                            </div>
+                            
+                            <div class="template-card" onclick="loadTemplate('campus-network')">
+                                <div class="template-title">🏫 Red de Campus</div>
+                                <div class="template-description">Red jerárquica para campus universitario o corporativo</div>
+                                <div class="template-devices">
+                                    <span class="template-device">Core</span>
+                                    <span class="template-device">Distribución</span>
+                                    <span class="template-device">Acceso</span>
+                                </div>
+                            </div>
+                            
+                            <div class="template-card" onclick="loadTemplate('datacenter')">
+                                <div class="template-title">🏭 Data Center</div>
+                                <div class="template-description">Infraestructura de centro de datos con redundancia</div>
+                                <div class="template-devices">
+                                    <span class="template-device">Core Switches</span>
+                                    <span class="template-device">Servidores</span>
+                                    <span class="template-device">Storage</span>
+                                </div>
+                            </div>
+                            
+                            <div class="template-card" onclick="loadTemplate('star-topology')">
+                                <div class="template-title">⭐ Topología Estrella</div>
+                                <div class="template-description">Topología en estrella simple con switch central</div>
+                                <div class="template-devices">
+                                    <span class="template-device">1 Switch</span>
+                                    <span class="template-device">6 PCs</span>
+                                </div>
+                            </div>
+                            
+                            <div class="template-card" onclick="loadTemplate('mesh-network')">
+                                <div class="template-title">🕸️ Red Mesh</div>
+                                <div class="template-description">Red mallada con múltiples rutas de redundancia</div>
+                                <div class="template-devices">
+                                    <span class="template-device">4 Routers</span>
+                                    <span class="template-device">Múltiples enlaces</span>
+                                </div>
+                            </div>
+                            
+                            <div class="template-card" onclick="loadTemplate('iot-network')">
+                                <div class="template-title">🌐 Red IoT</div>
+                                <div class="template-description">Infraestructura para dispositivos IoT</div>
+                                <div class="template-devices">
+                                    <span class="template-device">Gateway IoT</span>
+                                    <span class="template-device">Sensores</span>
+                                    <span class="template-device">Cámaras</span>
+                                </div>
+                            </div>
+                            
+                            <div class="template-card" onclick="loadTemplate('hybrid-cloud')">
+                                <div class="template-title">☁️ Red Híbrida</div>
+                                <div class="template-description">Conexión on-premise con servicios en la nube</div>
+                                <div class="template-devices">
+                                    <span class="template-device">VPN Gateway</span>
+                                    <span class="template-device">Firewall</span>
+                                    <span class="template-device">Cloud Connect</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- SOLUCION 3: Layers Tab mejorado -->
+                    <!-- Layers Tab -->
                     <div id="layers-tab" class="tab-content">
                         <h3 style="color: white; margin-bottom: 20px;">🏗️ Gestión de Capas</h3>
                         
@@ -1346,6 +1472,77 @@
                             <p style="color: #ccc; font-size: 12px; margin-top: 8px;">Los nuevos dispositivos se añadirán a esta capa</p>
                         </div>
                     </div>
+
+                    <!-- Cable Labels Tab -->
+                    <div id="cable-labels-tab" class="tab-content">
+                        <h3 style="color: white; margin-bottom: 20px;">🏷️ Generador de Etiquetas</h3>
+                        <div class="cable-label-tool">
+                            <div class="cable-label-preview">
+                                <span id="origin-label">E1H8RA1U6SW4F23</span>
+                                <span class="cable-label-direction">↔</span>
+                                <span id="destination-label">E1H3RA2U9RT2F3</span>
+                            </div>
+                            <div class="cable-label-form">
+                                <div class="cable-label-section">
+                                    <h4>Origen</h4>
+                                    <div class="form-group">
+                                        <label for="origin-building">Edificio:</label>
+                                        <input type="text" id="origin-building" value="E1" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="origin-room">Habitación:</label>
+                                        <input type="text" id="origin-room" value="H8" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="origin-rack">Rack:</label>
+                                        <input type="text" id="origin-rack" value="RA1" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="origin-unit">Unidad:</label>
+                                        <input type="text" id="origin-unit" value="U6" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="origin-device">Equipo:</label>
+                                        <input type="text" id="origin-device" value="SW4" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="origin-interface">Interfaz:</label>
+                                        <input type="text" id="origin-interface" value="F23" oninput="updateCableLabel()">
+                                    </div>
+                                </div>
+                                <div class="cable-label-section">
+                                    <h4>Destino</h4>
+                                    <div class="form-group">
+                                        <label for="destination-building">Edificio:</label>
+                                        <input type="text" id="destination-building" value="E1" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="destination-room">Habitación:</label>
+                                        <input type="text" id="destination-room" value="H3" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="destination-rack">Rack:</label>
+                                        <input type="text" id="destination-rack" value="RA2" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="destination-unit">Unidad:</label>
+                                        <input type="text" id="destination-unit" value="U9" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="destination-device">Equipo:</label>
+                                        <input type="text" id="destination-device" value="RT2" oninput="updateCableLabel()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="destination-interface">Interfaz:</label>
+                                        <input type="text" id="destination-interface" value="F3" oninput="updateCableLabel()">
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="toolbar-btn" onclick="printCableLabel()">
+                                <span>🖨️</span> Imprimir Etiqueta
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
        
@@ -1385,6 +1582,15 @@
                         <button class="toolbar-btn" onclick="validateTopology()" title="Validar topología">
                             <span>✅</span> Validar
                         </button>
+                        <button class="toolbar-btn" onclick="generateDocumentation()" title="Generar documentación">
+                            <span>📋</span> Docs
+                        </button>
+                    </div>
+                    
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" onclick="exportDiagram()" title="Exportar como imagen">
+                            <span>📸</span> Exportar
+                        </button>
                         <button class="toolbar-btn" onclick="clearDiagram()" title="Limpiar diagrama">
                             <span>🗑️</span> Limpiar
                         </button>
@@ -1420,6 +1626,41 @@
                             <div class="minimap-viewport" id="minimap-viewport"></div>
                         </div>
                     </div>
+
+                    <!-- Monitoring Panel -->
+                <div class="monitoring-panel hidden" id="monitoring-panel">
+                    <!-- Contenido de monitoreo... -->
+                    <div class="monitoring-header">
+                        <h4>📊 Monitor de Red</h4>
+                        <button onclick="toggleMonitoring()" style="background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
+                    </div>
+                    <div id="monitoring-content">
+                        <div class="metric-item">
+                            <span>Dispositivos Activos:</span>
+                            <span class="metric-value metric-good" id="active-devices">0</span>
+                        </div>
+                        <div class="metric-item">
+                            <span>Conexiones:</span>
+                            <span class="metric-value metric-good" id="total-connections">0</span>
+                        </div>
+                        <div class="metric-item">
+                            <span>Alertas:</span>
+                            <span class="metric-value metric-warning" id="alerts-count">0</span>
+                        </div>
+                        <div class="metric-item">
+                            <span>Rendimiento Promedio:</span>
+                            <span class="metric-value metric-good" id="avg-performance">98%</span>
+                        </div>
+                        <div class="metric-item">
+                            <span>Ancho de Banda:</span>
+                            <span class="metric-value metric-good" id="bandwidth-usage">45%</span>
+                        </div>
+                        <div class="metric-item">
+                            <span>Latencia Promedio:</span>
+                            <span class="metric-value metric-good" id="avg-latency">12ms</span>
+                        </div>
+                    </div>
+                </div>
                 </div>
             </div>
         </div>
@@ -1443,7 +1684,9 @@
     </div>
 
     <!-- SOLUCION 2: Modal mejorado con interfaces -->
+     <!-- Enhanced Properties Modal -->
     <div id="properties-modal" class="modal">
+         <!-- Contenido del modal... -->
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modal-title">Propiedades del Dispositivo</h3>
@@ -1521,6 +1764,10 @@
                                 <input type="text" id="device-mac" name="mac" placeholder="00:11:22:33:44:55">
                             </div>
                             <div class="form-group">
+                                <label for="device-ports">Puertos Abiertos:</label>
+                                <input type="text" id="device-ports" name="ports" placeholder="22, 80, 443">
+                            </div>
+                            <div class="form-group">
                                 <label for="device-layer">Capa de Red:</label>
                                 <select id="device-layer" name="layer">
                                     <option value="isp">ISP Layer</option>
@@ -1584,6 +1831,10 @@
                                 <input type="number" id="device-memory" name="memory" min="0" max="100" value="45">
                             </div>
                             <div class="form-group">
+                                <label for="device-bandwidth">Ancho de Banda (%):</label>
+                                <input type="number" id="device-bandwidth" name="bandwidth" min="0" max="100" value="30">
+                            </div>
+                            <div class="form-group">
                                 <label for="device-temperature">Temperatura (°C):</label>
                                 <input type="number" id="device-temperature" name="temperature" min="0" max="100" value="35">
                             </div>
@@ -1639,6 +1890,160 @@
                         <button type="submit" style="background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">💾 Guardar</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Ayuda - Network Diagram Creator Pro</h3>
+                <span class="close" onclick="closeHelpModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="modal-tabs">
+                    <button class="modal-tab active" onclick="switchHelpTab('basics')">📋 Conceptos Básicos</button>
+                    <button class="modal-tab" onclick="switchHelpTab('interfaces')">🔌 Interfaces</button>
+                    <button class="modal-tab" onclick="switchHelpTab('connections')">🔗 Conexiones</button>
+                    <button class="modal-tab" onclick="switchHelpTab('labels')">🏷️ Etiquetas</button>
+                </div>
+                    
+                <div class="help-content">
+                    <div id="basics-tab" class="tab-content active">
+                        <div class="help-section">
+                            <h3>Creando un Diagrama</h3>
+                            <p>Para crear un diagrama de red:</p>
+                            <ol>
+                                <li>Arrastra dispositivos desde el panel izquierdo al área de trabajo</li>
+                                <li>Haz clic en el botón "Conectar" en la barra de herramientas</li>
+                                <li>Selecciona un dispositivo de origen y luego un dispositivo de destino</li>
+                                <li>Selecciona las interfaces específicas para la conexión</li>
+                                <li>Usa el panel de capas para organizar tu diagrama jerárquicamente</li>
+                            </ol>
+                        </div>
+                           
+                        <div class="help-section">
+                            <h3>Atajos de Teclado</h3>
+                            <ul>
+                                <li><strong>Ctrl + N:</strong> Nuevo diagrama</li>
+                                <li><strong>Ctrl + S:</strong> Guardar diagrama</li>
+                                <li><strong>Ctrl + O:</strong> Abrir diagrama existente</li>
+                                <li><strong>Ctrl + + / -:</strong> Zoom in/out</li>
+                                <li><strong>Delete:</strong> Eliminar dispositivo seleccionado</li>
+                                <li><strong>C:</strong> Activar/desactivar modo conexión</li>
+                            </ul>
+                        </div>
+                    </div>
+                        
+                    <div id="interfaces-tab" class="tab-content">
+                        <div class="help-section">
+                            <h3>Configuración de Interfaces</h3>
+                            <p>Cada dispositivo puede tener múltiples interfaces de red. Puedes configurar:</p>
+                            <ul>
+                                <li>Tipo de interfaz (Ethernet, Fiber, Serial, etc.)</li>
+                                <li>Dirección IP y máscara de subred</li>
+                                <li>Gateway y VLAN</li>
+                                <li>Estado (habilitada/deshabilitada)</li>
+                            </ul>
+                            <p>Para configurar interfaces:</p>
+                            <ol>
+                                <li>Haz clic derecho en un dispositivo y selecciona "Propiedades"</li>
+                                <li>Ve a la pestaña "Interfaces"</li>
+                                <li>Agrega, edita o elimina interfaces según sea necesario</li>
+                            </ol>
+                        </div>
+                            
+                        <div class="help-section">
+                            <h3>Tipos de Interfaces Compatibles</h3>
+                            <table style="width:100%; border-collapse: collapse;">
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Compatible con</th>
+                                </tr>
+                                <tr>
+                                    <td>Ethernet</td>
+                                    <td>Ethernet, FastEthernet, GigabitEthernet</td>
+                                </tr>
+                                <tr>
+                                    <td>Fiber</td>
+                                    <td>Fiber, SFP, SFP+</td>
+                                </tr>
+                                <tr>
+                                    <td>Serial</td>
+                                    <td>Serial, RS-232</td>
+                                </tr>
+                                <tr>
+                                    <td>Coaxial</td>
+                                    <td>Coaxial, BNC</td>
+                                </tr>
+                                <tr>
+                                    <td>Telephonic</td>
+                                    <td>RJ11, RJ12</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                        
+                    <div id="connections-tab" class="tab-content">
+                        <div class="help-section">
+                            <h3>Creando Conexiones</h3>
+                            <p>Para conectar dispositivos:</p>
+                            <ol>
+                                <li>Activa el modo conexión con el botón 🔗 o presionando C</li>
+                                <li>Selecciona el primer dispositivo (origen)</li>
+                                <li>Selecciona la interfaz de origen</li>
+                                <li>Selecciona el segundo dispositivo (destino)</li>
+                                <li>Selecciona la interfaz de destino</li>
+                            </ol>
+                            <p>El sistema validará automáticamente la compatibilidad de las interfaces.</p>
+                        </div>
+                            
+                        <div class="help-section">
+                            <h3>Validación de Conexiones</h3>
+                            <p>El sistema verificará:</p>
+                            <ul>
+                                <li>Compatibilidad de tipos de interfaz</li>
+                                <li>Disponibilidad de interfaces (no conectadas previamente)</li>
+                                <li>Estado de las interfaces (deben estar habilitadas)</li>
+                            </ul>
+                            <p>Si una conexión no es válida, se mostrará un mensaje de error explicando el motivo.</p>
+                        </div>
+                    </div>
+                        
+                    <div id="labels-tab" class="tab-content">
+                        <div class="help-section">
+                            <h3>Generando Etiquetas de Cableado</h3>
+                            <p>La herramienta de etiquetas te permite generar códigos estándar para identificar cables:</p>
+                            <ol>
+                                <li>Ve a la pestaña "Etiquetas" en el panel izquierdo</li>
+                                <li>Completa los campos para origen y destino</li>
+                                <li>El formato se generará automáticamente</li>
+                                <li>Haz clic en "Imprimir Etiqueta" para obtener una versión imprimible</li>
+                            </ol>
+                        </div>
+                            
+                        <div class="help-section">
+                            <h3>Formato de Etiquetas</h3>
+                            <p>El formato estándar es:</p>
+                            <div class="help-example">
+                                [Edificio][Habitación][Rack][Unidad][Dispositivo][Interfaz]
+                            </div>
+                            <p>Ejemplo:</p>
+                            <div class="help-example">
+                                E1H8RA1U6SW4F23 → E1H3RA2U9RT2F3
+                            </div>
+                            <p>Donde:</p>
+                            <ul>
+                                <li><strong>E1</strong>: Edificio 1</li>
+                                <li><strong>H8</strong>: Habitación 8</li>
+                                <li><strong>RA1</strong>: Rack 1</li>
+                                <li><strong>U6</strong>: Unidad 6</li>
+                                <li><strong>SW4</strong>: Switch 4</li>
+                                <li><strong>F23</strong>: Puerto FastEthernet 23</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
