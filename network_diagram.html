@@ -408,17 +408,26 @@
             transition: var(--transition);
             background: #f8f9fa;
             border: 1px solid #e9ecef;
+            color: #2c3e50; /* SOLUCION 1: Color de texto mejorado para legibilidad */
+            font-weight: 500;
         }
 
         .layer-item-improved:hover {
             background: #e3f2fd;
             border-color: var(--secondary-color);
+            color: var(--primary-color); /* Texto más oscuro al hover */
+            /*color: #1976d2; /* Color más oscuro en hover */
         }
 
         .layer-item-improved.active {
             background: var(--secondary-color);
-            color: white;
+            color: white !important;
             border-color: var(--secondary-color);
+        }
+
+        .layer-item-improved span {
+            font-weight: 500;
+            font-size: 14px;
         }
 
         .layer-toggle-switch {
@@ -521,7 +530,7 @@
                 font-size: 12px;
                 z-index: 1000;
                 max-width: 300px;
-            }
+        }
 
         /* SOLUCION 5: Dispositivos con z-index superior */
         /* Advanced Device Styling */
@@ -616,13 +625,13 @@
             line-height: 1.3;
         }
 
-        /*.device-metrics {
+        .device-metrics {
             margin-top: 6px;
             padding: 4px;
             background: rgba(0, 0, 0, 0.05);
             border-radius: 4px;
             font-size: 9px;
-        }*/
+        }
 
         /* SOLUCION 2: Sistema de interfaces mejorado */
         .device-interfaces {
@@ -797,6 +806,242 @@
             border-color: var(--secondary-color);
         }
 
+        /* Enhanced Status Bar */
+        .status-bar {
+            background: var(--primary-color);
+            color: var(--text-light);
+            padding: 12px 20px;
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            gap: 20px;
+            align-items: center;
+            font-size: 13px;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success-color);
+        }
+
+        /* Monitoring Dashboard */
+        .monitoring-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            padding: 15px;
+            min-width: 300px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 150;
+        }
+
+        .monitoring-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--bg-light);
+        }
+
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            margin: 4px 0;
+            background: var(--bg-light);
+            border-radius: 4px;
+        }
+
+        .metric-value {
+            font-weight: bold;
+        }
+
+        .metric-good { color: var(--success-color); }
+        .metric-warning { color: var(--warning-color); }
+        .metric-critical { color: var(--accent-color); }
+
+        /* Templates Panel */
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .template-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+
+        .template-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: var(--secondary-color);
+        }
+
+        .template-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        .template-description {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+
+        .template-devices {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .template-device {
+            background: var(--bg-light);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: var(--text-dark);
+        }
+
+        
+
+        /* Utilities */
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Cable Label Tool */
+        .cable-label-tool {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                background: white;
+                padding: 20px;
+                border-radius: var(--border-radius);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                margin-top: 20px;
+        }
+
+        .cable-label-preview {
+                display: flex;
+                justify-content: space-between;
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: var(--border-radius);
+                font-family: monospace;
+                font-size: 16px;
+                border: 1px solid #dee2e6;
+                text-align: center;
+        }
+
+        .cable-label-direction {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                color: #6c757d;
+        }
+
+        .cable-label-form {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+        }
+
+        .cable-label-section {
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: var(--border-radius);
+        }
+
+        .cable-label-section h4 {
+                margin-bottom: 10px;
+                padding-bottom: 5px;
+                border-bottom: 1px solid #dee2e6;
+        }
+
+        /* Interface Selection */
+        .interface-selection {
+                position: absolute;
+                background: white;
+                border-radius: var(--border-radius);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+                padding: 15px;
+                min-width: 250px;
+                z-index: 200;
+        }
+
+        .interface-option {
+                padding: 8px;
+                margin: 4px 0;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: var(--transition);
+                border: 1px solid #eee;
+        }
+
+        .interface-option:hover {
+                background: #f0f8ff;
+        }
+
+        .interface-option.disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .sidebar { width: 280px; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 240px; }
+            .advanced-toolbar { flex-direction: column; align-items: stretch; }
+            .toolbar-group { 
+                border-right: none; 
+                border-bottom: 1px solid #555;
+                padding: 10px 0; 
+                width: 100%;
+            }
+            .toolbar-btn {
+                flex: 1;
+            }
+            .status-bar {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .cable-label-form {
+                grid-template-columns: 1fr;
+            }
+        }
+
         /* SOLUCION 2: Tabla de interfaces en modal */
         .interfaces-table {
             width: 100%;
@@ -952,30 +1197,109 @@
                 gap: 10px;
             }
         }
-
+        /* Layer specific backgrounds */
+        .layer-isp { background-color: rgba(142, 68, 173, 0.1); }
+        .layer-wan { background-color: rgba(231, 76, 60, 0.1); }
+        .layer-core { background-color: rgba(52, 152, 219, 0.1); }
+        .layer-distribution { background-color: rgba(46, 204, 113, 0.1); }
+        .layer-access { background-color: rgba(243, 156, 18, 0.1); }
+        .layer-dmz { background-color: rgba(230, 126, 34, 0.1); }
+        .layer-user { background-color: rgba(155, 89, 182, 0.1); }
+        .layer-iot { background-color: rgba(26, 188, 156, 0.1); }
+        /* SOLUCION 2: Notification System mejorado */
         /* Notification System */
         .notification {
             position: fixed;
-            top: 20px;
+            top: 80px; /* Más abajo para no bloquear header */
             right: 20px;
             background: white;
             border-radius: var(--border-radius);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
             padding: 15px 20px;
-            z-index: 3000;
-            min-width: 300px;
-            transform: translateX(350px);
-            transition: transform 0.3s ease;
+            z-index: 5000;
+            min-width: 300px;            
+            max-width: 400px;
+            transform: translateX(420px);/* Completamente fuera de vista */            
+            transition: transform 0.4s ease-in-out;
+            /* transition: transform 0.3s ease; */
+            pointer-events: none; /* SOLUCION: No bloquea interacciones */
+            opacity: 0;
+            font-size: 13px; /* Texto más pequeño */
+            line-height: 1.4;
+            border: 1px solid #e9ecef;
         }
 
         .notification.show {
             transform: translateX(0);
+            pointer-events: auto; /* Solo permite interacción cuando está visible */            
+            opacity: 1;
+        }        
+
+        .notification.success { 
+            border-left: 4px solid var(--success-color); 
+            background: #f8fff8;
+        }
+        .notification.warning { 
+            border-left: 4px solid var(--warning-color); 
+            background: #fffbf0;
+        }
+        .notification.error { 
+            border-left: 4px solid var(--accent-color); 
+            background: #fff5f5;
+        }
+        .notification.info { 
+            border-left: 4px solid var(--secondary-color); 
+            background: #f0f8ff;
+        }        
+
+        /* Botón de cerrar notificación */
+        .notification-close {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            /*color: #aaa;*/
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            line-height: 1;
         }
 
-        .notification.success { border-left: 4px solid var(--success-color); }
-        .notification.warning { border-left: 4px solid var(--warning-color); }
-        .notification.error { border-left: 4px solid var(--accent-color); }
-        .notification.info { border-left: 4px solid var(--secondary-color); }
+        .notification-close:hover {
+            color: #333;
+        }
+
+        /* Hacer notificaciones menos intrusivas */
+        .notification {
+            pointer-events: none; /* No bloquear clics */
+            opacity: 0.95; /* Ligeramente transparente */
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .sidebar { width: 280px; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 240px; }
+            .advanced-toolbar { flex-direction: column; align-items: stretch; }
+            .toolbar-group { 
+                border-right: none; 
+                border-bottom: 1px solid #555;
+                padding: 10px 0; 
+                width: 100%;
+            }
+            .toolbar-btn {
+                flex: 1;
+            }
+            .status-bar {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
 
         .close {
             color: #aaa;
@@ -987,6 +1311,279 @@
 
         .close:hover {
             color: black;
+        } 
+        
+        /* Estilos para plantillas seleccionadas */
+        .template-item.selected {
+            background: #d4edda !important;
+            border-color: #27ae60 !important;
+            transform: scale(1.02);
+        }
+
+        .template-item {
+            transition: all 0.3s ease;
+        }
+
+        /* Mejorar estilos del modal de interfaz */
+        #interface-modal .modal-content {
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Estilo para modo múltiple activo */
+        .multi-template-active {
+            background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+            color: white !important;
+        }
+
+        .multi-template-active .device-icon {
+            background: rgba(255, 255, 255, 0.3) !important;
+            color: white !important;
+        }
+
+        /* Sistema de anotaciones */
+        .annotation {
+            position: absolute;
+            background: rgba(255, 255, 102, 0.9);
+            border: 2px solid #ffd700;
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 12px;
+            max-width: 200px;
+            z-index: 25;
+            cursor: move;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .annotation:hover {
+            background: rgba(255, 255, 102, 1);
+            z-index: 30;
+        }
+
+        .annotation-delete {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 16px;
+            height: 16px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 16px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        /* Resaltado de búsqueda */
+        .device-on-canvas.search-highlight {
+            border-color: #ffd700 !important;
+            background: rgba(255, 215, 0, 0.2) !important;
+            animation: searchPulse 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes searchPulse {
+            from { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+            to { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+        }
+
+        /* Modal de estadísticas */
+        .stats-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            z-index: 2500;
+            min-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        /* Toolbar mejorado */
+        .toolbar-group input[type="text"] {
+            transition: all 0.3s ease;
+        }
+
+        .toolbar-group input[type="text"]:focus {
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+            border-color: var(--secondary-color);
+            outline: none;
+        }
+
+        /* Modo anotación activo */
+        .annotation-mode-active {
+            background: var(--warning-color) !important;
+        }
+
+        /* Toast de guardado automático */
+        .auto-save-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(39, 174, 96, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 1500;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .auto-save-toast.show {
+            opacity: 1;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        
+
+        /* SOLUCION 6: Estilos para plantillas seleccionadas */
+        .template-item.selected {
+            background: var(--secondary-color) !important;
+            color: white !important;
+            border-color: #2980b9 !important;
+            transform: scale(1.02);
+        }
+
+        .template-item.selected .device-description {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+    
+
+        /* SOLUCION 5: Modal inline para interfaces */
+        .interface-form-inline {
+            display: none;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .interface-form-inline.active {
+            display: block;
+        }
+
+        .interface-form-inline h4 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .interface-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .interface-form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .interface-form-group label {
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .interface-form-group input,
+        .interface-form-group select {
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .interface-form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+
+        .interface-form-actions button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        /* Help Modal */
+        .help-content {
+            line-height: 1.6;
+        }
+        .help-section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .help-section h3 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        .help-example {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-family: monospace;
         }
     </style>
 </head>
@@ -1003,6 +1600,8 @@
                 <button class="theme-toggle" onclick="exportDiagram()">📸 Exportar</button>
                 <button class="theme-toggle" onclick="showNotification('Función en desarrollo', 'info')">📊 Monitor</button>
                 <button class="theme-toggle" onclick="showHelp()">❓ Ayuda</button>
+                <button class="theme-toggle" onclick="toggleTheme()">🌙 Tema</button>
+                /* <button class="theme-toggle" onclick="toggleMode()">🪖 Modo Camp / Modo Guar 🏢 </button> */
             </div>
         </div>
 
@@ -1014,7 +1613,8 @@
                 <div class="sidebar-tabs">
                     <button class="sidebar-tab active" onclick="switchSidebarTab('devices')">📱 Dispositivos</button>
                     <button class="sidebar-tab" onclick="switchSidebarTab('templates')">📋 Plantillas</button>
-                    <button class="sidebar-tab" onclick="switchSidebarTab('layers')">🏗️ Capas</button>
+                    <button class="sidebar-tab" onclick="switchSidebarTab('layers')">🏗️ Capas</button>                    
+                    <button class="sidebar-tab" onclick="switchSidebarTab('cable-labels')">🏷️ Etiquetas</button>
                 </div>
 
                 <div class="sidebar-content">
@@ -1305,10 +1905,305 @@
                             </div>
                         </div>
                     </div>
+                    
+
+                    <!-- SOLUCION 3: Templates Tab con todas las plantillas originales -->
+                    <div id="templates-tab" class="tab-content">
+                        <h3 style="color: white; margin-bottom: 20px;">🏗️ Plantillas de Red</h3>
+                        
+                        <!-- SOLUCION 6: Botón para aplicar múltiples plantillas -->
+                        <div style="margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                            <h4 style="color: white; margin-bottom: 10px;">🔄 Modo Combinación:</h4>
+                            <button class="device-item" id="multi-template-btn" onclick="toggleMultiTemplateMode()" style="justify-content: center;">
+                                <div class="device-icon" style="background: #e67e22;">🔀</div>
+                                <div class="device-info">
+                                    <div class="device-name">Activar Modo Múltiple</div>
+                                    <div class="device-description">Combinar varias plantillas</div>
+                                </div>
+                            </button>
+                            <div id="apply-templates-btn" class="hidden" style="margin-top: 10px;">
+                                <button class="device-item" onclick="applySelectedTemplates()" style="justify-content: center; background: #27ae60;">
+                                    <div class="device-icon" style="background: #27ae60;">✅</div>
+                                    <div class="device-info">
+                                        <div class="device-name">Aplicar Plantillas Seleccionadas</div>
+                                        <div class="device-description" id="selected-count">0 plantillas seleccionadas</div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <div class="device-item template-item" data-template="basic-enterprise" onclick="handleTemplateClick('basic-enterprise')">
+                                <div class="device-icon router-icon">🏢</div>
+                                <div class="device-info">
+                                    <div class="device-name">Red Empresarial Básica</div>
+                                    <div class="device-description">Router + 2 Switches + 4 PCs</div>
+                                </div>
+                            </div>
+                            
+                            <div class="device-item template-item" data-template="dmz-network" onclick="handleTemplateClick('dmz-network')">
+                                <div class="device-icon firewall-icon">🛡️</div>
+                                <div class="device-info">
+                                    <div class="device-name">Red con DMZ</div>
+                                    <div class="device-description">Firewall + DMZ + Servidores</div>
+                                </div>
+                            </div>
+                            
+                            <div class="device-item template-item" data-template="campus-network" onclick="handleTemplateClick('campus-network')">
+                                <div class="device-icon core-router-icon">🏫</div>
+                                <div class="device-info">
+                                    <div class="device-name">Red de Campus</div>
+                                    <div class="device-description">Core-Distribution-Access</div>
+                                </div>
+                            </div>
+                            
+                            <div class="device-item template-item" data-template="datacenter" onclick="handleTemplateClick('datacenter')">
+                                <div class="device-icon server-icon">🏭</div>
+                                <div class="device-info">
+                                    <div class="device-name">Data Center</div>
+                                    <div class="device-description">Infraestructura redundante</div>
+                                </div>
+                            </div>
+                            
+                            <div class="device-item template-item" data-template="star-topology" onclick="handleTemplateClick('star-topology')">
+                                <div class="device-icon switch-icon">⭐</div>
+                                <div class="device-info">
+                                    <div class="device-name">Topología Estrella</div>
+                                    <div class="device-description">Switch central + 6 PCs</div>
+                                </div>
+                            </div>
+                            
+                            <div class="device-item template-item" data-template="mesh-network" onclick="handleTemplateClick('mesh-network')">
+                                <div class="device-icon router-icon">🕸️</div>
+                                <div class="device-info">
+                                    <div class="device-name">Red Mesh</div>
+                                    <div class="device-description">4 Routers interconectados</div>
+                                </div>
+                            </div>
+                            
+                            <div class="device-item template-item" data-template="iot-network" onclick="handleTemplateClick('iot-network')">
+                                <div class="device-icon iot-device-icon">🌐</div>
+                                <div class="device-info">
+                                    <div class="device-name">Red IoT</div>
+                                    <div class="device-description">Gateway + Sensores + Cámaras</div>
+                                </div>
+                            </div>
+                            
+                            <div class="device-item template-item" data-template="hybrid-cloud" onclick="handleTemplateClick('hybrid-cloud')">
+                                <div class="device-icon vpn-icon">☁️</div>
+                                <div class="device-info">
+                                    <div class="device-name">Red Híbrida</div>
+                                    <div class="device-description">On-premise + Cloud</div>
+                                </div>
+                            </div>
+
+                            <div class="device-item template-item" data-template="wireless-enterprise" onclick="handleTemplateClick('wireless-enterprise')">
+                                <div class="device-icon ap-icon">📶</div>
+                                <div class="device-info">
+                                    <div class="device-name">Empresa Inalámbrica</div>
+                                    <div class="device-description">Controlador + APs + Usuarios</div>
+                                </div>
+                            </div>
+
+                            <div class="device-item template-item" data-template="small-office" onclick="handleTemplateClick('small-office')">
+                                <div class="device-icon modem-icon">🏢</div>
+                                <div class="device-info">
+                                    <div class="device-name">Oficina Pequeña</div>
+                                    <div class="device-description">Módem + Router + Switch básico</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Templates Tab -->
                     <div id="templates-tab" class="tab-content">
                         <h3 style="color: white; margin-bottom: 20px;">🏗️ Plantillas de Red</h3>
+                        
+                        <!-- SOLUCION 6: Botón para aplicar múltiples plantillas -->
+                        <div style="margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                            <h4 style="color: white; margin-bottom: 10px;">Modo Múltiple:</h4>
+                            <button class="toolbar-btn" onclick="toggleMultiTemplateMode()" id="multi-template-btn">
+                                <span>🔄</span> Activar Modo Múltiple
+                            </button>
+                            <p style="color: #ccc; font-size: 12px; margin-top: 8px;">Permite aplicar varias plantillas en secuencia</p>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <!-- SOLUCION 3: Plantillas restauradas y expandidas -->
+                            <div class="device-item" onclick="loadTemplate('basic')">
+                                <div class="device-icon router-icon">🏠</div>
+                                <div class="device-info">
+                                    <div class="device-name">Red Doméstica</div>
+                                    <div class="device-description">Router + Switch + PCs básicos</div>
+                                </div>
+                            </div>
+
+                            <div class="device-item" onclick="loadTemplate('basic-enterprise')">
+                                <div class="device-icon l3-switch-icon">🏢</div>
+                                <div class="device-info">
+                                    <div class="device-name">Empresa Básica</div>
+                                    <div class="device-description">Topología empresarial simple</div>
+                                </div>
+                            </div>
+
+                            <div class="device-item" onclick="loadTemplate('campus-network')">
+                                <div class="device-icon core-router-icon">🏫</div>
+                                <div class="device-info">
+                                    <div class="device-name">Red de Campus</div>
+                                    <div class="device-description">Jerarquía Core-Distribution-Access</div>
+                                </div>
+                            </div>
+
+                            <div class="device-item" onclick="loadTemplate('datacenter')">
+                                <div class="device-icon server-icon">🏭</div>
+                                <div class="device-info">
+                                    <div class="device-name">Centro de Datos</div>
+                                    <div class="device-description">Infraestructura con redundancia</div>
+                                </div>
+                            </div>
+
+                            <div class="device-item" onclick="loadTemplate('dmz-network')">
+                                <div class="device-icon firewall-icon">🛡️</div>
+                                <div class="device-info">
+                                    <div class="device-name">Red con DMZ</div>
+                                    <div class="device-description">Firewall + DMZ + LAN</div>
+                                </div>
+                            </div>
+
+                            <div class="device-item" onclick="loadTemplate('star-topology')">
+                                <div class="device-icon switch-icon">⭐</div>
+                                <div class="device-info">
+                                    <div class="device-name">Topología Estrella</div>
+                                    <div class="device-description">Switch central con múltiples PCs</div>
+                                </div>
+                            </div>
+
+                            <div class="device-item" onclick="loadTemplate('mesh-network')">
+                                <div class="device-icon router-icon">🕸️</div>
+                                <div class="device-info">
+                                    <div class="device-name">Red Mesh</div>
+                                    <div class="device-description">Redundancia completa entre routers</div>
+                                </div>
+                            </div>
+
+                            <div class="device-item" onclick="loadTemplate('iot-network')">
+                                <div class="device-icon iot-device-icon">🌐</div>
+                                <div class="device-info">
+                                    <div class="device-name">Red IoT</div>
+                                    <div class="device-description">Gateway + sensores + cámaras</div>
+                                </div>
+                            </div>
+
+                            <div class="device-item" onclick="loadTemplate('hybrid-cloud')">
+                                <div class="device-icon vpn-icon">☁️</div>
+                                <div class="device-info">
+                                    <div class="device-name">Nube Híbrida</div>
+                                    <div class="device-description">On-premise + conexión cloud</div>
+                                </div>
+                            </div>
+
+                            <div class="device-item" onclick="loadTemplate('wan-topology')">
+                                <div class="device-icon edge-router-icon">🌍</div>
+                                <div class="device-info">
+                                    <div class="device-name">Topología WAN</div>
+                                    <div class="device-description">Múltiples sitios interconectados</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                        <!-- SOLUCION 6: Botón para aplicar múltiples plantillas -->
+                        <div style="margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                            <h4 style="color: white; margin-bottom: 10px;">Modo Combinación:</h4>
+                            <div style="display: flex; gap: 10px;">
+                                <button id="combination-mode-btn" class="toolbar-btn" onclick="toggleCombinationMode()" style="background: var(--warning-color);">
+                                    🔗 Activar Modo Combinación
+                                </button>
+                                <button id="clear-selection-btn" class="toolbar-btn" onclick="clearTemplateSelection()" style="display: none;">
+                                    🗑️ Limpiar Selección
+                                </button>
+                                <button id="apply-templates-btn" class="toolbar-btn" onclick="applyCombinedTemplates()" style="display: none;">
+                                    ✨ Aplicar Combinadas
+                                </button>
+                            </div>
+                            <p style="color: #ccc; font-size: 12px; margin-top: 8px;" id="combination-help">Activa el modo para seleccionar múltiples plantillas</p>
+                        </div>
+                        <!-- SOLUCION 3: Plantillas restauradas y expandidas -->
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div class="device-item template-item" onclick="selectTemplate('basic')" data-template="basic">
+                                <div class="device-icon router-icon">📋</div>
+                                <div class="device-info">
+                                    <div class="device-name">Red Básica</div>
+                                    <div class="device-description">Router + Switch + PCs</div>
+                                </div>
+                            </div>
+
+                            <div class="device-item template-item" onclick="selectTemplate('enterprise')" data-template="enterprise">
+                                <div class="device-icon core-router-icon">🏢</div>
+                                <div class="device-info">
+                                    <div class="device-name">Red Empresarial</div>
+                                    <div class="device-description">Core-Distribution-Access</div>
+                                </div>
+                            </div>
+
+                            <div class="device-item template-item" onclick="selectTemplate('dmz')" data-template="dmz">
+                                <div class="device-icon firewall-icon">🛡️</div>
+                                <div class="device-info">
+                                    <div class="device-name">Red con DMZ</div>
+                                    <div class="device-description">Firewall + DMZ + LAN</div>
+                                </div>
+                            </div>
+
+                            <div class="device-item template-item" onclick="selectTemplate('datacenter')" data-template="datacenter">
+                                <div class="device-icon server-icon">🏭</div>
+                                <div class="device-info">
+                                    <div class="device-name">Data Center</div>
+                                    <div class="device-description">Core + Servidores + Storage</div>
+                                </div>
+                            </div>
+
+                            <div class="device-item template-item" onclick="selectTemplate('star-topology')" data-template="star-topology">
+                                <div class="device-icon switch-icon">⭐</div>
+                                <div class="device-info">
+                                    <div class="device-name">Topología Estrella</div>
+                                    <div class="device-description">Switch central + dispositivos</div>
+                                </div>
+                            </div>
+
+                            <div class="device-item template-item" onclick="selectTemplate('mesh-network')" data-template="mesh-network">
+                                <div class="device-icon router-icon">🕸️</div>
+                                <div class="device-info">
+                                    <div class="device-name">Red Mesh</div>
+                                    <div class="device-description">Red mallada con redundancia</div>
+                                </div>
+                            </div>
+
+                            <div class="device-item template-item" onclick="selectTemplate('iot-network')" data-template="iot-network">
+                                <div class="device-icon iot-device-icon">🌐</div>
+                                <div class="device-info">
+                                    <div class="device-name">Red IoT</div>
+                                    <div class="device-description">Gateway + sensores + cámaras</div>
+                                </div>
+                            </div>
+
+                            <div class="device-item template-item" onclick="selectTemplate('campus-network')" data-template="campus-network">
+                                <div class="device-icon l3-switch-icon">🏫</div>
+                                <div class="device-info">
+                                    <div class="device-name">Red de Campus</div>
+                                    <div class="device-description">Red jerárquica completa</div>
+                                </div>
+                            </div>
+
+                            <div class="device-item template-item" onclick="selectTemplate('wireless-office')" data-template="wireless-office">
+                                <div class="device-icon ap-icon">📶</div>
+                                <div class="device-info">
+                                    <div class="device-name">Oficina WiFi</div>
+                                    <div class="device-description">Red inalámbrica empresarial</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SOLUCION 3: Plantillas restauradas y expandidas -->
                         <div style="display: flex; flex-direction: column; gap: 15px;">
                             <div class="device-item" onclick="loadTemplate('basic')">
                                 <div class="device-icon router-icon">📋</div>
@@ -1462,7 +2357,7 @@
                             <select id="current-layer" onchange="setCurrentLayer(this.value)" style="width: 100%; padding: 8px; border-radius: 4px;">
                                 <option value="isp">ISP Layer</option>
                                 <option value="wan">WAN Layer</option>
-                                <option value="core" selected>Core Layer</option>
+                                <option value="core">Core Layer</option>
                                 <option value="distribution">Distribution Layer</option>
                                 <option value="access">Access Layer</option>
                                 <option value="dmz">DMZ Layer</option>
@@ -1780,6 +2675,12 @@
                                     <option value="iot">IoT Layer</option>
                                 </select>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Monitoring Tab -->
+                    <div id="monitoring-tab" class="tab-content">
+                        <div class="form-grid">
                             <div class="form-group">
                                 <label for="device-status">Estado:</label>
                                 <select id="device-status" name="status">
@@ -1794,6 +2695,55 @@
                     <!-- SOLUCION 2: Nueva pestaña de Interfaces -->
                     <div id="interfaces-tab" class="tab-content">
                         <h4>Interfaces de Red</h4>
+                        
+                        <!-- SOLUCION 5: Formulario inline para agregar/editar interfaces -->
+                        <div id="interface-form-inline" class="interface-form-inline">
+                            <h4 id="interface-form-title">Agregar Nueva Interfaz</h4>
+                            <div class="interface-form-row">
+                                <div class="interface-form-group">
+                                    <label for="interface-name">Nombre:</label>
+                                    <input type="text" id="interface-name" placeholder="Ej: GigabitEthernet0/1">
+                                </div>
+                                <div class="interface-form-group">
+                                    <label for="interface-type">Tipo:</label>
+                                    <select id="interface-type">
+                                        <option value="ethernet">Ethernet</option>
+                                        <option value="fiber">Fiber</option>
+                                        <option value="serial">Serial</option>
+                                        <option value="wireless">Wireless</option>
+                                        <option value="vlan">VLAN</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="interface-form-row">
+                                <div class="interface-form-group">
+                                    <label for="interface-ip">Dirección IP:</label>
+                                    <input type="text" id="interface-ip" placeholder="192.168.1.1">
+                                </div>
+                                <div class="interface-form-group">
+                                    <label for="interface-vlan">VLAN:</label>
+                                    <input type="text" id="interface-vlan" placeholder="100">
+                                </div>
+                            </div>
+                            <div class="interface-form-row">
+                                <div class="interface-form-group">
+                                    <label for="interface-status">Estado:</label>
+                                    <select id="interface-status">
+                                        <option value="up">🟢 Up (Activo)</option>
+                                        <option value="down">🔴 Down (Inactivo)</option>
+                                    </select>
+                                </div>
+                                <div class="interface-form-group">
+                                    <label for="interface-description">Descripción:</label>
+                                    <input type="text" id="interface-description" placeholder="Descripción de la interfaz">
+                                </div>
+                            </div>
+                            <div class="interface-form-actions">
+                                <button type="button" onclick="cancelInterfaceForm()" style="background: #6c757d; color: white;">Cancelar</button>
+                                <button type="button" onclick="saveInterface()" style="background: var(--success-color); color: white;">Guardar</button>
+                            </div>
+                        </div>
+
                         <table class="interfaces-table">
                             <thead>
                                 <tr>
@@ -1802,6 +2752,7 @@
                                     <th>Tipo</th>
                                     <th>IP</th>
                                     <th>VLAN</th>
+                                    <th>Velocidad</th>
                                     <th>Descripción</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -1811,6 +2762,9 @@
                             </tbody>
                         </table>
                         <button type="button" class="btn-add" onclick="addInterface()">
+                            <span>➕</span> Agregar Interfaz
+                        </button>
+                        <button type="button" class="btn-add" onclick="showAddInterfaceForm()">
                             <span>➕</span> Agregar Interfaz
                         </button>
                     </div>
@@ -1884,10 +2838,86 @@
                         </div>
                     </div>
 
+                    <div class="modal-buttons">
+                        <button type="button" class="btn-secondary" onclick="closePropertiesModal()">Cancelar</button>
+                        <button type="button" class="btn-secondary" onclick="deleteSelectedDevice()">🗑️ Eliminar</button>
+                        <button type="submit" class="btn-primary">💾 Guardar</button>
+                    </div>
+
                     <div style="margin-top: 20px; padding: 15px; border-top: 1px solid #eee;">
                         <button type="button" onclick="closePropertiesModal()" style="background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 4px; margin-right: 10px; cursor: pointer;">Cancelar</button>
                         <button type="button" onclick="deleteSelectedDevice()" style="background: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 4px; margin-right: 10px; cursor: pointer;">🗑️ Eliminar</button>
                         <button type="submit" style="background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">💾 Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOLUCION 5: Modal para editar interfaces -->
+    <div id="interface-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 id="interface-modal-title">Agregar Nueva Interfaz</h3>
+                <span class="close" onclick="closeInterfaceModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="interface-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="interface-name">Nombre de la Interfaz:</label>
+                            <input type="text" id="interface-name" name="name" required placeholder="ej. GigabitEthernet0/1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="interface-type">Tipo:</label>
+                            <select id="interface-type" name="type" required>
+                                <option value="ethernet">Ethernet</option>
+                                <option value="fiber">Fibra Óptica</option>
+                                <option value="serial">Serial</option>
+                                <option value="wireless">Inalámbrico</option>
+                                <option value="vlan">VLAN</option>
+                                <option value="loopback">Loopback</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="interface-status">Estado:</label>
+                            <select id="interface-status" name="status" required>
+                                <option value="up">🟢 Activo (Up)</option>
+                                <option value="down">🔴 Inactivo (Down)</option>
+                                <option value="admin-down">⚫ Administrativamente Down</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="interface-ip">Dirección IP:</label>
+                            <input type="text" id="interface-ip" name="ip" placeholder="192.168.1.1 o DHCP">
+                        </div>
+                        <div class="form-group">
+                            <label for="interface-vlan">VLAN ID:</label>
+                            <input type="text" id="interface-vlan" name="vlan" placeholder="1, 10, trunk">
+                        </div>
+                        <div class="form-group">
+                            <label for="interface-speed">Velocidad:</label>
+                            <select id="interface-speed" name="speed">
+                                
+                                <option value="10Mbps">10 Mbps</option>
+                                <option value="100Mbps">100 Mbps</option>
+                                <option value="1Gbps">1 Gbps</option>
+                                <option value="10Gbps">10 Gbps</option>
+                                <option value="40Gbps">40 Gbps</option>
+                                <option value="100Gbps">100 Gbps</option>
+                                <option value="Auto">Auto</option>
+                            </select>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="interface-description">Descripción:</label>
+                            <input type="text" id="interface-description" name="description" placeholder="Descripción de la interfaz">
+                            <textarea id="interface-description" name="description" rows="2" placeholder="Descripción de la interfaz"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; border-top: 1px solid #eee; text-align: right;">
+                        <button type="button" onclick="closeInterfaceModal()" style="background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 4px; margin-right: 10px; cursor: pointer;">Cancelar</button>
+                        <button type="submit" style="background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">💾 Guardar Interfaz</button>
                     </div>
                 </form>
             </div>
@@ -2052,7 +3082,10 @@
     <input type="file" id="file-input" style="display: none;" accept=".json" onchange="loadDiagram(event)">
 
     <!-- Notification Container -->
-    <div id="notification" class="notification"></div>
+    <div id="notification" class="notification">
+        <!-- Contenido dinámico -->
+    </div>
+    <div id="auto-save-toast-container"></div>
 
     <script>
         // Global Variables
@@ -2071,15 +3104,74 @@
             isp: true, wan: true, core: true, distribution: true,
             access: true, dmz: true, user: true, iot: true
         };
+        let monitoringEnabled = false;
         let connectionStart = null;
+        let multiTemplateMode = false; // SOLUCION 6: Modo múltiples plantillas        
+        let connectionStartInterface = null;
+        let interfaceSelectionActive = false;
+         // SOLUCION 6: Variables para modo combinación de plantillas
+        let combinationMode = false;
+        let selectedTemplates = [];
+        
+        // SOLUCION 5: Variable para gestión de interfaces
+        let editingInterfaceIndex = -1; // SOLUCION 5: Para editar interfaces
+        
+        // Variables adicionales para funcionalidades avanzadas
+        let copiedDevice = null;
+        let annotationMode = false;
+        let annotations = [];
+        let searchResults = [];
+        let autoSaveEnabled = true;
+        let autoSaveInterval = null;
+        let customTemplates = [];
+        let performanceData = {
+            deviceCount: 0,
+            connectionCount: 0,
+            renderTime: 0,
+            lastUpdate: Date.now()
+        };
 
         // Initialize Application
         document.addEventListener('DOMContentLoaded', function() {
             initializeEventListeners();
+            // Inicializar la etiqueta
+            updateCableLabel();
             updateZoom();
             updateStats();
             updateMinimap(); // SOLUCION 4
+            initializeAutoSave(); // Guardado automático
+            loadCustomTemplates(); // Cargar plantillas personalizadas
+            startMonitoringSimulation();
             showNotification('¡Bienvenido a Network Diagram Creator Pro Mejorado!', 'success');
+            
+            // Initialize interface form event listener
+            document.getElementById('interface-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const interfaceData = {
+                    name: document.getElementById('interface-name').value,
+                    type: document.getElementById('interface-type').value,
+                    status: document.getElementById('interface-status').value,
+                    ip: document.getElementById('interface-ip').value,
+                    vlan: document.getElementById('interface-vlan').value,
+                    speed: document.getElementById('interface-speed').value,
+                    description: document.getElementById('interface-description').value
+                };
+                
+                if (editingInterfaceIndex >= 0) {
+                    // Editando interfaz existente
+                    selectedDevice.interfaces[editingInterfaceIndex] = interfaceData;
+                    showNotification('Interfaz actualizada exitosamente', 'success');
+                } else {
+                    // Agregando nueva interfaz
+                    selectedDevice.interfaces.push(interfaceData);
+                    showNotification('Interfaz agregada exitosamente', 'success');
+                }
+                
+                populateInterfacesTable(selectedDevice);
+                updateDeviceDisplay(selectedDevice);
+                closeInterfaceModal();
+            });
         });
 
         function initializeEventListeners() {
@@ -2100,12 +3192,18 @@
             // Properties form
             document.getElementById('properties-form').addEventListener('submit', handlePropertiesSubmit);
 
+            // SOLUCION 5: Interface form
+            document.getElementById('interface-form').addEventListener('submit', handleInterfaceSubmit);
+
             // Keyboard shortcuts
             document.addEventListener('keydown', handleKeyboard);
 
             // SOLUCION 4: Minimap events
             const minimapViewport = document.getElementById('minimap-viewport');
             minimapViewport.addEventListener('mousedown', handleMinimapMouseDown);
+
+            // Scroll event for minimap update
+            viewport.addEventListener('scroll', updateMinimap);
 
             // Initialize zoom
             updateZoomDisplay();
@@ -2154,9 +3252,11 @@
                 description: '',
                 status: 'up',
                 cpu: Math.floor(Math.random() * 50) + 10,
-                memory: Math.floor(Math.random() * 60) + 20,
+                memory: Math.floor(Math.random() * 60) + 20,                
+                bandwidth: Math.floor(Math.random() * 40) + 10,
                 temperature: Math.floor(Math.random() * 30) + 25,
                 uptime: '99.' + Math.floor(Math.random() * 9) + '%',
+                ports: getDefaultPorts(type),
                 alerts: '',
                 // SOLUCION 2: Agregar interfaces por defecto
                 interfaces: generateDefaultInterfaces(type),
@@ -2175,44 +3275,46 @@
             updateStats();
             updateMinimap(); // SOLUCION 4
             setStatus(`Dispositivo ${device.name} agregado a ${currentLayer} layer`);
+            // Auto-save
+            setTimeout(() => autoSave(), 1000);
         }
 
         // SOLUCION 2: Generar interfaces por defecto según tipo de dispositivo
         function generateDefaultInterfaces(type) {
             const interfaceTemplates = {
                 'router': [
-                    { name: 'GigabitEthernet0/0', type: 'ethernet', status: 'up', ip: '', vlan: '', description: 'WAN Interface' },
-                    { name: 'GigabitEthernet0/1', type: 'ethernet', status: 'up', ip: '', vlan: '', description: 'LAN Interface' },
-                    { name: 'Serial0/0/0', type: 'serial', status: 'down', ip: '', vlan: '', description: 'Serial Interface' }
+                    { name: 'GigabitEthernet0/0', type: 'ethernet', status: 'up', ip: '', vlan: '', description: 'WAN Interface', speed: '1 Gbps' },
+                    { name: 'GigabitEthernet0/1', type: 'ethernet', status: 'up', ip: '', vlan: '', description: 'LAN Interface', speed: '1 Gbps' },
+                    { name: 'Serial0/0/0', type: 'serial', status: 'down', ip: '', vlan: '', description: 'Serial Interface', speed: '2 Mbps' }
                 ],
                 'switch': [
-                    { name: 'FastEthernet0/1', type: 'ethernet', status: 'up', ip: '', vlan: '1', description: 'Access Port' },
-                    { name: 'FastEthernet0/2', type: 'ethernet', status: 'up', ip: '', vlan: '1', description: 'Access Port' },
-                    { name: 'FastEthernet0/24', type: 'ethernet', status: 'down', ip: '', vlan: '1', description: 'Trunk Port' },
-                    { name: 'GigabitEthernet0/1', type: 'ethernet', status: 'up', ip: '', vlan: '', description: 'Uplink' }
+                    { name: 'FastEthernet0/1', type: 'ethernet', status: 'up', ip: '', vlan: '1', description: 'Access Port', speed: '100 Mbps' },
+                    { name: 'FastEthernet0/2', type: 'ethernet', status: 'up', ip: '', vlan: '1', description: 'Access Port', speed: '100 Mbps' },
+                    { name: 'FastEthernet0/24', type: 'ethernet', status: 'up', ip: '', vlan: '1', description: 'Trunk Port', speed: '100 Mbps' },
+                    { name: 'GigabitEthernet0/1', type: 'ethernet', status: 'up', ip: '', vlan: '', description: 'Uplink', speed: '1 Gbps' }
                 ],
                 'l3-switch': [
-                    { name: 'Vlan1', type: 'vlan', status: 'up', ip: '192.168.1.1', vlan: '1', description: 'Management VLAN' },
-                    { name: 'GigabitEthernet1/0/1', type: 'ethernet', status: 'up', ip: '', vlan: '', description: 'Port 1' },
-                    { name: 'GigabitEthernet1/0/2', type: 'ethernet', status: 'up', ip: '', vlan: '', description: 'Port 2' },
-                    { name: 'TenGigabitEthernet1/0/1', type: 'fiber', status: 'up', ip: '', vlan: '', description: 'Uplink' }
+                    { name: 'Vlan1', type: 'vlan', status: 'up', ip: '192.168.1.1', vlan: '1', description: 'Management VLAN', speed: 'Virtual' },
+                    { name: 'GigabitEthernet1/0/1', type: 'ethernet', status: 'up', ip: '', vlan: '', description: 'Port 1', speed: '1 Gbps' },
+                    { name: 'GigabitEthernet1/0/2', type: 'ethernet', status: 'up', ip: '', vlan: '', description: 'Port 2', speed: '1 Gbps' },
+                    { name: 'TenGigabitEthernet1/0/1', type: 'fiber', status: 'up', ip: '', vlan: '', description: 'Uplink', speed: '10 Gbps' }
                 ],
                 'firewall': [
-                    { name: 'outside', type: 'ethernet', status: 'up', ip: '', vlan: '', description: 'Outside Interface' },
-                    { name: 'inside', type: 'ethernet', status: 'up', ip: '192.168.1.1', vlan: '', description: 'Inside Interface' },
-                    { name: 'dmz', type: 'ethernet', status: 'down', ip: '10.0.1.1', vlan: '', description: 'DMZ Interface' }
+                    { name: 'outside', type: 'ethernet', status: 'up', ip: '', vlan: '', description: 'Outside Interface', speed: '1 Gbps' },
+                    { name: 'inside', type: 'ethernet', status: 'up', ip: '192.168.1.1', vlan: '', description: 'Inside Interface', speed: '1 Gbps' },
+                    { name: 'dmz', type: 'ethernet', status: 'up', ip: '10.0.1.1', vlan: '', description: 'DMZ Interface', speed: '1 Gbps' }
                 ],
                 'server': [
-                    { name: 'eth0', type: 'ethernet', status: 'up', ip: '192.168.1.100', vlan: '', description: 'Primary Interface' },
-                    { name: 'eth1', type: 'ethernet', status: 'down', ip: '', vlan: '', description: 'Secondary Interface' }
+                    { name: 'eth0', type: 'ethernet', status: 'up', ip: '192.168.1.100', vlan: '', description: 'Primary Interface', speed: '1 Gbps' },
+                    { name: 'eth1', type: 'ethernet', status: 'down', ip: '', vlan: '', description: 'Secondary Interface', speed: '1 Gbps' }
                 ],
                 'pc': [
-                    { name: 'Ethernet', type: 'ethernet', status: 'up', ip: 'DHCP', vlan: '', description: 'Network Adapter' }
+                    { name: 'Ethernet', type: 'ethernet', status: 'up', ip: 'DHCP', vlan: '', description: 'Network Adapter', speed: '1 Gbps' }
                 ]
             };
 
             return interfaceTemplates[type] || [
-                { name: 'eth0', type: 'ethernet', status: 'up', ip: '', vlan: '', description: 'Default Interface' }
+                { name: 'eth0', type: 'ethernet', status: 'up', ip: '', vlan: '', description: 'Default Interface', speed: 'auto' }
             ];
         }
 
@@ -2250,6 +3352,22 @@
             return `${prefixes[type] || 'DEV'}-${String(counter).padStart(3, '0')}`;
         }
 
+        function getDefaultPorts(type) {
+            const defaultPorts = {
+                'router': '22, 23, 80, 443',
+                'switch': '22, 23, 80, 443',
+                'firewall': '22, 80, 443',
+                'server': '22, 80, 443',
+                'web-server': '80, 443',
+                'db-server': '3306, 5432',
+                'dns-server': '53',
+                'mail-server': '25, 110, 143, 993, 995',
+                'pc': '3389',
+                'printer': '9100, 631'
+            };
+            return defaultPorts[type] || '';
+        }
+
         function renderDevice(device) {
             const deviceElement = document.createElement('div');
             // SOLUCION: Aplicar clase de capa desde el inicio para color de fondo correcto
@@ -2285,12 +3403,17 @@
                 <div class="device-interfaces">
                     ${interfacesHtml}
                 </div>
+                <div class="device-metrics">
+                    CPU: ${device.cpu}% | RAM: ${device.memory}%
+                </div>
             `;
 
             // Event listeners
             deviceElement.addEventListener('mousedown', (e) => handleDeviceMouseDown(e, device));
             deviceElement.addEventListener('click', (e) => handleDeviceClick(e, device));
             deviceElement.addEventListener('contextmenu', (e) => handleDeviceRightClick(e, device));
+            deviceElement.addEventListener('mouseenter', (e) => showDeviceTooltip(e, device));
+            deviceElement.addEventListener('mouseleave', hideTooltip);
 
             document.getElementById('canvas-container').appendChild(deviceElement);
         }
@@ -2411,6 +3534,8 @@
             renderConnection(connection);
             updateStats();
             updateMinimap(); // SOLUCION 4
+            // Auto-save
+            setTimeout(() => autoSave(), 500);
         }
 
         function getConnectionBandwidth(type) {
@@ -2442,7 +3567,10 @@
             line.setAttribute('x1', device1Center.x);
             line.setAttribute('y1', device1Center.y);
             line.setAttribute('x2', device2Center.x);
-            line.setAttribute('y2', device2Center.y);
+            line.setAttribute('y2', device2Center.y);            
+            
+            // Add connection styles
+            line.setAttribute('stroke-width', '4');
             line.setAttribute('stroke-dasharray', connection.status === 'down' ? '10,5' : 'none');
             
             svg.appendChild(line);
@@ -2671,6 +3799,15 @@
                 issues.push('Se recomienda redundancia en la capa Core (mínimo 2 dispositivos)');
             }
 
+            // Check for proper layer hierarchy
+            const layerHierarchy = ['isp', 'wan', 'core', 'distribution', 'access', 'dmz', 'user', 'iot'];
+            const presentLayers = [...new Set(devices.map(d => d.layer))];
+            
+            // Check for missing critical layers
+            if (!presentLayers.includes('core') && devices.length > 5) {
+                issues.push('Red compleja sin capa Core definida');
+            }
+
             // Check for IP conflicts
             const ipAddresses = devices.filter(d => d.ip).map(d => d.ip);
             const duplicateIPs = ipAddresses.filter((ip, index) => ipAddresses.indexOf(ip) !== index);
@@ -2687,6 +3824,85 @@
                 showNotification(`⚠️ Problemas encontrados:\n${issueList}`, 'warning');
                 setStatus(`Validación completada - ${issues.length} problema(s) encontrado(s)`);
             }
+        }
+
+        function generateDocumentation() {
+            if (devices.length === 0) {
+                showNotification('No hay dispositivos para documentar', 'warning');
+                return;
+            }
+
+            const doc = {
+                title: 'Documentación de Red',
+                generatedAt: new Date().toLocaleString(),
+                summary: {
+                    totalDevices: devices.length,
+                    totalConnections: connections.length,
+                    layers: [...new Set(devices.map(d => d.layer))],
+                    deviceTypes: [...new Set(devices.map(d => d.type))]
+                },
+                devices: devices.map(device => ({
+                    name: device.name,
+                    type: device.type,
+                    layer: device.layer,
+                    ip: device.ip,
+                    location: device.location,
+                    model: device.model,
+                    brand: device.brand,
+                    status: device.status
+                })),
+                connections: connections.map(conn => {
+                    const dev1 = devices.find(d => d.id === conn.device1);
+                    const dev2 = devices.find(d => d.id === conn.device2);
+                    return {
+                        from: dev1?.name || 'Unknown',
+                        to: dev2?.name || 'Unknown',
+                        type: conn.type,
+                        bandwidth: conn.bandwidth
+                    };
+                })
+            };
+
+            const docContent = `
+                # ${doc.title}
+
+                **Generado:** ${doc.generatedAt}
+
+                ## Resumen Ejecutivo
+                - **Total de Dispositivos:** ${doc.summary.totalDevices}
+                - **Total de Conexiones:** ${doc.summary.totalConnections}
+                - **Capas de Red:** ${doc.summary.layers.join(', ')}
+                - **Tipos de Dispositivos:** ${doc.summary.deviceTypes.join(', ')}
+
+                ## Inventario de Dispositivos
+                ${doc.devices.map(d => `
+                ### ${d.name}
+                - **Tipo:** ${d.type}
+                - **Capa:** ${d.layer}
+                - **IP:** ${d.ip || 'No asignada'}
+                - **Ubicación:** ${d.location || 'No especificada'}
+                - **Modelo:** ${d.model || 'No especificado'}
+                - **Estado:** ${d.status}
+                `).join('')}
+
+                ## Conexiones de Red
+                ${doc.connections.map(c => `- ${c.from} ↔ ${c.to} (${c.type}, ${c.bandwidth})`).join('\n')}
+
+                ---
+                *Documento generado automáticamente por Network Diagram Creator Pro*
+            `;
+
+            // Download documentation
+            const blob = new Blob([docContent], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `network_documentation_${new Date().toISOString().split('T')[0]}.md`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showNotification('📋 Documentación generada y descargada', 'success');
+            setStatus('Documentación técnica generada exitosamente');
         }
 
         // Zoom Functions
@@ -2817,11 +4033,13 @@
             document.getElementById('device-dns').value = device.dns || '';
             document.getElementById('device-vlan').value = device.vlan || '';
             document.getElementById('device-mac').value = device.mac || '';
+            document.getElementById('device-ports').value = device.ports;
             document.getElementById('device-layer').value = device.layer;
             document.getElementById('device-status').value = device.status;
             document.getElementById('device-uptime').value = device.uptime || '';
             document.getElementById('device-cpu').value = device.cpu || 0;
             document.getElementById('device-memory').value = device.memory || 0;
+            document.getElementById('device-bandwidth').value = device.bandwidth;
             document.getElementById('device-temperature').value = device.temperature || 0;
             document.getElementById('device-alerts').value = device.alerts || '';
             
@@ -2858,6 +4076,168 @@
             document.getElementById(`${tabName}-tab`).classList.add('active');
         }
 
+        // SOLUCION 4 y 5: Funciones de interfaz modal mejoradas
+        function addInterface() {
+            if (!selectedDevice) return;
+            
+            editingInterfaceIndex = -1;
+            document.getElementById('interface-modal-title').textContent = 'Agregar Nueva Interfaz';
+            
+            // Limpiar formulario
+            document.getElementById('interface-form').reset();
+            document.getElementById('interface-status').value = 'up'; // SOLUCION 4: Default a UP
+            document.getElementById('interface-speed').value = '1 Gbps';
+            
+            document.getElementById('interface-modal').style.display = 'block';
+        }
+
+        function editInterface(index) {
+            if (!selectedDevice || !selectedDevice.interfaces[index]) return;
+            
+            editingInterfaceIndex = index;
+            const intf = selectedDevice.interfaces[index];
+            
+            document.getElementById('interface-modal-title').textContent = 'Editar Interfaz';
+            
+            // Poblar formulario con datos existentes
+            document.getElementById('interface-name').value = intf.name;
+            document.getElementById('interface-type').value = intf.type;
+            document.getElementById('interface-status').value = intf.status;
+            document.getElementById('interface-ip').value = intf.ip || '';
+            document.getElementById('interface-vlan').value = intf.vlan || '';
+            document.getElementById('interface-speed').value = intf.speed || '1 Gbps';
+            document.getElementById('interface-description').value = intf.description || '';
+            
+            document.getElementById('interface-modal').style.display = 'block';
+        }
+
+        function closeInterfaceModal() {
+            document.getElementById('interface-modal').style.display = 'none';
+            editingInterfaceIndex = -1;
+        }
+
+        // Event listener para formulario de interfaz
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('interface-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const interfaceData = {
+                    name: document.getElementById('interface-name').value,
+                    type: document.getElementById('interface-type').value,
+                    status: document.getElementById('interface-status').value,
+                    ip: document.getElementById('interface-ip').value,
+                    vlan: document.getElementById('interface-vlan').value,
+                    speed: document.getElementById('interface-speed').value,
+                    description: document.getElementById('interface-description').value
+                };
+                
+                if (editingInterfaceIndex >= 0) {
+                    // Editando interfaz existente
+                    selectedDevice.interfaces[editingInterfaceIndex] = interfaceData;
+                    showNotification('Interfaz actualizada exitosamente', 'success');
+                } else {
+                    // Agregando nueva interfaz
+                    selectedDevice.interfaces.push(interfaceData);
+                    showNotification('Interfaz agregada exitosamente', 'success');
+                }
+                
+                populateInterfacesTable(selectedDevice);
+                updateDeviceDisplay(selectedDevice);
+                closeInterfaceModal();
+            });
+        });
+
+        // SOLUCION 5: Funciones mejoradas de interfaces con formulario inline
+        function showAddInterfaceForm() {
+            if (!selectedDevice) return;
+            
+            editingInterfaceIndex = -1;
+            document.getElementById('interface-form-title').textContent = 'Agregar Nueva Interfaz';
+            
+            // SOLUCION 4: Estado por defecto configurable
+            document.getElementById('interface-name').value = `Interface${selectedDevice.interfaces.length + 1}`;
+            document.getElementById('interface-type').value = 'ethernet';
+            document.getElementById('interface-status').value = 'up'; // Por defecto UP
+            document.getElementById('interface-ip').value = '';
+            document.getElementById('interface-vlan').value = '';
+            document.getElementById('interface-description').value = '';
+            
+            document.getElementById('interface-form-inline').classList.add('active');
+        }
+
+        function showEditInterfaceForm(index) {
+            if (!selectedDevice || !selectedDevice.interfaces[index]) return;
+            
+            editingInterfaceIndex = index;
+            const intf = selectedDevice.interfaces[index];
+            
+            document.getElementById('interface-form-title').textContent = 'Editar Interfaz';
+            document.getElementById('interface-name').value = intf.name;
+            document.getElementById('interface-type').value = intf.type;
+            document.getElementById('interface-status').value = intf.status;
+            document.getElementById('interface-ip').value = intf.ip;
+            document.getElementById('interface-vlan').value = intf.vlan;
+            document.getElementById('interface-description').value = intf.description;
+            
+            document.getElementById('interface-form-inline').classList.add('active');
+        }
+
+        function cancelInterfaceForm() {
+            document.getElementById('interface-form-inline').classList.remove('active');
+            editingInterfaceIndex = -1;
+        }
+
+        function saveInterface() {
+            if (!selectedDevice) return;
+            
+            const interfaceData = {
+                name: document.getElementById('interface-name').value,
+                type: document.getElementById('interface-type').value,
+                status: document.getElementById('interface-status').value,
+                ip: document.getElementById('interface-ip').value,
+                vlan: document.getElementById('interface-vlan').value,
+                description: document.getElementById('interface-description').value
+            };
+            
+            if (!interfaceData.name) {
+                showNotification('El nombre de la interfaz es obligatorio', 'warning');
+                return;
+            }
+            
+            if (editingInterfaceIndex >= 0) {
+                // Editando interfaz existente
+                selectedDevice.interfaces[editingInterfaceIndex] = interfaceData;
+                showNotification('Interfaz actualizada exitosamente', 'success');
+            } else {
+                // Agregando nueva interfaz
+                selectedDevice.interfaces.push(interfaceData);
+                showNotification('Interfaz agregada exitosamente', 'success');
+            }
+            
+            populateInterfacesTable(selectedDevice);
+            updateDeviceDisplay(selectedDevice);
+            cancelInterfaceForm();
+        }
+
+        function addInterface() {
+            showAddInterfaceForm();
+        }
+
+        function editInterface(index) {
+            showEditInterfaceForm(index);
+        }
+
+        function deleteInterface(index) {
+            if (!selectedDevice || !selectedDevice.interfaces[index]) return;
+            
+            if (confirm('¿Estás seguro de que quieres eliminar esta interfaz?')) {
+                selectedDevice.interfaces.splice(index, 1);
+                populateInterfacesTable(selectedDevice);
+                updateDeviceDisplay(selectedDevice);
+                showNotification('Interfaz eliminada exitosamente', 'info');
+            }
+        }
+
         // SOLUCION 2: Funciones de interfaces
         function populateInterfacesTable(device) {
             const tableBody = document.getElementById('interfaces-table-body');
@@ -2875,6 +4255,7 @@
                     <td>${intf.type}</td>
                     <td>${intf.ip || 'N/A'}</td>
                     <td>${intf.vlan || 'N/A'}</td>
+                    <td>${intf.speed || 'auto'}</td>
                     <td>${intf.description || ''}</td>
                     <td class="interface-actions">
                         <button class="btn-small btn-edit" onclick="editInterface(${index})">✏️</button>
@@ -2944,6 +4325,53 @@
             }
         }
 
+        // SOLUCION 5: Manejar envío del formulario de interfaces
+        function handleInterfaceSubmit(e) {
+            e.preventDefault();
+            if (!selectedDevice) return;
+
+            const formData = new FormData(e.target);
+            const interfaceData = {
+                name: formData.get('name'),
+                type: formData.get('type'),
+                status: formData.get('status'),
+                ip: formData.get('ip'),
+                vlan: formData.get('vlan'),
+                speed: formData.get('speed'),
+                description: formData.get('description')
+            };
+
+            if (editingInterfaceIndex === -1) {
+                // Agregar nueva interfaz
+                selectedDevice.interfaces.push(interfaceData);
+                showNotification('Interfaz agregada exitosamente', 'success');
+            } else {
+                // Editar interfaz existente
+                selectedDevice.interfaces[editingInterfaceIndex] = interfaceData;
+                showNotification('Interfaz actualizada exitosamente', 'success');
+            }
+
+            populateInterfacesTable(selectedDevice);
+            updateDeviceDisplay(selectedDevice);
+            closeInterfaceModal();
+        }
+
+        // SOLUCION 6: Modo múltiples plantillas
+        function toggleMultiTemplateMode() {
+            multiTemplateMode = !multiTemplateMode;
+            const btn = document.getElementById('multi-template-btn');
+            
+            if (multiTemplateMode) {
+                btn.innerHTML = '<span>❌</span> Desactivar Modo Múltiple';
+                btn.classList.add('active');
+                showNotification('Modo múltiple activado - Las plantillas se agregarán sin limpiar el diagrama', 'info');
+            } else {
+                btn.innerHTML = '<span>🔄</span> Activar Modo Múltiple';
+                btn.classList.remove('active');
+                showNotification('Modo múltiple desactivado', 'info');
+            }
+        }
+
         function updateDeviceDisplay(device) {
             const deviceElement = document.getElementById(device.id);
             if (!deviceElement) return;
@@ -2978,10 +4406,12 @@
             selectedDevice.dns = document.getElementById('device-dns').value;
             selectedDevice.vlan = document.getElementById('device-vlan').value;
             selectedDevice.mac = document.getElementById('device-mac').value;
+            selectedDevice.ports = document.getElementById('device-ports').value;
             selectedDevice.layer = document.getElementById('device-layer').value;
             selectedDevice.status = document.getElementById('device-status').value;
             selectedDevice.cpu = document.getElementById('device-cpu').value;
             selectedDevice.memory = document.getElementById('device-memory').value;
+            selectedDevice.bandwidth = document.getElementById('device-bandwidth').value;
             selectedDevice.temperature = document.getElementById('device-temperature').value;
             selectedDevice.alerts = document.getElementById('device-alerts').value;
             
@@ -3012,6 +4442,7 @@
                 deviceElement.innerHTML = `
                     <div class="device-header">
                         <div class="device-icon ${iconClass}">${iconText}</div>
+                        <div class="device-icon ${selectedDevice.type}-icon">${getDeviceIcon(selectedDevice.type)}</div>
                         <div class="device-status-indicator status-${selectedDevice.status}"></div>
                     </div>
                     <div class="device-label">${selectedDevice.name}</div>
@@ -3021,6 +4452,9 @@
                     </div>
                     <div class="device-interfaces">
                         ${interfacesHtml}
+                    </div>
+                    <div class="device-metrics">
+                        CPU: ${selectedDevice.cpu}% | RAM: ${selectedDevice.memory}%
                     </div>
                 `;
                 
@@ -3034,6 +4468,8 @@
             setStatus(`Propiedades de ${selectedDevice.name} actualizadas`);
             showNotification('Propiedades actualizadas exitosamente', 'success');
             updateMinimap(); // SOLUCION 4
+            // Auto-save
+            setTimeout(() => autoSave(), 500);
         }
 
         function deleteSelectedDevice() {
@@ -3091,8 +4527,15 @@
                 if (label) label.remove();
             });
             
+            // Remove all annotations
+            annotations.forEach(annotation => {
+                const element = document.getElementById(annotation.id);
+                if (element) element.remove();
+            });
+            
             devices = [];
             connections = [];
+            annotations = [];
             selectedDevice = null;
             connectionStart = null;
             deviceCounter = 0;
@@ -3105,11 +4548,11 @@
 
         function saveDiagram() {
             const diagramData = {
-                version: '2.1',
+                version: '2.2',
                 metadata: {
                     createdAt: new Date().toISOString(),
                     title: 'Network Diagram',
-                    description: 'Created with Network Diagram Creator Pro - Mejorado'
+                    description: 'Created with Network Diagram Creator Pro'
                 },
                 settings: {
                     currentLayer: currentLayer,
@@ -3117,13 +4560,15 @@
                     zoom: currentZoom
                 },
                 devices: devices,
-                connections: connections
+                connections: connections,
+                annotations: annotations,
+                customTemplates: customTemplates
             };
             
             const dataStr = JSON.stringify(diagramData, null, 2);
             const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
             
-            const filename = `network_diagram_improved_${new Date().toISOString().split('T')[0]}.json`;
+            const filename = `network_diagram_${new Date().toISOString().split('T')[0]}.json`;
             
             const linkElement = document.createElement('a');
             linkElement.setAttribute('href', dataUri);
@@ -3175,6 +4620,21 @@
                             renderConnection(connection);
                         });
                         connectionCounter = Math.max(...connections.map(c => parseInt(c.id.split('_')[1]))) || 0;
+                    }
+                    
+                    // Load annotations
+                    if (diagramData.annotations) {
+                        annotations = diagramData.annotations;
+                        annotations.forEach(annotation => {
+                            renderAnnotation(annotation);
+                        });
+                    }
+                    
+                    // Load custom templates
+                    if (diagramData.customTemplates) {
+                        customTemplates = diagramData.customTemplates;
+                        // Re-render custom templates in UI
+                        customTemplates.forEach(template => addCustomTemplateToUI(template));
                     }
                     
                     updateStats();
@@ -3336,8 +4796,1072 @@
                 'san': '#795548', 'iot-device': '#00bcd4', 'sensor': '#4caf50',
                 'camera': '#9e9e9e'
             };
-            return colors[type] || '#34495e';
+            return colors[type] || '#34495e';        
         }
+
+         // Template Loading
+        function loadTemplate(templateName) {
+            if (devices.length > 0 && !multiTemplateMode && !confirm('¿Cargar plantilla? Se perderán los cambios actuales.')) {
+                return;
+            }
+            
+            if (!multiTemplateMode) {
+                clearDiagram();
+            }
+            
+            loadTemplateWithOffset(templateName, 0, 0);
+        }
+
+        function loadTemplateWithOffset(templateName, offsetX, offsetY) {
+            const templates = {
+                'basic-enterprise': () => {
+                    createDeviceWithOffset('router', 400, 200, offsetX, offsetY);
+                    createDeviceWithOffset('switch', 200, 350, offsetX, offsetY);
+                    createDeviceWithOffset('switch', 600, 350, offsetX, offsetY);
+                    createDeviceWithOffset('pc', 100, 500, offsetX, offsetY);
+                    createDeviceWithOffset('pc', 300, 500, offsetX, offsetY);
+                    createDeviceWithOffset('pc', 500, 500, offsetX, offsetY);
+                    createDeviceWithOffset('pc', 700, 500, offsetX, offsetY);
+                },
+                
+                'dmz-network': () => {
+                    createDeviceWithOffset('firewall', 400, 200, offsetX, offsetY);
+                    createDeviceWithOffset('switch', 200, 350, offsetX, offsetY);
+                    createDeviceWithOffset('switch', 600, 350, offsetX, offsetY);
+                    createDeviceWithOffset('web-server', 150, 500, offsetX, offsetY);
+                    createDeviceWithOffset('mail-server', 250, 500, offsetX, offsetY);
+                    createDeviceWithOffset('pc', 550, 500, offsetX, offsetY);
+                    createDeviceWithOffset('pc', 650, 500, offsetX, offsetY);
+                },
+                
+                'campus-network': () => {
+                    createDeviceWithOffset('core-router', 350, 100, offsetX, offsetY);
+                    createDeviceWithOffset('core-router', 450, 100, offsetX, offsetY);
+                    createDeviceWithOffset('l3-switch', 200, 250, offsetX, offsetY);
+                    createDeviceWithOffset('l3-switch', 600, 250, offsetX, offsetY);
+                    createDeviceWithOffset('switch', 100, 400, offsetX, offsetY);
+                    createDeviceWithOffset('switch', 300, 400, offsetX, offsetY);
+                    createDeviceWithOffset('switch', 500, 400, offsetX, offsetY);
+                    createDeviceWithOffset('switch', 700, 400, offsetX, offsetY);
+                },
+                
+                'datacenter': () => {
+                    createDeviceWithOffset('core-router', 300, 150, offsetX, offsetY);
+                    createDeviceWithOffset('core-router', 500, 150, offsetX, offsetY);
+                    createDeviceWithOffset('l3-switch', 200, 300, offsetX, offsetY);
+                    createDeviceWithOffset('l3-switch', 400, 300, offsetX, offsetY);
+                    createDeviceWithOffset('l3-switch', 600, 300, offsetX, offsetY);
+                    createDeviceWithOffset('server', 150, 450, offsetX, offsetY);
+                    createDeviceWithOffset('server', 250, 450, offsetX, offsetY);
+                    createDeviceWithOffset('server', 350, 450, offsetX, offsetY);
+                    createDeviceWithOffset('server', 450, 450, offsetX, offsetY);
+                    createDeviceWithOffset('server', 550, 450, offsetX, offsetY);
+                    createDeviceWithOffset('server', 650, 450, offsetX, offsetY);
+                    createDeviceWithOffset('nas', 300, 600, offsetX, offsetY);
+                    createDeviceWithOffset('san', 500, 600, offsetX, offsetY);
+                },
+                
+                'star-topology': () => {
+                    createDeviceWithOffset('switch', 400, 300, offsetX, offsetY);
+                    createDeviceWithOffset('pc', 200, 150, offsetX, offsetY);
+                    createDeviceWithOffset('pc', 600, 150, offsetX, offsetY);
+                    createDeviceWithOffset('pc', 700, 300, offsetX, offsetY);
+                    createDeviceWithOffset('pc', 600, 450, offsetX, offsetY);
+                    createDeviceWithOffset('pc', 200, 450, offsetX, offsetY);
+                    createDeviceWithOffset('pc', 100, 300, offsetX, offsetY);
+                },
+                
+                'mesh-network': () => {
+                    createDeviceWithOffset('router', 200, 200, offsetX, offsetY);
+                    createDeviceWithOffset('router', 600, 200, offsetX, offsetY);
+                    createDeviceWithOffset('router', 200, 500, offsetX, offsetY);
+                    createDeviceWithOffset('router', 600, 500, offsetX, offsetY);
+                },
+                
+                'iot-network': () => {
+                    createDeviceWithOffset('router', 400, 150, offsetX, offsetY);
+                    createDeviceWithOffset('switch', 400, 300, offsetX, offsetY);
+                    createDeviceWithOffset('iot-device', 200, 450, offsetX, offsetY);
+                    createDeviceWithOffset('sensor', 300, 450, offsetX, offsetY);
+                    createDeviceWithOffset('camera', 500, 450, offsetX, offsetY);
+                    createDeviceWithOffset('sensor', 600, 450, offsetX, offsetY);
+                },
+                
+                'hybrid-cloud': () => {
+                    createDeviceWithOffset('firewall', 400, 200, offsetX, offsetY);
+                    createDeviceWithOffset('vpn', 400, 350, offsetX, offsetY);
+                    createDeviceWithOffset('switch', 200, 500, offsetX, offsetY);
+                    createDeviceWithOffset('server', 600, 500, offsetX, offsetY);
+                },
+                
+                'wireless-enterprise': () => {
+                    createDeviceWithOffset('controller', 400, 150, offsetX, offsetY);
+                    createDeviceWithOffset('switch', 400, 300, offsetX, offsetY);
+                    createDeviceWithOffset('ap', 200, 450, offsetX, offsetY);
+                    createDeviceWithOffset('ap', 400, 450, offsetX, offsetY);
+                    createDeviceWithOffset('ap', 600, 450, offsetX, offsetY);
+                    createDeviceWithOffset('notebook', 150, 600, offsetX, offsetY);
+                    createDeviceWithOffset('notebook', 350, 600, offsetX, offsetY);
+                    createDeviceWithOffset('notebook', 550, 600, offsetX, offsetY);
+                    createDeviceWithOffset('notebook', 750, 600, offsetX, offsetY);
+                },
+                
+                'small-office': () => {
+                    createDeviceWithOffset('modem', 300, 200, offsetX, offsetY);
+                    createDeviceWithOffset('router', 400, 300, offsetX, offsetY);
+                    createDeviceWithOffset('switch', 400, 450, offsetX, offsetY);
+                    createDeviceWithOffset('pc', 200, 600, offsetX, offsetY);
+                    createDeviceWithOffset('pc', 400, 600, offsetX, offsetY);
+                    createDeviceWithOffset('printer', 600, 600, offsetX, offsetY);
+                }
+            };
+            
+            if (templates[templateName]) {
+                templates[templateName]();
+                if (!multiTemplateMode) {
+                    autoArrange();
+                }
+                setStatus(`Plantilla "${templateName}" cargada exitosamente`);
+                showNotification(`Plantilla ${templateName} aplicada`, 'success');
+            }
+        }
+
+        function createDeviceWithOffset(type, x, y, offsetX, offsetY) {
+            createDevice(type, x + offsetX, y + offsetY);
+        }
+
+        // FUNCIONES AVANZADAS ADICIONALES
+
+        // Sistema de copiar/pegar dispositivos
+        function copySelectedDevice() {
+            if (!selectedDevice) {
+                showNotification('Selecciona un dispositivo para copiar', 'warning');
+                return;
+            }
+            
+            copiedDevice = JSON.parse(JSON.stringify(selectedDevice));
+            copiedDevice.id = null; // Reset ID for new device
+            showNotification(`${selectedDevice.name} copiado al portapapeles`, 'success');
+        }
+
+        function pasteDevice() {
+            if (!copiedDevice) {
+                showNotification('No hay dispositivo en el portapapeles', 'warning');
+                return;
+            }
+            
+            // Crear nuevo dispositivo con offset
+            const newDevice = JSON.parse(JSON.stringify(copiedDevice));
+            newDevice.x += 100; // Offset para no solapar
+            newDevice.y += 100;
+            newDevice.name = generateDeviceName(newDevice.type, ++deviceCounter);
+            newDevice.id = `device_${deviceCounter}`;
+            
+            devices.push(newDevice);
+            renderDevice(newDevice);
+            updateStats();
+            updateMinimap();
+            showNotification(`${newDevice.name} pegado exitosamente`, 'success');
+        }
+
+        function duplicateSelectedDevice() {
+            if (!selectedDevice) {
+                showNotification('Selecciona un dispositivo para duplicar', 'warning');
+                return;
+            }
+            
+            copySelectedDevice();
+            pasteDevice();
+        }
+
+        // Sistema de anotaciones
+        function toggleAnnotationMode() {
+            annotationMode = !annotationMode;
+            const btn = document.getElementById('annotation-btn');
+            
+            if (annotationMode) {
+                btn.classList.add('annotation-mode-active');
+                btn.title = 'Salir del modo anotaciones';
+                setStatus('Modo anotaciones activado - Haz clic en el canvas para agregar notas');
+                showNotification('Modo anotaciones activado - Haz clic donde quieras agregar una nota', 'info');
+            } else {
+                btn.classList.remove('annotation-mode-active');
+                btn.title = 'Modo anotaciones';
+                setStatus('Modo anotaciones desactivado');
+                showNotification('Modo anotaciones desactivado', 'info');
+            }
+        }
+
+        function addAnnotation(x, y) {
+            const text = prompt('Introduce el texto de la anotación:');
+            if (!text) return;
+            
+            const annotation = {
+                id: `annotation_${Date.now()}`,
+                x: x,
+                y: y,
+                text: text,
+                timestamp: new Date().toISOString()
+            };
+            
+            annotations.push(annotation);
+            renderAnnotation(annotation);
+            showNotification('Anotación agregada exitosamente', 'success');
+        }
+
+        function renderAnnotation(annotation) {
+            const annotationEl = document.createElement('div');
+            annotationEl.className = 'annotation';
+            annotationEl.id = annotation.id;
+            annotationEl.style.left = annotation.x + 'px';
+            annotationEl.style.top = annotation.y + 'px';
+            annotationEl.innerHTML = `
+                ${annotation.text}
+                <div class="annotation-delete" onclick="deleteAnnotation('${annotation.id}')" title="Eliminar anotación">×</div>
+            `;
+            
+            // Make draggable
+            annotationEl.addEventListener('mousedown', (e) => {
+                if (e.target.classList.contains('annotation-delete')) return;
+                handleAnnotationDrag(e, annotation);
+            });
+            
+            document.getElementById('canvas-container').appendChild(annotationEl);
+        }
+
+        function deleteAnnotation(annotationId) {
+            annotations = annotations.filter(a => a.id !== annotationId);
+            const element = document.getElementById(annotationId);
+            if (element) element.remove();
+            showNotification('Anotación eliminada', 'info');
+        }
+
+        function handleAnnotationDrag(e, annotation) {
+            let isDragging = true;
+            const startX = e.clientX;
+            const startY = e.clientY;
+            const startLeft = annotation.x;
+            const startTop = annotation.y;
+            
+            function onMouseMove(e) {
+                if (!isDragging) return;
+                
+                annotation.x = startLeft + (e.clientX - startX) / currentZoom;
+                annotation.y = startTop + (e.clientY - startY) / currentZoom;
+                
+                const element = document.getElementById(annotation.id);
+                if (element) {
+                    element.style.left = annotation.x + 'px';
+                    element.style.top = annotation.y + 'px';
+                }
+            }
+            
+            function onMouseUp() {
+                isDragging = false;
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+            
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        }
+
+        // Sistema de búsqueda en canvas
+        function searchInCanvas(query) {
+            clearSearch();
+            
+            if (!query.trim()) return;
+            
+            const results = devices.filter(device => {
+                return device.name.toLowerCase().includes(query.toLowerCase()) ||
+                       device.type.toLowerCase().includes(query.toLowerCase()) ||
+                       device.ip.toLowerCase().includes(query.toLowerCase()) ||
+                       device.description.toLowerCase().includes(query.toLowerCase());
+            });
+            
+            searchResults = results;
+            
+            results.forEach(device => {
+                const element = document.getElementById(device.id);
+                if (element) {
+                    element.classList.add('search-highlight');
+                }
+            });
+            
+            if (results.length > 0) {
+                showNotification(`${results.length} dispositivo(s) encontrado(s)`, 'success');
+                // Hacer zoom al primer resultado
+                const firstResult = results[0];
+                scrollToDevice(firstResult);
+            } else {
+                showNotification('No se encontraron dispositivos', 'warning');
+            }
+        }
+
+        function clearSearch() {
+            searchResults.forEach(device => {
+                const element = document.getElementById(device.id);
+                if (element) {
+                    element.classList.remove('search-highlight');
+                }
+            });
+            searchResults = [];
+            document.getElementById('search-canvas').value = '';
+        }
+
+        function scrollToDevice(device) {
+            const viewport = document.getElementById('canvas-viewport');
+            const centerX = device.x * currentZoom - viewport.clientWidth / 2;
+            const centerY = device.y * currentZoom - viewport.clientHeight / 2;
+            
+            viewport.scrollTo({
+                left: Math.max(0, centerX),
+                top: Math.max(0, centerY),
+                behavior: 'smooth'
+            });
+        }
+
+        // Sistema de estadísticas avanzadas
+        function showPerformanceStats() {
+            const stats = generatePerformanceStats();
+            
+            const modal = document.createElement('div');
+            modal.className = 'stats-modal';
+            modal.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+                    <h3>📊 Estadísticas del Diagrama</h3>
+                    <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; font-size: 20px; cursor: pointer;">×</button>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">${stats.devices}</div>
+                        <div class="stat-label">Dispositivos</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${stats.connections}</div>
+                        <div class="stat-label">Conexiones</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${stats.layers}</div>
+                        <div class="stat-label">Capas Activas</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${stats.deviceTypes}</div>
+                        <div class="stat-label">Tipos de Dispositivos</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${stats.annotations}</div>
+                        <div class="stat-label">Anotaciones</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${stats.interfaces}</div>
+                        <div class="stat-label">Interfaces Totales</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <h4>📈 Resumen de Red</h4>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li><strong>Complejidad:</strong> ${stats.complexity}</li>
+                        <li><strong>Redundancia:</strong> ${stats.redundancy}</li>
+                        <li><strong>Seguridad:</strong> ${stats.security}</li>
+                        <li><strong>Escalabilidad:</strong> ${stats.scalability}</li>
+                    </ul>
+                </div>
+                
+                <div style="margin-top: 15px; text-align: center;">
+                    <small style="color: #6c757d;">Última actualización: ${new Date().toLocaleString()}</small>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function generatePerformanceStats() {
+            const deviceTypes = [...new Set(devices.map(d => d.type))];
+            const activeLayers = Object.keys(layerVisibility).filter(layer => layerVisibility[layer]);
+            const totalInterfaces = devices.reduce((sum, device) => sum + (device.interfaces?.length || 0), 0);
+            
+            // Calcular métricas de calidad
+            const coreDevices = devices.filter(d => d.layer === 'core').length;
+            const securityDevices = devices.filter(d => ['firewall', 'ips', 'waf'].includes(d.type)).length;
+            const redundancy = coreDevices >= 2 ? 'Alta' : coreDevices === 1 ? 'Media' : 'Baja';
+            const security = securityDevices >= 2 ? 'Alta' : securityDevices === 1 ? 'Media' : 'Baja';
+            
+            let complexity = 'Baja';
+            if (devices.length > 20) complexity = 'Alta';
+            else if (devices.length > 10) complexity = 'Media';
+            
+            let scalability = 'Alta';
+            if (activeLayers.length < 3) scalability = 'Media';
+            if (activeLayers.length < 2) scalability = 'Baja';
+            
+            return {
+                devices: devices.length,
+                connections: connections.length,
+                layers: activeLayers.length,
+                deviceTypes: deviceTypes.length,
+                annotations: annotations.length,
+                interfaces: totalInterfaces,
+                complexity,
+                redundancy,
+                security,
+                scalability
+            };
+        }
+
+        // Sistema de plantillas personalizadas
+        function saveCustomTemplate() {
+            if (devices.length === 0) {
+                showNotification('No hay dispositivos para guardar como plantilla', 'warning');
+                return;
+            }
+            
+            const name = prompt('Nombre de la plantilla personalizada:');
+            if (!name) return;
+            
+            const template = {
+                id: `custom_${Date.now()}`,
+                name: name,
+                description: `Plantilla personalizada con ${devices.length} dispositivos`,
+                devices: JSON.parse(JSON.stringify(devices)),
+                connections: JSON.parse(JSON.stringify(connections)),
+                annotations: JSON.parse(JSON.stringify(annotations)),
+                createdAt: new Date().toISOString()
+            };
+            
+            customTemplates.push(template);
+            saveCustomTemplatesToStorage();
+            addCustomTemplateToUI(template);
+            
+            showNotification(`Plantilla "${name}" guardada exitosamente`, 'success');
+        }
+
+        function saveCustomTemplatesToStorage() {
+            try {
+                localStorage.setItem('customNetworkTemplates', JSON.stringify(customTemplates));
+            } catch (e) {
+                console.log('No se puede guardar en localStorage');
+            }
+        }
+
+        function loadCustomTemplates() {
+            try {
+                const saved = localStorage.getItem('customNetworkTemplates');
+                if (saved) {
+                    customTemplates = JSON.parse(saved);
+                    customTemplates.forEach(template => addCustomTemplateToUI(template));
+                }
+            } catch (e) {
+                console.log('No se pueden cargar plantillas personalizadas');
+            }
+        }
+
+        function addCustomTemplateToUI(template) {
+            const templatesContainer = document.querySelector('#templates-tab .device-item').parentElement;
+            
+            const templateElement = document.createElement('div');
+            templateElement.className = 'device-item template-item';
+            templateElement.dataset.template = template.id;
+            templateElement.onclick = () => handleTemplateClick(template.id);
+            
+            templateElement.innerHTML = `
+                <div class="device-icon" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe);">👤</div>
+                <div class="device-info">
+                    <div class="device-name">${template.name}</div>
+                    <div class="device-description">${template.description}</div>
+                </div>
+                <button onclick="deleteCustomTemplate('${template.id}'); event.stopPropagation();" 
+                        style="background: #e74c3c; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; cursor: pointer; margin-left: 5px;">×</button>
+            `;
+            
+            templatesContainer.appendChild(templateElement);
+        }
+
+        function deleteCustomTemplate(templateId) {
+            if (confirm('¿Eliminar esta plantilla personalizada?')) {
+                customTemplates = customTemplates.filter(t => t.id !== templateId);
+                saveCustomTemplatesToStorage();
+                
+                const element = document.querySelector(`[data-template="${templateId}"]`);
+                if (element) element.remove();
+                
+                showNotification('Plantilla eliminada', 'info');
+            }
+        }
+
+        // Sistema de guardado automático
+        function initializeAutoSave() {
+            if (autoSaveEnabled) {
+                autoSaveInterval = setInterval(() => {
+                    autoSave();
+                }, 30000); // Auto-save cada 30 segundos
+            }
+        }
+
+        function autoSave() {
+            if (devices.length === 0) return;
+            
+            try {
+                const saveData = {
+                    devices,
+                    connections,
+                    annotations,
+                    settings: { currentLayer, layerVisibility, zoom: currentZoom },
+                    timestamp: Date.now()
+                };
+                
+                localStorage.setItem('networkDiagramAutoSave', JSON.stringify(saveData));
+                showAutoSaveToast();
+            } catch (e) {
+                console.log('Auto-save failed');
+            }
+        }
+
+        function showAutoSaveToast() {
+            const toast = document.createElement('div');
+            toast.className = 'auto-save-toast show';
+            toast.textContent = '💾 Guardado automático';
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }
+
+        function createConnectionById(device1Id, device2Id, type) {
+            const device1 = devices.find(d => d.id === device1Id);
+            const device2 = devices.find(d => d.id === device2Id);
+            
+            if (device1 && device2) {
+                const connection = {
+                    id: `connection_${++connectionCounter}`,
+                    device1: device1Id,
+                    device2: device2Id,
+                    type: type,
+                    bandwidth: getConnectionBandwidth(type),
+                    status: 'up'
+                };
+                
+                connections.push(connection);
+                renderConnection(connection);
+            }
+        }
+        
+        function createConnectionById(device1Id, device2Id, type) {
+            const device1 = devices.find(d => d.id === device1Id);
+            const device2 = devices.find(d => d.id === device2Id);
+            
+            if (device1 && device2) {
+                const connection = {
+                    id: `connection_${++connectionCounter}`,
+                    device1: device1Id,
+                    device2: device2Id,
+                    type: type,
+                    bandwidth: getConnectionBandwidth(type),
+                    status: 'up'
+                };
+                
+                connections.push(connection);
+                renderConnection(connection);
+            }
+        }
+
+        // Utility Functions
+        function updateStats() {
+            document.getElementById('device-count').textContent = devices.length;
+            document.getElementById('connection-count').textContent = connections.length;
+        }
+
+        function setStatus(message) {
+            document.getElementById('status-text').textContent = message;
+        }
+
+
+        // SOLUCION 3 y 6: Template Loading mejorado con modo múltiple
+        function loadTemplate(templateName) {
+            // SOLUCION 6: En modo múltiple no confirmar ni limpiar
+            if (!multiTemplateMode && devices.length > 0 && !confirm('¿Cargar plantilla? Se perderán los cambios actuales.')) {
+                return;
+            }
+            
+            if (!multiTemplateMode) {
+                clearDiagram();
+            }
+
+            // Obtener el próximo deviceCounter para modo múltiple
+            const startingCounter = deviceCounter;
+            
+            const templates = {
+                'basic': () => {
+                    createDevice('router', 400, 200);
+                    createDevice('switch', 400, 350);
+                    createDevice('pc', 200, 500);
+                    createDevice('pc', 400, 500);
+                    createDevice('pc', 600, 500);
+                    
+                    setTimeout(() => {
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 2}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 2}`, `device_${startingCounter + 3}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 2}`, `device_${startingCounter + 4}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 2}`, `device_${startingCounter + 5}`, 'utp');
+                    }, 100);
+                },
+
+                'basic-enterprise': () => {
+                    // Red empresarial básica
+                    createDevice('router', 400, 200);
+                    createDevice('switch', 200, 350);
+                    createDevice('switch', 600, 350);
+                    createDevice('pc', 100, 500);
+                    createDevice('pc', 300, 500);
+                    createDevice('pc', 500, 500);
+                    createDevice('pc', 700, 500);
+                    
+                    setTimeout(() => {
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 2}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 3}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 2}`, `device_${startingCounter + 4}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 2}`, `device_${startingCounter + 5}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 3}`, `device_${startingCounter + 6}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 3}`, `device_${startingCounter + 7}`, 'utp');
+                    }, 100);
+                },
+                
+                'campus-network': () => {
+                    // Core layer
+                    createDevice('core-router', 350, 100);
+                    createDevice('core-router', 450, 100);
+                    
+                    // Distribution layer
+                    createDevice('l3-switch', 200, 250);
+                    createDevice('l3-switch', 600, 250);
+                    
+                    // Access layer
+                    createDevice('switch', 150, 400);
+                    createDevice('switch', 350, 400);
+                    createDevice('switch', 550, 400);
+                    createDevice('switch', 750, 400);
+                    
+                    setTimeout(() => {
+                        // Core connections
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 2}`, 'fiber');
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 3}`, 'fiber');
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 4}`, 'fiber');
+                        createConnectionById(`device_${startingCounter + 2}`, `device_${startingCounter + 3}`, 'fiber');
+                        createConnectionById(`device_${startingCounter + 2}`, `device_${startingCounter + 4}`, 'fiber');
+                        
+                        // Distribution to access
+                        createConnectionById(`device_${startingCounter + 3}`, `device_${startingCounter + 5}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 3}`, `device_${startingCounter + 6}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 4}`, `device_${startingCounter + 7}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 4}`, `device_${startingCounter + 8}`, 'utp');
+                    }, 100);
+                },
+
+                'datacenter': () => {
+                    // Core switches
+                    createDevice('core-router', 300, 100);
+                    createDevice('core-router', 500, 100);
+                    
+                    // Distribution switches
+                    createDevice('l3-switch', 200, 250);
+                    createDevice('l3-switch', 400, 250);
+                    createDevice('l3-switch', 600, 250);
+                    
+                    // Servers
+                    createDevice('server', 150, 400);
+                    createDevice('server', 250, 400);
+                    createDevice('server', 350, 400);
+                    createDevice('server', 450, 400);
+                    createDevice('server', 550, 400);
+                    createDevice('server', 650, 400);
+                    
+                    // Storage
+                    createDevice('nas', 300, 550);
+                    createDevice('san', 500, 550);
+                    
+                    setTimeout(() => {
+                        // Core redundancy
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 2}`, 'fiber');
+                        
+                        // Core to distribution
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 3}`, 'fiber');
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 4}`, 'fiber');
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 5}`, 'fiber');
+                        createConnectionById(`device_${startingCounter + 2}`, `device_${startingCounter + 3}`, 'fiber');
+                        createConnectionById(`device_${startingCounter + 2}`, `device_${startingCounter + 4}`, 'fiber');
+                        createConnectionById(`device_${startingCounter + 2}`, `device_${startingCounter + 5}`, 'fiber');
+                        
+                        // Distribution to servers
+                        createConnectionById(`device_${startingCounter + 3}`, `device_${startingCounter + 6}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 3}`, `device_${startingCounter + 7}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 4}`, `device_${startingCounter + 8}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 4}`, `device_${startingCounter + 9}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 5}`, `device_${startingCounter + 10}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 5}`, `device_${startingCounter + 11}`, 'utp');
+                        
+                        // Storage connections
+                        createConnectionById(`device_${startingCounter + 4}`, `device_${startingCounter + 12}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 4}`, `device_${startingCounter + 13}`, 'fiber');
+                    }, 100);
+                },
+
+                'dmz-network': () => {
+                    createDevice('firewall', 400, 200);
+                    createDevice('switch', 200, 350);
+                    createDevice('switch', 600, 350);
+                    createDevice('web-server', 150, 500);
+                    createDevice('mail-server', 250, 500);
+                    createDevice('pc', 550, 500);
+                    createDevice('pc', 650, 500);
+                    
+                    setTimeout(() => {
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 2}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 3}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 2}`, `device_${startingCounter + 4}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 2}`, `device_${startingCounter + 5}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 3}`, `device_${startingCounter + 6}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 3}`, `device_${startingCounter + 7}`, 'utp');
+                    }, 100);
+                },
+
+                'star-topology': () => {
+                    createDevice('switch', 400, 300);
+                    createDevice('pc', 200, 150);
+                    createDevice('pc', 600, 150);
+                    createDevice('pc', 700, 300);
+                    createDevice('pc', 600, 450);
+                    createDevice('pc', 200, 450);
+                    createDevice('pc', 100, 300);
+                    
+                    setTimeout(() => {
+                        for (let i = 2; i <= 7; i++) {
+                            createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + i}`, 'utp');
+                        }
+                    }, 100);
+                },
+
+                'mesh-network': () => {
+                    createDevice('router', 300, 200);
+                    createDevice('router', 500, 200);
+                    createDevice('router', 300, 400);
+                    createDevice('router', 500, 400);
+                    
+                    setTimeout(() => {
+                        // Conectar todos con todos
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 2}`, 'serial');
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 3}`, 'serial');
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 4}`, 'serial');
+                        createConnectionById(`device_${startingCounter + 2}`, `device_${startingCounter + 3}`, 'serial');
+                        createConnectionById(`device_${startingCounter + 2}`, `device_${startingCounter + 4}`, 'serial');
+                        createConnectionById(`device_${startingCounter + 3}`, `device_${startingCounter + 4}`, 'serial');
+                    }, 100);
+                },
+
+                'iot-network': () => {
+                    createDevice('router', 400, 150);
+                    createDevice('switch', 400, 300);
+                    createDevice('ap', 200, 450);
+                    createDevice('ap', 600, 450);
+                    createDevice('sensor', 100, 600);
+                    createDevice('sensor', 300, 600);
+                    createDevice('camera', 500, 600);
+                    createDevice('camera', 700, 600);
+                    createDevice('iot-device', 400, 750);
+                    
+                    setTimeout(() => {
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 2}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 2}`, `device_${startingCounter + 3}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 2}`, `device_${startingCounter + 4}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 3}`, `device_${startingCounter + 5}`, 'wireless');
+                        createConnectionById(`device_${startingCounter + 3}`, `device_${startingCounter + 6}`, 'wireless');
+                        createConnectionById(`device_${startingCounter + 4}`, `device_${startingCounter + 7}`, 'wireless');
+                        createConnectionById(`device_${startingCounter + 4}`, `device_${startingCounter + 8}`, 'wireless');
+                        createConnectionById(`device_${startingCounter + 2}`, `device_${startingCounter + 9}`, 'utp');
+                    }, 100);
+                },
+
+                'hybrid-cloud': () => {
+                    createDevice('vpn', 400, 200);
+                    createDevice('firewall', 400, 350);
+                    createDevice('switch', 400, 500);
+                    createDevice('server', 200, 650);
+                    createDevice('server', 400, 650);
+                    createDevice('server', 600, 650);
+                    
+                    setTimeout(() => {
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 2}`, 'fiber');
+                        createConnectionById(`device_${startingCounter + 2}`, `device_${startingCounter + 3}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 3}`, `device_${startingCounter + 4}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 3}`, `device_${startingCounter + 5}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 3}`, `device_${startingCounter + 6}`, 'utp');
+                    }, 100);
+                },
+
+                'wan-topology': () => {
+                    // Sitio Central
+                    createDevice('core-router', 400, 200);
+                    
+                    // Sitios remotos
+                    createDevice('edge-router', 150, 400);
+                    createDevice('edge-router', 400, 450);
+                    createDevice('edge-router', 650, 400);
+                    
+                    // Switches locales
+                    createDevice('switch', 100, 550);
+                    createDevice('switch', 350, 600);
+                    createDevice('switch', 600, 550);
+                    
+                    setTimeout(() => {
+                        // WAN connections
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 2}`, 'serial');
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 3}`, 'serial');
+                        createConnectionById(`device_${startingCounter + 1}`, `device_${startingCounter + 4}`, 'serial');
+                        
+                        // Local connections
+                        createConnectionById(`device_${startingCounter + 2}`, `device_${startingCounter + 5}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 3}`, `device_${startingCounter + 6}`, 'utp');
+                        createConnectionById(`device_${startingCounter + 4}`, `device_${startingCounter + 7}`, 'utp');
+                    }, 100);
+                }
+            };
+            
+            if (templates[templateName]) {
+                templates[templateName]();
+                if (!multiTemplateMode) {
+                    setTimeout(() => autoArrange(), 200);
+                }
+                setStatus(`Plantilla "${templateName}" ${multiTemplateMode ? 'agregada' : 'cargada'} exitosamente`);
+                showNotification(`Plantilla ${templateName} ${multiTemplateMode ? 'agregada al diagrama existente' : 'aplicada'}`, 'success');
+            }
+        }
+
+        function createConnectionById(device1Id, device2Id, type) {
+            const device1 = devices.find(d => d.id === device1Id);
+            const device2 = devices.find(d => d.id === device2Id);
+            
+            if (device1 && device2) {
+                const connection = {
+                    id: `connection_${++connectionCounter}`,
+                    device1: device1Id,
+                    device2: device2Id,
+                    type: type,
+                    bandwidth: getConnectionBandwidth(type),
+                    status: 'up'
+                };
+                
+                connections.push(connection);
+                renderConnection(connection);
+            }
+        }
+
+
+        // SOLUCION 6: Funciones para modo combinación de plantillas
+        function toggleCombinationMode() {
+            combinationMode = !combinationMode;
+            const btn = document.getElementById('combination-mode-btn');
+            const clearBtn = document.getElementById('clear-selection-btn');
+            const applyBtn = document.getElementById('apply-templates-btn');
+            const helpText = document.getElementById('combination-help');
+            
+            if (combinationMode) {
+                btn.innerHTML = '❌ Desactivar Combinación';
+                btn.style.background = 'var(--accent-color)';
+                clearBtn.style.display = 'block';
+                applyBtn.style.display = 'block';
+                helpText.textContent = 'Selecciona las plantillas que quieres combinar';
+            } else {
+                btn.innerHTML = '🔗 Activar Modo Combinación';
+                btn.style.background = 'var(--warning-color)';
+                clearBtn.style.display = 'none';
+                applyBtn.style.display = 'none';
+                helpText.textContent = 'Activa el modo para seleccionar múltiples plantillas';
+                clearTemplateSelection();
+            }
+        }
+
+        function selectTemplate(templateName) {
+            if (combinationMode) {
+                // Modo combinación: agregar/quitar de selección
+                const templateElement = document.querySelector(`[data-template="${templateName}"]`);
+                
+                if (selectedTemplates.includes(templateName)) {
+                    // Quitar de selección
+                    selectedTemplates = selectedTemplates.filter(t => t !== templateName);
+                    templateElement.classList.remove('selected');
+                } else {
+                    // Agregar a selección
+                    selectedTemplates.push(templateName);
+                    templateElement.classList.add('selected');
+                }
+                
+                document.getElementById('combination-help').textContent = 
+                    `${selectedTemplates.length} plantilla(s) seleccionada(s): ${selectedTemplates.join(', ')}`;
+            } else {
+                // Modo normal: aplicar inmediatamente
+                if (devices.length > 0 && !confirm('¿Aplicar plantilla? Se perderán los cambios actuales.')) {
+                    return;
+                }
+                loadTemplate(templateName);
+            }
+        }
+
+        function clearTemplateSelection() {
+            selectedTemplates = [];
+            document.querySelectorAll('.template-item.selected').forEach(item => {
+                item.classList.remove('selected');
+            });
+            document.getElementById('combination-help').textContent = 
+                combinationMode ? 'Selecciona las plantillas que quieres combinar' : 'Activa el modo para seleccionar múltiples plantillas';
+        }
+
+        function applyCombinedTemplates() {
+            if (selectedTemplates.length === 0) {
+                showNotification('Selecciona al menos una plantilla para aplicar', 'warning');
+                return;
+            }
+            
+            if (devices.length > 0 && !confirm(`¿Aplicar ${selectedTemplates.length} plantillas combinadas? Se perderán los cambios actuales.`)) {
+                return;
+            }
+            
+            clearDiagram();
+            
+            let offsetX = 0;
+            let offsetY = 0;
+            
+            selectedTemplates.forEach((templateName, index) => {
+                // Aplicar cada plantilla con un offset para que no se superpongan
+                setTimeout(() => {
+                    const previousDeviceCount = deviceCounter;
+                    loadTemplateAtOffset(templateName, offsetX, offsetY);
+                    
+                    // Calcular siguiente offset
+                    offsetX += 800; // Separación horizontal
+                    if (offsetX > 2000) {
+                        offsetX = 0;
+                        offsetY += 600; // Nueva fila
+                    }
+                    
+                    if (index === selectedTemplates.length - 1) {
+                        // Última plantilla aplicada
+                        setTimeout(() => {
+                            autoArrange();
+                            showNotification(`${selectedTemplates.length} plantillas aplicadas y organizadas`, 'success');
+                        }, 200);
+                    }
+                }, index * 100); // Pequeño delay entre plantillas
+            });
+            
+            clearTemplateSelection();
+        }
+
+        function loadTemplateAtOffset(templateName, offsetX, offsetY) {
+            const originalCounter = deviceCounter;
+            loadTemplate(templateName, false); // No auto-arrange
+            
+            // Aplicar offset a los dispositivos recién creados
+            devices.forEach(device => {
+                if (parseInt(device.id.split('_')[1]) > originalCounter) {
+                    device.x += offsetX;
+                    device.y += offsetY;
+                    
+                    const deviceElement = document.getElementById(device.id);
+                    if (deviceElement) {
+                        deviceElement.style.left = device.x + 'px';
+                        deviceElement.style.top = device.y + 'px';
+                    }
+                }
+            });
+            
+            updateConnections();
+            updateMinimap();
+        
+            if (devices.length > 0 && !confirm('¿Cargar plantilla? Se perderán los cambios actuales.')) {
+                return;
+            }
+            
+            clearDiagram();
+            
+            const templates = {
+                'basic': () => {
+                    createDevice('router', 400, 200);
+                    createDevice('switch', 400, 350);
+                    createDevice('pc', 200, 500);
+                    createDevice('pc', 400, 500);
+                    createDevice('pc', 600, 500);
+                    
+                    setTimeout(() => {
+                        createConnectionById('device_1', 'device_2', 'utp');
+                        createConnectionById('device_2', 'device_3', 'utp');
+                        createConnectionById('device_2', 'device_4', 'utp');
+                        createConnectionById('device_2', 'device_5', 'utp');
+                    }, 100);
+                },
+                
+                'enterprise': () => {
+                    // Core layer
+                    createDevice('core-router', 350, 100);
+                    createDevice('core-router', 450, 100);
+                    
+                    // Distribution layer
+                    createDevice('l3-switch', 200, 250);
+                    createDevice('l3-switch', 600, 250);
+                    
+                    // Access layer
+                    createDevice('switch', 150, 400);
+                    createDevice('switch', 350, 400);
+                    createDevice('switch', 550, 400);
+                    createDevice('switch', 750, 400);
+                    
+                    setTimeout(() => {
+                        // Core connections
+                        createConnectionById('device_1', 'device_2', 'fiber');
+                        createConnectionById('device_1', 'device_3', 'fiber');
+                        createConnectionById('device_1', 'device_4', 'fiber');
+                        createConnectionById('device_2', 'device_3', 'fiber');
+                        createConnectionById('device_2', 'device_4', 'fiber');
+                        
+                        // Distribution to access
+                        createConnectionById('device_3', 'device_5', 'utp');
+                        createConnectionById('device_3', 'device_6', 'utp');
+                        createConnectionById('device_4', 'device_7', 'utp');
+                        createConnectionById('device_4', 'device_8', 'utp');
+                    }, 100);
+                },
+                
+                'dmz': () => {
+                    createDevice('firewall', 400, 200);
+                    createDevice('switch', 200, 350);
+                    createDevice('switch', 600, 350);
+                    createDevice('web-server', 150, 500);
+                    createDevice('mail-server', 250, 500);
+                    createDevice('pc', 550, 500);
+                    createDevice('pc', 650, 500);
+                    
+                    setTimeout(() => {
+                        createConnectionById('device_1', 'device_2', 'utp');
+                        createConnectionById('device_1', 'device_3', 'utp');
+                        createConnectionById('device_2', 'device_4', 'utp');
+                        createConnectionById('device_2', 'device_5', 'utp');
+                        createConnectionById('device_3', 'device_6', 'utp');
+                        createConnectionById('device_3', 'device_7', 'utp');
+                    }, 100);
+                }
+            };
+            
+            if (templates[templateName]) {
+                templates[templateName]();
+                autoArrange();
+                setStatus(`Plantilla "${templateName}" cargada exitosamente`);
+                showNotification(`Plantilla ${templateName} aplicada`, 'success');
+            }
+        }
+
+        
 
         // Template Loading
         function loadTemplate(templateName) {
@@ -3348,6 +5872,114 @@
             clearDiagram();
             
             const templates = {
+                'basic-enterprise': () => {
+                    // Basic enterprise network
+                    createDevice('router', 400, 200);
+                    createDevice('switch', 200, 350);
+                    createDevice('switch', 600, 350);
+                    createDevice('pc', 100, 500);
+                    createDevice('pc', 300, 500);
+                    createDevice('pc', 500, 500);
+                    createDevice('pc', 700, 500);
+                    
+                    // Create connections
+                    setTimeout(() => {
+                        createConnectionById('device_1', 'device_2', 'utp');
+                        createConnectionById('device_1', 'device_3', 'utp');
+                        createConnectionById('device_2', 'device_4', 'utp');
+                        createConnectionById('device_2', 'device_5', 'utp');
+                        createConnectionById('device_3', 'device_6', 'utp');
+                        createConnectionById('device_3', 'device_7', 'utp');
+                    }, 100);
+                },
+                
+                'dmz-network': () => {
+                    createDevice('firewall', 400, 200);
+                    createDevice('switch', 200, 350);
+                    createDevice('switch', 600, 350);
+                    createDevice('web-server', 150, 500);
+                    createDevice('mail-server', 250, 500);
+                    createDevice('pc', 550, 500);
+                    createDevice('pc', 650, 500);
+                    
+                    setTimeout(() => {
+                        createConnectionById('device_1', 'device_2', 'utp');
+                        createConnectionById('device_1', 'device_3', 'utp');
+                        createConnectionById('device_2', 'device_4', 'utp');
+                        createConnectionById('device_2', 'device_5', 'utp');
+                        createConnectionById('device_3', 'device_6', 'utp');
+                        createConnectionById('device_3', 'device_7', 'utp');
+                    }, 100);
+                },
+                
+                'campus-network': () => {
+                    // Core layer
+                    createDevice('core-router', 350, 100);
+                    createDevice('core-router', 450, 100);
+                    
+                    // Distribution layer
+                    createDevice('l3-switch', 200, 250);
+                    createDevice('l3-switch', 600, 250);
+                    
+                    // Access layer
+                    createDevice('switch', 100, 400);
+                    createDevice('switch', 300, 400);
+                    createDevice('switch', 500, 400);
+                    createDevice('switch', 700, 400);
+                    
+                    // End devices
+                    createDevice('pc', 50, 550);
+                    createDevice('pc', 150, 550);
+                    createDevice('pc', 250, 550);
+                    createDevice('pc', 350, 550);
+                    createDevice('pc', 450, 550);
+                    createDevice('pc', 550, 550);
+                    createDevice('pc', 650, 550);
+                    createDevice('pc', 750, 550);
+                    
+                    setTimeout(() => {
+                        // Core connections
+                        createConnectionById('device_1', 'device_2', 'fiber');
+                        
+                        // Core to distribution
+                        createConnectionById('device_1', 'device_3', 'fiber');
+                        createConnectionById('device_1', 'device_4', 'fiber');
+                        createConnectionById('device_2', 'device_3', 'fiber');
+                        createConnectionById('device_2', 'device_4', 'fiber');
+                        
+                        // Distribution to access
+                        createConnectionById('device_3', 'device_5', 'utp');
+                        createConnectionById('device_3', 'device_6', 'utp');
+                        createConnectionById('device_4', 'device_7', 'utp');
+                        createConnectionById('device_4', 'device_8', 'utp');
+                        
+                        // Access to end devices
+                        createConnectionById('device_5', 'device_9', 'utp');
+                        createConnectionById('device_5', 'device_10', 'utp');
+                        createConnectionById('device_6', 'device_11', 'utp');
+                        createConnectionById('device_6', 'device_12', 'utp');
+                        createConnectionById('device_7', 'device_13', 'utp');
+                        createConnectionById('device_7', 'device_14', 'utp');
+                        createConnectionById('device_8', 'device_15', 'utp');
+                        createConnectionById('device_8', 'device_16', 'utp');
+                    }, 100);
+                },
+                
+                'star-topology': () => {
+                    createDevice('switch', 400, 300);
+                    createDevice('pc', 200, 150);
+                    createDevice('pc', 600, 150);
+                    createDevice('pc', 700, 300);
+                    createDevice('pc', 600, 450);
+                    createDevice('pc', 200, 450);
+                    createDevice('pc', 100, 300);
+                    
+                    setTimeout(() => {
+                        for (let i = 2; i <= 7; i++) {
+                            createConnectionById('device_1', `device_${i}`, 'utp');
+                        }
+                    }, 100);
+
                 'basic': () => {
                     createDevice('router', 400, 200);
                     createDevice('switch', 400, 350);
@@ -3441,6 +6073,63 @@
             }
         }
 
+        // Monitoring Functions
+        function toggleMonitoring() {
+            monitoringEnabled = !monitoringEnabled;
+            const panel = document.getElementById('monitoring-panel');
+            
+            if (monitoringEnabled) {
+                panel.classList.remove('hidden');
+                startMonitoringSimulation();
+                showNotification('Monitoreo de red activado', 'info');
+            } else {
+                panel.classList.add('hidden');
+                showNotification('Monitoreo de red desactivado', 'info');
+            }
+        }
+
+        function startMonitoringSimulation() {
+            setInterval(() => {
+                if (!monitoringEnabled) return;
+                
+                // Update device statuses randomly
+                devices.forEach(device => {
+                    // Random status changes (rare)
+                    if (Math.random() < 0.01) {
+                        const statuses = ['up', 'down', 'warning'];
+                        device.status = statuses[Math.floor(Math.random() * statuses.length)];
+                        
+                        const deviceElement = document.getElementById(device.id);
+                        if (deviceElement) {
+                            deviceElement.className = `device-on-canvas status-${device.status} layer-${device.layer}`;
+                        }
+                    }
+                    
+                    // Update metrics
+                    device.cpu = Math.max(5, Math.min(95, device.cpu + (Math.random() - 0.5) * 10));
+                    device.memory = Math.max(10, Math.min(90, device.memory + (Math.random() - 0.5) * 5));
+                    device.bandwidth = Math.max(5, Math.min(80, device.bandwidth + (Math.random() - 0.5) * 15));
+                });
+                
+                updateMonitoringPanel();
+            }, 3000);
+        }
+
+        function updateMonitoringPanel() {
+            const activeDevices = devices.filter(d => d.status === 'up').length;
+            const totalConnections = connections.length;
+            const alerts = devices.filter(d => d.status !== 'up').length;
+            const avgPerformance = Math.round(devices.reduce((acc, d) => acc + (100 - d.cpu), 0) / devices.length);
+            const avgBandwidth = Math.round(devices.reduce((acc, d) => acc + d.bandwidth, 0) / devices.length);
+            
+            document.getElementById('active-devices').textContent = activeDevices;
+            document.getElementById('total-connections').textContent = totalConnections;
+            document.getElementById('alerts-count').textContent = alerts;
+            document.getElementById('avg-performance').textContent = avgPerformance + '%';
+            document.getElementById('bandwidth-usage').textContent = avgBandwidth + '%';
+            document.getElementById('avg-latency').textContent = Math.floor(Math.random() * 20 + 5) + 'ms';
+        }
+
         // Utility Functions
         function updateStats() {
             document.getElementById('device-count').textContent = devices.length;
@@ -3449,6 +6138,47 @@
 
         function setStatus(message) {
             document.getElementById('status-text').textContent = message;
+        }
+
+        // SOLUCION 2: Función de notificaciones mejorada
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            
+            // Clear any existing timeout
+            if (notification.timeoutId) {
+                clearTimeout(notification.timeoutId);
+            }
+            
+            // SOLUCION 2: Notificación mejorada con botón de cerrar
+            notification.innerHTML = `
+                <button class="notification-close" onclick="hideNotification()">×</button>
+                <div>${message}</div>
+            `;
+            notification.className = `notification ${type} show`;
+            
+            // Set new timeout and store the ID
+            notification.timeoutId = setTimeout(() => {
+                hideNotification();
+            }, 6000); // 6 segundos
+        }
+
+        function hideNotification() {
+            const notification = document.getElementById('notification');
+            notification.classList.remove('show');
+            
+            // Clear timeout if exists
+            if (notification.timeoutId) {
+                clearTimeout(notification.timeoutId);
+                notification.timeoutId = null;
+            }
+            
+            // Completely hide after animation
+            setTimeout(() => {
+                notification.style.display = 'none';
+                setTimeout(() => {
+                    notification.style.display = 'block';
+                }, 100);
+            }, 400);
         }
 
         function showNotification(message, type = 'info') {
@@ -3469,6 +6199,50 @@
             }, 5000); // 5 segundos para leer bien el mensaje
         }
 
+        function showDeviceTooltip(e, device) {
+            // Create tooltip content
+            const tooltip = document.createElement('div');
+            tooltip.className = 'tooltip visible';
+            tooltip.innerHTML = `
+                <strong>${device.name}</strong><br>
+                Tipo: ${device.type}<br>
+                IP: ${device.ip || 'Sin IP'}<br>
+                Estado: ${device.status}<br>
+                CPU: ${device.cpu}%<br>
+                RAM: ${device.memory}%<br>
+                Capa: ${device.layer}
+            `;
+            
+            tooltip.style.left = e.pageX + 10 + 'px';
+            tooltip.style.top = e.pageY + 10 + 'px';
+            
+            document.body.appendChild(tooltip);
+            
+            // Store reference for cleanup
+            e.target.tooltipElement = tooltip;
+        }
+
+        function hideTooltip(e) {
+            if (e.target.tooltipElement) {
+                e.target.tooltipElement.remove();
+                e.target.tooltipElement = null;
+            }
+        }
+
+        function autoSave() {
+            try {
+                const saveData = {
+                    devices: devices,
+                    connections: connections,
+                    settings: { currentLayer, layerVisibility, zoom: currentZoom }
+                };
+                localStorage.setItem('networkDiagramAutoSave', JSON.stringify(saveData));
+            } catch (e) {
+                // localStorage might not be available
+                console.log('Auto-save not available');
+            }
+        }
+
         function handleKeyboard(e) {
             // Keyboard shortcuts
             if (e.ctrlKey || e.metaKey) {
@@ -3484,6 +6258,43 @@
                     case 'o':
                         e.preventDefault();
                         document.getElementById('file-input').click();
+                        break;
+                        case 'z':
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            // Redo (not implemented)
+                        } else {
+                            // Undo (not implemented)
+                        }
+                        break;
+                    case '=':
+                    case '+':
+                        e.preventDefault();
+                        zoomIn();
+                        break;
+                    case '-':
+                        e.preventDefault();
+                        zoomOut();
+                        break;
+                    case '0':
+                        e.preventDefault();
+                        resetZoom();
+                        break;
+                    case 'c':
+                        e.preventDefault();
+                        copySelectedDevice();
+                        break;
+                    case 'v':
+                        e.preventDefault();
+                        pasteDevice();
+                        break;
+                    case 'd':
+                        e.preventDefault();
+                        duplicateSelectedDevice();
+                        break;
+                    case 'f':
+                        e.preventDefault();
+                        document.getElementById('search-canvas').focus();
                         break;
                     case '=':
                     case '+':
@@ -3506,8 +6317,12 @@
                 if (connectionMode) {
                     toggleConnectionMode();
                 }
+                if (annotationMode) {
+                    toggleAnnotationMode();
+                }
                 clearSelection();
                 closePropertiesModal();
+                clearSearch();
             }
             
             if (e.key === 'Delete' && selectedDevice) {
@@ -3517,44 +6332,147 @@
             if (e.key === 'c' && !e.ctrlKey) {
                 toggleConnectionMode();
             }
+            
+            if (e.key === 'a' && !e.ctrlKey) {
+                toggleAnnotationMode();
+            }
+            
+            if (e.key === 'F1') {
+                e.preventDefault();
+                showHelp();
+            }
         }
 
         function handleWorkspaceClick(e) {
+            if (annotationMode) {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / currentZoom;
+                const y = (e.clientY - rect.top) / currentZoom;
+                addAnnotation(x, y);
+                return;
+            }
+            
             if (!connectionMode) {
                 clearSelection();
             }
         }
 
+        function toggleTheme() {
+            // Theme toggle implementation
+            showNotification('Función de tema en desarrollo', 'info');
+        }
+
         function showHelp() {
             const helpMessage = `
-🌐 Network Diagram Creator Pro - Mejorado
+                🌐 Network Diagram Creator Pro - Mejorado
+                # Ayuda - Network Diagram Creator Pro
 
-✨ MEJORAS IMPLEMENTADAS:
-• ✅ Sidebar con scroll - Todos los dispositivos visibles
-• ✅ Sistema de interfaces completo en modal
-• ✅ Panel de capas rediseñado y funcional  
-• ✅ Minimapa funcional con navegación
-• ✅ Conexiones con z-index correcto
+                ## Controles Principales
+                - **Arrastrar dispositivos**: Desde el panel lateral al área de trabajo
+                - **Seleccionar**: Click izquierdo en dispositivo
+                - **Propiedades**: Click derecho en dispositivo
+                - **Mover**: Arrastrar dispositivo seleccionado
+                - **Conectar**: Activar modo conexión y seleccionar dos dispositivos
 
-🎮 CONTROLES:
-• Arrastrar: Dispositivos desde sidebar al canvas
-• Click derecho: Propiedades del dispositivo
+                ## Atajos de Teclado
+                - **Ctrl+N**: Nuevo diagrama
+                - **Ctrl+S**: Guardar diagrama
+                - **Ctrl+O**: Abrir diagrama
+                - **Ctrl+Z**: Deshacer (próximamente)
+                - **Ctrl++ / Ctrl+-**: Zoom in/out
+                - **Ctrl+0**: Resetear zoom
+                - **C**: Alternar modo conexión
+                - **Escape**: Cancelar acciones
+                - **Delete**: Eliminar dispositivo seleccionado
+
+                ## Funciones Avanzadas
+                - **Capas**: Organizar dispositivos por jerarquía de red
+                - **Plantillas**: Topologías predefinidas para comenzar rápido
+                - **Monitoreo**: Simulación de estado de dispositivos
+                - **Validación**: Verificar integridad de la topología
+                - **Documentación**: Generar reportes automáticos
+
+                ## Soporte
+                Para más información, consulte la documentación completa.
+
+                ✨ MEJORAS IMPLEMENTADAS:
+                • ✅ Sidebar con scroll - Todos los dispositivos visibles
+                • ✅ Sistema de interfaces completo en modal
+                • ✅ Panel de capas rediseñado y funcional  
+                • ✅ Minimapa funcional con navegación
+                • ✅ Conexiones con z-index correcto
+
+                🎮 CONTROLES:
+                • Arrastrar: Dispositivos desde sidebar al canvas
+                • Click derecho: Propiedades del dispositivo
+                • C: Modo conexión
+                • Ctrl+S: Guardar | Ctrl+O: Cargar
+                • +/-: Zoom | Escape: Cancelar
+
+                🔧 FUNCIONES:
+                • Gestión de interfaces por dispositivo
+                • Organización por capas de red
+                • Validación de topología
+                • Exportar a imagen
+                • Plantillas predefinidas
+
+                ¡Disfruta creando diagramas de red profesionales!
+🌐 Network Diagram Creator Pro - VERSIÓN COMPLETA
+
+✨ FUNCIONALIDADES PRINCIPALES:
+• ✅ Sistema completo de dispositivos con interfaces
+• ✅ Gestión avanzada de capas de red
+• ✅ 10+ plantillas profesionales + plantillas personalizadas
+• ✅ Sistema de anotaciones para documentación
+• ✅ Búsqueda inteligente en tiempo real
+• ✅ Copiar/pegar/duplicar dispositivos
+• ✅ Minimapa funcional interactivo
+• ✅ Estadísticas avanzadas de red
+• ✅ Guardado automático cada 30 segundos
+• ✅ Exportación profesional a imagen
+
+🎮 ATAJOS DE TECLADO COMPLETOS:
+• Ctrl+N: Nuevo diagrama
+• Ctrl+S: Guardar diagrama  
+• Ctrl+O: Cargar diagrama
+• Ctrl+C: Copiar dispositivo seleccionado
+• Ctrl+V: Pegar dispositivo
+• Ctrl+D: Duplicar dispositivo
+• Ctrl+F: Buscar en canvas
 • C: Modo conexión
-• Ctrl+S: Guardar | Ctrl+O: Cargar
-• +/-: Zoom | Escape: Cancelar
+• A: Modo anotaciones
+• +/-: Zoom in/out
+• Escape: Cancelar acciones
+• Delete: Eliminar seleccionado
+• F1: Esta ayuda
 
-🔧 FUNCIONES:
-• Gestión de interfaces por dispositivo
-• Organización por capas de red
-• Validación de topología
-• Exportar a imagen
-• Plantillas predefinidas
+🔧 FUNCIONES AVANZADAS:
+• 📝 Anotaciones: Modo 'A' → Click para agregar notas
+• 🔍 Búsqueda: Encuentra dispositivos por nombre, IP, tipo
+• 📊 Estadísticas: Análisis completo de tu red
+• 🔄 Plantillas múltiples: Combina varias topologías
+• 💾 Plantillas personalizadas: Guarda tus propios diseños
+• 🎯 Auto-organización: Ordena dispositivos por capas
+• ✅ Validación: Verifica la integridad de tu topología
 
-¡Disfruta creando diagramas de red profesionales!
+¡Crea diagramas de red de nivel profesional! 🚀
             `;
             
             showNotification(helpMessage, 'info');
         }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const propertiesModal = document.getElementById('properties-modal');
+            const interfaceModal = document.getElementById('interface-modal');
+            
+            if (event.target === propertiesModal) {
+                closePropertiesModal();
+            }
+            if (event.target === interfaceModal) {
+                closeInterfaceModal();
+            }
+        };
 
         // Close modal when clicking outside
         window.onclick = function(event) {
@@ -3566,6 +6484,322 @@
 
         // Scroll event for minimap update
         document.getElementById('canvas-viewport').addEventListener('scroll', updateMinimap);
+
+        // Initialize theme
+        document.documentElement.setAttribute('data-theme', 'light');
+
+        // Connection line styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .utp-line { stroke: #27ae60; stroke-width: 4; }
+            .fiber-line { stroke: #f39c12; stroke-width: 4; }
+            .serial-line { stroke: #9b59b6; stroke-width: 4; }
+            .coaxial-line { stroke: #34495e; stroke-width: 4; }
+            .wireless-line { stroke: #3498db; stroke-width: 4; stroke-dasharray: 5,5; }
+        `;
+        document.head.appendChild(style);
+
+        /*
+        =============================================================================
+        INTEGRACIÓN FUTURA CON NMAP Y HERRAMIENTAS DE MONITOREO
+        =============================================================================
+        
+        Las siguientes funciones están preparadas para integración futura:
+        
+        1. INTEGRACIÓN NMAP:
+        */
+        
+        function importNmapScan(nmapData) {
+            /*
+            Función para importar resultados de escaneo Nmap
+            Estructura esperada del JSON:
+            {
+              "scan_info": {
+                "started": "2024-01-01 10:00:00",
+                "version": "7.94"
+              },
+              "hosts": [
+                {
+                  "ip": "192.168.1.1",
+                  "hostname": "router.local",
+                  "mac": "00:11:22:33:44:55",
+                  "vendor": "Cisco Systems",
+                  "os": "IOS 15.x",
+                  "ports": [
+                    {"port": 22, "state": "open", "service": "ssh"},
+                    {"port": 80, "state": "open", "service": "http"},
+                    {"port": 443, "state": "open", "service": "https"}
+                  ],
+                  "uptime": "up (since Mon Jan 1 09:00:00 2024)"
+                }
+              ]
+            }
+            */
+            
+            if (!nmapData || !nmapData.hosts) {
+                showNotification('Formato de datos Nmap inválido', 'error');
+                return;
+            }
+            
+            let importedCount = 0;
+            const existingIPs = devices.map(d => d.ip).filter(ip => ip);
+            
+            nmapData.hosts.forEach((host, index) => {
+                // Skip if IP already exists
+                if (existingIPs.includes(host.ip)) {
+                    console.log(`IP ${host.ip} ya existe, omitiendo...`);
+                    return;
+                }
+                
+                const deviceType = guessDeviceTypeFromNmap(host);
+                const layer = guessLayerFromIP(host.ip);
+                
+                // Calculate position
+                const x = 150 + (index % 8) * 150;
+                const y = 150 + Math.floor(index / 8) * 150;
+                
+                const device = {
+                    id: `nmap_device_${++deviceCounter}`,
+                    type: deviceType,
+                    x: x,
+                    y: y,
+                    layer: layer,
+                    name: host.hostname || `Host_${host.ip.replace(/\./g, '_')}`,
+                    ip: host.ip,
+                    mac: host.mac || '',
+                    brand: host.vendor || '',
+                    model: host.os || 'Unknown',
+                    ports: host.ports ? host.ports.map(p => p.port).join(', ') : '',
+                    status: 'up',
+                    notes: `Detectado por Nmap - ${host.uptime || 'Unknown uptime'}`,
+                    // ... other default properties
+                };
+                
+                devices.push(device);
+                renderDevice(device);
+                importedCount++;
+            });
+            
+            updateStats();
+            if (importedCount > 0) {
+                autoArrange();
+                showNotification(`${importedCount} dispositivos importados desde Nmap`, 'success');
+                setStatus(`Importación Nmap completada: ${importedCount} dispositivos agregados`);
+            } else {
+                showNotification('No se importaron nuevos dispositivos', 'warning');
+            }
+        }
+        
+        function guessDeviceTypeFromNmap(host) {
+            // Lógica para determinar tipo de dispositivo basado en datos Nmap
+            const openPorts = host.ports ? host.ports.map(p => p.port) : [];
+            const os = (host.os || '').toLowerCase();
+            const vendor = (host.vendor || '').toLowerCase();
+            
+            // Routers y switches basado en vendor
+            if (vendor.includes('cisco') || vendor.includes('juniper') || vendor.includes('mikrotik')) {
+                if (openPorts.includes(22) || openPorts.includes(23)) {
+                    return os.includes('nx-os') || os.includes('ios-xr') ? 'core-router' : 'router';
+                }
+                return 'switch';
+            }
+            
+            // Firewalls
+            if (vendor.includes('fortinet') || vendor.includes('palo alto') || vendor.includes('checkpoint')) {
+                return 'firewall';
+            }
+            
+            // Servidores basado en puertos abiertos
+            if (openPorts.includes(80) || openPorts.includes(443)) {
+                if (openPorts.includes(3306) || openPorts.includes(5432)) return 'db-server';
+                if (openPorts.includes(25) || openPorts.includes(110)) return 'mail-server';
+                if (openPorts.includes(53)) return 'dns-server';
+                return 'web-server';
+            }
+            
+            // Dispositivos Windows (puertos SMB)
+            if (openPorts.includes(135) || openPorts.includes(445) || openPorts.includes(3389)) {
+                return os.includes('server') ? 'server' : 'pc';
+            }
+            
+            // Impresoras
+            if (openPorts.includes(9100) || openPorts.includes(631)) {
+                return 'printer';
+            }
+            
+            // Default basado en OS
+            if (os.includes('linux') || os.includes('unix')) return 'server';
+            if (os.includes('windows')) return 'pc';
+            
+            return 'pc'; // Fallback
+        }
+        
+        function guessLayerFromIP(ip) {
+            // Guess network layer based on IP address patterns
+            const parts = ip.split('.');
+            const subnet = `${parts[0]}.${parts[1]}.${parts[2]}`;
+            
+            // Common patterns
+            const patterns = {
+                '192.168.1': 'user',      // Home networks
+                '192.168.10': 'core',     // Core infrastructure
+                '192.168.20': 'distribution',
+                '192.168.30': 'access',
+                '192.168.100': 'dmz',     // DMZ
+                '10.0.1': 'core',
+                '10.0.10': 'distribution',
+                '10.0.20': 'access',
+                '172.16.1': 'core'
+            };
+            
+            return patterns[subnet] || 'access'; // Default to access layer
+        }
+        
+        /*
+        2. INTEGRACIÓN CON SNMP:
+        */
+        function pollSNMPDevices() {
+            /*
+            Función para recopilar datos SNMP de dispositivos
+            Requiere backend con capacidades SNMP
+            */
+            
+            devices.forEach(device => {
+                if (device.snmp && device.ip) {
+                    // Simular polling SNMP
+                    setTimeout(() => {
+                        updateDeviceFromSNMP(device, {
+                            cpu: Math.random() * 80,
+                            memory: Math.random() * 70,
+                            uptime: Math.floor(Math.random() * 365) + ' days',
+                            interfaces: generateMockInterfaces(),
+                            temperature: 25 + Math.random() * 30
+                        });
+                    }, Math.random() * 5000);
+                }
+            });
+        }
+        
+        function updateDeviceFromSNMP(device, snmpData) {
+            device.cpu = Math.round(snmpData.cpu);
+            device.memory = Math.round(snmpData.memory);
+            device.uptime = snmpData.uptime;
+            device.temperature = Math.round(snmpData.temperature);
+            
+            // Update visualization
+            const deviceElement = document.getElementById(device.id);
+            if (deviceElement) {
+                const metricsElement = deviceElement.querySelector('.device-metrics');
+                if (metricsElement) {
+                    metricsElement.textContent = `CPU: ${device.cpu}% | RAM: ${device.memory}%`;
+                }
+            }
+        }
+        
+        /*
+        3. INTEGRACIÓN CON SYSLOG:
+        */
+        function processSyslogMessage(message) {
+            /*
+            Procesar mensajes de syslog para alertas en tiempo real
+            */
+            const deviceIP = extractIPFromSyslog(message);
+            const device = devices.find(d => d.ip === deviceIP);
+            
+            if (device) {
+                const severity = getSyslogSeverity(message);
+                
+                if (severity === 'critical' || severity === 'error') {
+                    device.status = 'down';
+                    device.alerts = message.substring(0, 100) + '...';
+                } else if (severity === 'warning') {
+                    device.status = 'warning';
+                }
+                
+                // Update visualization
+                const deviceElement = document.getElementById(device.id);
+                if (deviceElement) {
+                    deviceElement.className = `device-on-canvas status-${device.status} layer-${device.layer}`;
+                }
+                
+                showNotification(`Alerta de ${device.name}: ${message.substring(0, 50)}...`, 'warning');
+            }
+        }
+        
+        /*
+        4. API REST PARA INTEGRACIONES:
+        */
+        const NetworkAPI = {
+            // Exportar datos para otras herramientas
+            exportToAPI: function() {
+                return {
+                    timestamp: new Date().toISOString(),
+                    topology: {
+                        devices: devices.map(d => ({
+                            id: d.id,
+                            name: d.name,
+                            type: d.type,
+                            ip: d.ip,
+                            layer: d.layer,
+                            status: d.status,
+                            coordinates: { x: d.x, y: d.y }
+                        })),
+                        connections: connections.map(c => ({
+                            id: c.id,
+                            source: c.device1,
+                            target: c.device2,
+                            type: c.type,
+                            status: c.status
+                        }))
+                    }
+                };
+            },
+            
+            // Importar desde otras herramientas
+            importFromAPI: function(apiData) {
+                if (apiData.topology) {
+                    // Implementar importación desde formato API
+                    console.log('Importing from API:', apiData);
+                }
+            },
+            
+            // Webhook para recibir actualizaciones
+            handleWebhook: function(webhookData) {
+                console.log('Webhook received:', webhookData);
+                // Procesar actualizaciones en tiempo real
+            }
+        };
+        
+        // Funciones helper para integraciones
+        function generateMockInterfaces() {
+            return [
+                { name: 'GigabitEthernet0/1', status: 'up', speed: '1000Mbps' },
+                { name: 'GigabitEthernet0/2', status: 'up', speed: '1000Mbps' },
+                { name: 'Serial0/0', status: 'down', speed: '2048Kbps' }
+            ];
+        }
+        
+        function extractIPFromSyslog(message) {
+            const ipRegex = /(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/;
+            const match = message.match(ipRegex);
+            return match ? match[1] : null;
+        }
+        
+        function getSyslogSeverity(message) {
+            if (message.includes('ERROR') || message.includes('CRITICAL')) return 'critical';
+            if (message.includes('WARNING') || message.includes('WARN')) return 'warning';
+            if (message.includes('INFO')) return 'info';
+            return 'debug';
+        }
+        
+        // Exportar API para uso externo
+        window.NetworkDiagramAPI = NetworkAPI;
+        
+        /*
+        =============================================================================
+        FIN DE INTEGRACIONES FUTURAS
+        =============================================================================
+        */
     </script>
 </body>
 </html>
